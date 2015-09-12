@@ -69,6 +69,7 @@ var gSrvOptions = {
         "/COMODORSADomainValidationSecureServerCA.crt"
     ],
 
+    "http":     false, //_ nginx + nodejs = <3
     "host":     "site.xx"
 };
 
@@ -81,8 +82,7 @@ objBot
 //------------------]>
 
 function cbServer(data) {
-    var msg         = data.message;
-    var msgChat     = msg.chat;
+    var msgChat = data.message.chat;
 
     //----------------]>
 
@@ -100,8 +100,7 @@ function cbServer(data) {
 }
 
 function cbCmdFeedback(data, params) {
-    var msg         = data.message;
-    var msgChat     = msg.chat;
+    var msgChat = data.message.chat;
 
     //----------------]>
 

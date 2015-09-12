@@ -26,6 +26,7 @@ var gSrvOptions = {
         "/COMODORSADomainValidationSecureServerCA.crt"
     ],
 
+    "http":     false, //_ nginx + nodejs = <3
     "host":     "site.xx"
 };
 

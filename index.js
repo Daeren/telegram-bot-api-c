@@ -9,7 +9,8 @@
 
 //-----------------------------------------------------
 
-var rHttps          = require("https"),
+var rHttp           = require("http"),
+    rHttps          = require("https"),
     rFs             = require("fs"),
     rStream         = require("stream");
 
@@ -745,28 +746,31 @@ var CBot = function(token) {
     //-----------)>
 
     function createServer(params, callback) {
-        var certDir = params.certDir || "";
-
-        var optKey  = rFs.readFileSync(certDir + params.key),
-            optCert = rFs.readFileSync(certDir + params.cert),
-            optCa   = params.ca;
-
-        if(optCa) {
-            if(Array.isArray(optCa)) {
-                optCa = optCa.map(function(e) {
-                    return rFs.readFileSync(certDir + e);
-                });
-            } else if(typeof(optCa) === "string") {
-                optCa = certDir + optCa;
-            }
-        }
+        var srv,
+            srvCommands = {};
 
         //----------)>
 
-        var srv,
-            srvCommands = {},
+        if(params.http) {
+            srv = rHttp.createServer(cbServer)
+        } else {
+            var certDir = params.certDir || "";
 
-            options = {
+            var optKey  = rFs.readFileSync(certDir + params.key),
+                optCert = rFs.readFileSync(certDir + params.cert),
+                optCa   = params.ca;
+
+            if(optCa) {
+                if(Array.isArray(optCa)) {
+                    optCa = optCa.map(function(e) {
+                        return rFs.readFileSync(certDir + e);
+                    });
+                } else if(typeof(optCa) === "string") {
+                    optCa = certDir + optCa;
+                }
+            }
+
+            var options = {
                 "key":    optKey,
                 "cert":   optCert,
                 "ca":     optCa,
@@ -796,7 +800,12 @@ var CBot = function(token) {
                 "rejectUnauthorized":   false
             };
 
-        srv = rHttps.createServer(options, cbServer).listen(params.port || 88, params.host, cbListen);
+            //------)>
+
+            srv = rHttps.createServer(options, cbServer);
+        }
+
+        srv.listen(params.port || 88, params.host, cbListen);
 
         //---)>
 
