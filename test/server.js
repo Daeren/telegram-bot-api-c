@@ -16,17 +16,17 @@ var rBot = require("./../index");
 var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 var gSrvOptions = {
-    "certDir":  "J:/WebServers/NodeJS/www/db.gg/SSL",
+    "certDir":  "/www/site",
 
-    "key":       "/3_db.gg.key",
-    "cert":      "/2_db.gg.crt",
+    "key":       "/3_site.xx.key",
+    "cert":      "/2_site.xx.crt",
     "ca":       [
         "/AddTrustExternalCARoot.crt",
         "/COMODORSAAddTrustCA.crt",
         "/COMODORSADomainValidationSecureServerCA.crt"
     ],
 
-    "host":     "db.gg"
+    "host":     "site.xx"
 };
 
 //------------------]>
