@@ -1,0 +1,40 @@
+{
+    "name": "telegram-bot-api-c",
+    "version": "0.0.3",
+    "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
+
+    "homepage": "http://666.io",
+    "keywords": [
+        "telegram bot",
+        "telegram",
+        "bot",
+        "api",
+        "bottality"
+    ],
+
+    "author": {
+        "name": "Daeren Torn",
+        "email": "x@db.gg"
+    },
+
+    "main": "./index",
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/Daeren/telegram-bot-api-c.git"
+    },
+
+    "license": "MIT",
+    "engines": {
+        "node": ">= 0.10.0"
+    },
+
+    "readme": "",
+    "readmeFilename": "readme.md",
+
+    "bugs": {
+        "url": "https://github.com/Daeren/telegram-bot-api-c/issues"
+    },
+
+    "_id": "telegram-bot-api-c@0.0.3",
+    "_from": "telegram-bot-api-c@"
+}
