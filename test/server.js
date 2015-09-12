@@ -48,7 +48,17 @@ function cbServer(data) {
 
     //----------------]>
 
-    objBot.send(msgChat.id, {"message": "Use: /feedback"});
+    this.id = msgChat.id;
+
+    this.i()
+        .then(() => {
+            this.data.chatAction = "typing";
+            return this.send();
+        })
+        .then(() => {
+            this.data.message = "Use: /feedback";
+            return this.send();
+        });
 }
 
 function cbCmdFeedback(data, params) {
@@ -57,5 +67,8 @@ function cbCmdFeedback(data, params) {
 
     //----------------]>
 
-    objBot.send(msgChat.id, {"message": "I'm feedback!"});
+    this.id = msgChat.id;
+    this.data.message = "I'm feedback!";
+
+    this.send();
 }

@@ -741,6 +741,178 @@ var CBot = function(token) {
         token = t;
         return self;
     }
+
+    //-----------)>
+
+    function createServer(params, callback) {
+        var certDir = params.certDir || "";
+
+        var optKey  = rFs.readFileSync(certDir + params.key),
+            optCert = rFs.readFileSync(certDir + params.cert),
+            optCa   = params.ca;
+
+        if(optCa) {
+            if(Array.isArray(optCa)) {
+                optCa = optCa.map(function(e) {
+                    return rFs.readFileSync(certDir + e);
+                });
+            } else if(typeof(optCa) === "string") {
+                optCa = certDir + optCa;
+            }
+        }
+
+        //----------)>
+
+        var srv,
+            srvCommands = {},
+
+            options = {
+                "key":    optKey,
+                "cert":   optCert,
+                "ca":     optCa,
+
+                "ciphers": [
+                    "ECDHE-RSA-AES256-SHA384",
+                    "DHE-RSA-AES256-SHA384",
+                    "ECDHE-RSA-AES256-SHA256",
+                    "DHE-RSA-AES256-SHA256",
+                    "ECDHE-RSA-AES128-SHA256",
+                    "DHE-RSA-AES128-SHA256",
+                    "HIGH",
+                    "!aNULL",
+                    "!eNULL",
+                    "!EXPORT",
+                    "!DES",
+                    "!RC4",
+                    "!MD5",
+                    "!PSK",
+                    "!SRP",
+                    "!CAMELLIA"
+                ].join(":"),
+
+                "honorCipherOrder":     true,
+
+                "requestCert":          true,
+                "rejectUnauthorized":   false
+            };
+
+        srv = rHttps.createServer(options, cbServer).listen(params.port || 88, params.host, cbListen);
+
+        //---)>
+
+        srv.command = function command(cmd, cb) {
+            srvCommands[cmd] = cb;
+        };
+
+        //----------)>
+
+        var ctxSend = {
+            "send": function(callback) {
+                var d = this.data;
+                this.data = {};
+
+                return self.send(this.id, d, callback);
+            }
+        };
+
+        ctxSend.__proto__ = self;
+
+        //-----------------]>
+
+        return srv;
+
+        //-----------------]>
+
+        function cbServer(req, res) {
+            if(req.method == "POST") {
+                var chunks = [];
+
+                req.on("data", function(chunk) {
+                    chunks.push(chunk);
+                });
+
+                req.on("end", function() {
+                    response();
+
+                    //------------]>
+
+                    var cmd,
+                        result = Buffer.concat(chunks).toString();
+
+                    if(result) {
+                        try {
+                            result = JSON.parse(result);
+                        } catch(e) {
+                            result = null;
+                        }
+                    }
+
+                    if(!result)
+                        return;
+
+                    //-------------]>
+
+                    ctxSend.data = {};
+
+                    //-------------]>
+
+                    if(cmd = parseCmd(result.message.text))
+                        cmd.func.call(ctxSend, result, cmd.params, req); else callback.call(ctxSend, result, req);
+                });
+            } else
+                response();
+
+
+            function response(code) {
+                res.writeHead(code || 200, {"Content-Type": "text/plain"});
+                res.end("");
+            }
+        }
+
+        function cbListen() {
+            var host = srv.address().address;
+            var port = srv.address().port;
+
+            console.log("> Server run: [%s:%s]", host, port);
+            console.log("> Date: %s", getTime());
+            console.log("\n-----------------------------------------\n");
+
+            process.on("SIGINT", function() {
+                console.log("> Date: %s", getTime());
+
+                process.exit();
+            });
+
+            function getTime() {
+                return new Date().toISOString().replace(/T/, " ").replace(/\..+/, "");
+            }
+        }
+
+        //-----------------]>
+
+        function parseCmd(text) {
+            if(!text || text[0] !== "/")
+                return null;
+
+            var t       = text.split(/\s+([\s\S]+)?/, 2);
+
+            var name    = t[0].substr(1),
+                cmdFunc = srvCommands[name];
+
+            if(!cmdFunc)
+                return null;
+
+            return {
+                "func":     cmdFunc,
+
+                "params":   {
+                    "cmd":  t[0],
+                    "text": t[1] || "",
+                    "name": name
+                }
+            };
+        }
+    }
 };
 
 //-----------------------------------------------------
@@ -853,157 +1025,4 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
     }
 
     return data;
-}
-
-//---------------------------]>
-
-function createServer(params, callback) {
-    var certDir = params.certDir || "";
-
-    var optKey  = rFs.readFileSync(certDir + params.key),
-        optCert = rFs.readFileSync(certDir + params.cert),
-        optCa   = params.ca;
-
-    if(optCa) {
-        if(Array.isArray(optCa)) {
-            optCa = optCa.map(function(e) {
-                return rFs.readFileSync(certDir + e);
-            });
-        } else if(typeof(optCa) === "string") {
-            optCa = certDir + optCa;
-        }
-    }
-
-    //----------)>
-
-    var srv,
-        srvCommands = {},
-
-        options = {
-            "key":    optKey,
-            "cert":   optCert,
-            "ca":     optCa,
-
-            "ciphers": [
-                "ECDHE-RSA-AES256-SHA384",
-                "DHE-RSA-AES256-SHA384",
-                "ECDHE-RSA-AES256-SHA256",
-                "DHE-RSA-AES256-SHA256",
-                "ECDHE-RSA-AES128-SHA256",
-                "DHE-RSA-AES128-SHA256",
-                "HIGH",
-                "!aNULL",
-                "!eNULL",
-                "!EXPORT",
-                "!DES",
-                "!RC4",
-                "!MD5",
-                "!PSK",
-                "!SRP",
-                "!CAMELLIA"
-            ].join(":"),
-
-            "honorCipherOrder":     true,
-
-            "requestCert":          true,
-            "rejectUnauthorized":   false
-        };
-
-    srv = rHttps.createServer(options, cbServer).listen(params.port || 88, params.host, cbListen);
-
-    //---)>
-
-    srv.command = function command(cmd, cb) {
-        srvCommands[cmd] = cb;
-    };
-
-    //-----------------]>
-
-    return srv;
-
-    //-----------------]>
-
-    function cbServer(req, res) {
-        if(req.method == "POST") {
-            var chunks = [];
-
-            req.on("data", function(chunk) {
-                chunks.push(chunk);
-            });
-
-            req.on("end", function() {
-                response();
-
-                //------------]>
-
-                var cmd,
-                    result = Buffer.concat(chunks).toString();
-
-                if(result) {
-                    try {
-                        result = JSON.parse(result);
-                    } catch(e) {
-                        result = null;
-                    }
-                }
-
-                if(!result)
-                    return;
-
-                if(cmd = parseCmd(result.message.text))
-                    cmd.func(result, cmd.params, req); else callback(result, req);
-            });
-        } else
-            response();
-
-
-        function response(code) {
-            res.writeHead(code || 200, {"Content-Type": "text/plain"});
-            res.end("");
-        }
-    }
-
-    function cbListen() {
-        var host = srv.address().address;
-        var port = srv.address().port;
-
-        console.log("> Server run: [%s:%s]", host, port);
-        console.log("> Date: %s", getTime());
-        console.log("\n-----------------------------------------\n");
-
-        process.on("SIGINT", function() {
-            console.log("> Date: %s", getTime());
-
-            process.exit();
-        });
-
-        function getTime() {
-            return new Date().toISOString().replace(/T/, " ").replace(/\..+/, "");
-        }
-    }
-
-    //-----------------]>
-
-    function parseCmd(text) {
-        if(!text || text[0] !== "/")
-            return null;
-
-        var t       = text.split(/\s+([\s\S]+)?/, 2);
-
-        var name    = t[0].substr(1),
-            cmdFunc = srvCommands[name];
-
-        if(!cmdFunc)
-            return null;
-
-        return {
-            "func":     cmdFunc,
-
-            "params":   {
-                "cmd":  t[0],
-                "text": t[1] || "",
-                "name": name
-            }
-        };
-    }
 }
