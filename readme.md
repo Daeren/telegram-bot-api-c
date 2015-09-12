@@ -82,11 +82,7 @@ objBot
 //------------------]>
 
 function cbServer(data) {
-    var msgChat = data.message.chat;
-
-    //----------------]>
-
-    this.id = msgChat.id;
+    this.id = data.message.chat.id;
 
     this.i()
         .then(() => {
@@ -100,11 +96,7 @@ function cbServer(data) {
 }
 
 function cbCmdFeedback(data, params) {
-    var msgChat = data.message.chat;
-
-    //----------------]>
-
-    this.id = msgChat.id;
+    this.id = data.message.chat.id;
     this.data.message = "I'm feedback!";
 
     this.send();
