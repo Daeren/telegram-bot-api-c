@@ -20,7 +20,7 @@ i()
     .then(JSON.parse)
     .then(json => send(id, [{"chatAction": "upload_photo"}, {"message": ""}, {"message": json}]))
     
-    .then(function(results) {
+    .then(results => {
         for(var name in results)
             console.log("Name: %s\n%s\n\n", name, results[name].toString());
     })
@@ -136,12 +136,7 @@ function cbMsg(data) {
 }
 
 function cbCmdFeedback(data, params) {
-    var msg         = data.message;
-    var msgChat     = msg.chat;
-
-    //----------------]>
-
-    this.id = msgChat.id;
+    this.id = data.message.chat.id;
     this.data.message = params;
 
     this.send();
