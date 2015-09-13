@@ -22,7 +22,9 @@ var gReqOptions     = {
     "method":       "POST"
 };
 
-var gRePhotoExt     = /\.(jp[e]?g|[gt]if|png|bmp)$/i,
+var gReSplitCmd     = /\s+([\s\S]+)?/,
+
+    gRePhotoExt     = /\.(jp[e]?g|[gt]if|png|bmp)$/i,
     gReAudioExt     = /\.(mp3)$/i,
     gReDocumentExt  = /[\\\/\.]/,
     gReStickerExt   = /\.(jp[e]?g|[gt]if|png|bmp|webp)$/i,
@@ -602,13 +604,13 @@ var CBot = function(token) {
         if(body) {
             req.end(body);
         } else {
+            req.write(bodyBegin);
+
             if(typeof(file) === "string")
                 file = rFs.createReadStream(file);
             else {
                 if(file.closed) {
-                    req.write(bodyBegin);
                     req.end(bodyEnd);
-
                     return;
                 }
             }
@@ -616,11 +618,7 @@ var CBot = function(token) {
             file.pipe(req, gPipeOptions);
             file
                 .on("error", function(error) {
-                    req.write(bodyBegin);
                     req.end(bodyEnd);
-                })
-                .on("open", function() {
-                    req.write(bodyBegin);
                 })
                 .on("end", function() {
                     req.end(bodyEnd);
@@ -641,7 +639,7 @@ var CBot = function(token) {
                     result = null;
                 }
             } else
-                result = {};
+                result = null;
 
             callback(error, result, response)
         });
@@ -650,46 +648,42 @@ var CBot = function(token) {
     //-----------)>
 
     function send(id, data, callback) {
-        var def;
+        var defer;
 
         if(typeof(callback) !== "undefined")
-            cbPromise(function(r) { callback(null, r); }, function(e) { callback(e); });
-        else
-            def = new Promise(cbPromise);
+            cbPromise(); else defer = new Promise(cbPromise);
 
         //-------------------------]>
 
-        return def;
+        return defer;
 
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
-            var cmdData, cmdName;
+            var cmdName, cmdData;
+
+            var cbEnd = callback ? callback : function(error, results) {
+                if(error)
+                    reject(error); else resolve(results);
+            };
+
+            //--------]>
 
             if(Array.isArray(data)) {
                 var results = {};
 
                 forEachAsync(data, function(next, d) {
-                    call(d, function(error, body){
+                    call(d, function(error, body) {
                         var stack = results[cmdName] = results[cmdName] || [];
                         stack.push(body);
 
                         next(error);
                     });
-                }, function(error) {
-                    if(error)
-                        return reject(error);
+                }, cbEnd);
+            } else
+                call(data, cbEnd);
 
-                    resolve(results);
-                });
-            } else {
-                call(data, function(error, body){
-                    if(error)
-                        return reject(error);
-
-                    resolve(body);
-                });
-            }
+            //--------]>
 
             function call(d, cb) {
                 cmdName = getName(d);
@@ -704,7 +698,8 @@ var CBot = function(token) {
             }
 
             function getName(d) {
-                var type, len = gMMTypesLen;
+                var type,
+                    len = gMMTypesLen;
 
                 while(len--) {
                     type = gMMTypesKeys[len];
@@ -719,17 +714,19 @@ var CBot = function(token) {
     //----)>
 
     function getMe(callback) {
-        var def;
+        var defer;
 
-        if(callback)
-            callAPI("getMe", callback); else def = new Promise(cbPromise);
+        if(typeof(callback) !== "undefined")
+            cbPromise(); else defer = new Promise(cbPromise);
 
-        return def;
+        //-------------------------]>
+
+        return defer;
 
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
-            callAPI("getMe", function(error, body) {
+            callAPI("getMe", callback ? callback : function(error, body) {
                 if(error)
                     reject(error); else resolve(body);
             });
@@ -752,7 +749,7 @@ var CBot = function(token) {
         //----------)>
 
         if(params.http) {
-            srv = rHttp.createServer(cbServer)
+            srv = rHttp.createServer(cbServer);
         } else {
             var certDir = params.certDir || "";
 
@@ -882,12 +879,16 @@ var CBot = function(token) {
             var host = srv.address().address;
             var port = srv.address().port;
 
+            console.log("\n-----------------------------------------\n");
             console.log("> Server run: [%s:%s]", host, port);
             console.log("> Date: %s", getTime());
             console.log("\n-----------------------------------------\n");
 
             process.on("SIGINT", function() {
+                console.log("\n-----------------------------------------\n");
+                console.log("> SIGINT");
                 console.log("> Date: %s", getTime());
+                console.log("\n-----------------------------------------\n");
 
                 process.exit();
             });
@@ -903,7 +904,7 @@ var CBot = function(token) {
             if(!text || text[0] !== "/")
                 return null;
 
-            var t       = text.split(/\s+([\s\S]+)?/, 2);
+            var t       = text.split(gReSplitCmd, 2);
 
             var name    = t[0].substr(1),
                 cmdFunc = srvCommands[name];

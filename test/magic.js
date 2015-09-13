@@ -36,13 +36,13 @@ i()
     .then(function() {
         return send(id, {"photo": require("fs").createReadStream(file)});
     })
-    .then(function() {
-        return send(id, {"photo": file});
-    })
-    .then(JSON.parse)
-    .then(function(json) {
-        return send(id, {"photo": json.result.photo[0].file_id, "caption": "Hell World!"});
-    })
+    //.then(function() {
+    //    return send(id, {"photo": file});
+    //})
+    //.then(JSON.parse)
+    //.then(function(json) {
+    //    return send(id, {"photo": json.result.photo[0].file_id, "caption": "Hell World!"});
+    //})
     //.then(function() {
         //return send(id, {"location": {"latitude": "57.0061726", "longitude": "40.9821055"}});
         //return send(id, {"location": "57.0061726 40.9821055"});

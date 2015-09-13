@@ -50,14 +50,15 @@ function cbServer(data) {
     //----------------]>
 
     this.id = msgChat.id;
+    this.data.chatAction = "typing";
 
-    this.i()
+    this.send()
         .then(() => {
-            this.data.chatAction = "typing";
+            this.data.message = "Use: /feedback";
             return this.send();
         })
         .then(() => {
-            this.data.message = "Use: /feedback";
+            this.data.photo = __dirname + "/MiElPotato.jpg";
             return this.send();
         });
 }
@@ -69,7 +70,7 @@ function cbCmdFeedback(data, params) {
     //----------------]>
 
     this.id = msgChat.id;
-    this.data.message = "I'm feedback!";
+    this.data.message = params;
 
     this.send();
 }
