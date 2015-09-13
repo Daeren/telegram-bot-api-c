@@ -53,6 +53,20 @@ i()
     .then(JSON.parse)
     .then(console.info, console.error);
 
+return;
+
+
+objBot.forward(msg.message_id, msgChat.id, "-20838162");
+
+return;
+
+
+objBot
+    .profilePhotos("59725308")
+    .then(JSON.parse)
+    .then((r) => {
+        console.log(r.result.photos);
+    }, console.error);
 
 return;
 

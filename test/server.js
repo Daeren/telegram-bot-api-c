@@ -33,12 +33,20 @@ var gSrvOptions = {
 //------------------]>
 
 objBot
-    .createServer(gSrvOptions, cbServer)
-    .command("feedback", cbCmdFeedback);
+    .webhook("site.xx/myBot")
+    .then(JSON.parse)
+    .then(response => {
+        if(!response.ok)
+            throw new Error("Oops...problems with webhook...");
+
+        objBot
+            .createServer(gSrvOptions, cbMsg)
+            .command("feedback", cbCmdFeedback);
+    });
 
 //------------------]>
 
-function cbServer(data) {
+function cbMsg(data) {
     var msg         = data.message;
 
     var msgFrom     = msg.from,
@@ -50,9 +58,12 @@ function cbServer(data) {
     //----------------]>
 
     this.id = msgChat.id;
-    this.data.chatAction = "typing";
 
-    this.send()
+    this.i()
+        .then(() => {
+            this.data.chatAction = "typing";
+            return this.send();
+        })
         .then(() => {
             this.data.message = "Use: /feedback";
             return this.send();
@@ -60,7 +71,21 @@ function cbServer(data) {
         .then(() => {
             this.data.photo = __dirname + "/MiElPotato.jpg";
             return this.send();
-        });
+        })
+        .then(() => {
+            this.mid = msg.message_id;
+            this.from = msgChat.id;
+            this.to = msgText;
+
+            return this.forward();
+
+        })
+        .then(() => {
+            this.data.message = ">_>";
+            return this.send();
+        })
+        .then(JSON.parse)
+        .then(console.log, console.error);
 }
 
 function cbCmdFeedback(data, params) {

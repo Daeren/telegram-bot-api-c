@@ -52,12 +52,18 @@ var CBot = function(token) {
     this.call = callAPI;
     this.callJson = callAPIJson;
 
+    this.forward = forwardMessage;
     this.send = send;
     this.i = getMe;
 
-    this.createServer = createServer;
+    this.profilePhotos = getUserProfilePhotos;
+
+    this.webhook = setWebhook;
+    this.polling = getUpdates;
 
     this.setToken = setToken;
+
+    this.createServer = createServer;
 
     //--------------------]>
 
@@ -182,7 +188,7 @@ var CBot = function(token) {
         return value ? (gCRLF + gBoundaryDiv + value) : "";
     }
 
-    //-----------)>
+    //-----------[L1]----------}>
 
     function callAPI(method, data, callback) {
         var req,
@@ -549,16 +555,19 @@ var CBot = function(token) {
                 break;
 
             case "getUpdates":
-                var t;
+                var t, result = "";
 
                 if(t = data.offset)
-                    body += genBodyField("text", "offset", t);
+                    result += genBodyField("text", "offset", t);
 
                 if(t = data.limit)
-                    body += genBodyField("text", "limit", t);
+                    result += genBodyField("text", "limit", t);
 
                 if(t = data.timeout)
-                    body += genBodyField("text", "timeout", t);
+                    result += genBodyField("text", "timeout", t);
+
+                if(result)
+                    body = result;
 
                 break;
 
@@ -567,7 +576,17 @@ var CBot = function(token) {
 
                 file = data.certificate;
 
-                result = genBodyField("text", "url", data.url);
+                if((t = data.url) && typeof(t) === "string") {
+                    result = "https://api.telegram.org/bot" + token + "/setWebhook?url=";
+
+                    if(!(/^https:\/\//i).test(t))
+                        result += "https://";
+
+                    t = result + t;
+                    result = undefined;
+                }
+
+                result = genBodyField("text", "url", t || "");
 
                 if(t = data.certificate)
                     result += genBodyField("text", "certificate", t);
@@ -581,14 +600,20 @@ var CBot = function(token) {
 
                 break;
 
-            default:
-                switch(method) {
-                    case "getMe":
-                        request(method, callback).end();
-                        return;
-                }
+            case "getMe":
+                break;
 
+            default:
                 throw new Error("API method not found!")
+        }
+
+        //-------------------------]>
+
+        req = request(method, callback);
+
+        if(!body && !bodyBegin && !bodyEnd) {
+            req.end();
+            return;
         }
 
         //-------------------------]>
@@ -598,7 +623,6 @@ var CBot = function(token) {
 
         //-------------------------]>
 
-        req = request(method, callback);
         req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
 
         if(body) {
@@ -645,7 +669,27 @@ var CBot = function(token) {
         });
     }
 
-    //-----------)>
+    //-----------[L2]----------}>
+
+    function forwardMessage(mid, chatFrom, chatTo, callback) {
+        var defer;
+
+        if(typeof(callback) !== "undefined")
+            cbPromise(); else defer = new Promise(cbPromise);
+
+        //-------------------------]>
+
+        return defer;
+
+        //-------------------------]>
+
+        function cbPromise(resolve, reject) {
+            callAPI("forwardMessage", {"chat_id": chatTo, "from_chat_id": chatFrom, "message_id": mid}, callback ? callback : function(error, body) {
+                if(error)
+                    reject(error); else resolve(body);
+            });
+        }
+    }
 
     function send(id, data, callback) {
         var defer;
@@ -711,8 +755,6 @@ var CBot = function(token) {
         }
     }
 
-    //----)>
-
     function getMe(callback) {
         var defer;
 
@@ -733,7 +775,95 @@ var CBot = function(token) {
         }
     }
 
-    //-----------)>
+    //----)>
+
+    function getUserProfilePhotos(uid, offset, limit, callback) {
+        var defer;
+
+        if(typeof(limit) === "function") {
+            callback = limit;
+            limit = undefined;
+        } else if(typeof(offset) === "function") {
+            callback = offset;
+            offset = undefined;
+        }
+
+        if(typeof(callback) !== "undefined")
+            cbPromise(); else defer = new Promise(cbPromise);
+
+        //-------------------------]>
+
+        return defer;
+
+        //-------------------------]>
+
+        function cbPromise(resolve, reject) {
+            callAPI("getUserProfilePhotos", {"user_id": uid, "offset": offset, "limit": limit}, callback ? callback : function(error, body) {
+                if(error)
+                    reject(error); else resolve(body);
+            });
+        }
+    }
+
+    //----)>
+
+    function setWebhook(url, cert, callback) {
+        var defer;
+
+        if(typeof(cert) === "function") {
+            callback = cert;
+            cert = undefined;
+        }
+
+        if(typeof(callback) !== "undefined")
+            cbPromise(); else defer = new Promise(cbPromise);
+
+        //-------------------------]>
+
+        return defer;
+
+        //-------------------------]>
+
+        function cbPromise(resolve, reject) {
+            callAPI("setWebhook", {"url": url, "certificate": cert}, callback ? callback : function(error, body) {
+                if(error)
+                    reject(error); else resolve(body);
+            });
+        }
+    }
+    
+    function getUpdates(offset, limit, timeout, callback) {
+        var defer;
+
+        if(typeof(offset) === "function") {
+            callback = offset;
+            offset = undefined;
+        } else if(typeof(limit) === "function") {
+            callback = limit;
+            limit = undefined;
+        } else if(typeof(timeout) === "function") {
+            callback = timeout;
+            timeout = undefined;
+        }
+
+        if(typeof(callback) !== "undefined")
+            cbPromise(); else defer = new Promise(cbPromise);
+
+        //-------------------------]>
+
+        return defer;
+
+        //-------------------------]>
+
+        function cbPromise(resolve, reject) {
+            callAPI("getUpdates", {"offset": offset, "limit": limit, "timeout": timeout}, callback ? callback : function(error, body) {
+                if(error)
+                    reject(error); else resolve(body);
+            });
+        }
+    }
+
+    //-----------[L3]----------}>
 
     function setToken(t) {
         token = t;
@@ -818,6 +948,13 @@ var CBot = function(token) {
                 this.data = {};
 
                 return self.send(this.id, d, callback);
+            },
+
+            "forward": function(callback) {
+                var to = this.to;
+                this.to = undefined;
+
+                return self.forward(this.mid, this.from, to, callback);
             }
         };
 
