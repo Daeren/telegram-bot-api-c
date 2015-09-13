@@ -1,0 +1,28 @@
+{
+  "name": "telegram-bot-api-c",
+  "main": "index.js",
+  "version": "0.0.5",
+  "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
+  "keywords": [
+    "bottality",
+    "api",
+    "bot",
+    "telegram",
+    "telegram",
+    "bot"
+  ],
+  "authors": [
+    "daeren"
+  ],
+  "license": "MIT",
+  "homepage": "666.io",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Daeren/telegram-bot-api-c.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
