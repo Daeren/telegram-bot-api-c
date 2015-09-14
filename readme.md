@@ -6,46 +6,47 @@ var rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBot =  rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-objBot.call("sendMessage", {
-    "chat_id":      cid,
-    "text":         "*bold Just* _italic markdown_ [Daeren](666.io)",
-    "parse_mode":   "markdown"
-});
-    
-//------------------]>
+var api     = objBot.api,
 
-var id      = "59725308",
     file    = __dirname + "/MiElPotato.jpg",
+    data    = () => ({"chat_id": "-34042985", "text": "Date: " + Date.now()});
 
-    send    = objBot.send;
 
-objBot.i()
-    .then(JSON.parse)
-    .then(data => send(id, [{"chatAction": "upload_photo"}, {"message": data}]))
+api.sendMessage(data(), function justCallback() {
+    api.sendMessage(data())
     
-    .then(results => {
-        for(var name in results)
-            console.log("Name: %s\n%s\n\n", name, results[name].toString());
-    })
-    
-    .then(() => send(id, {"photo": require("fs").createReadStream(file)}))
-    .then(() => send(id, {"photo": file}))
-    .then(JSON.parse)
-    .then(data => send(id, {"photo": data.result.photo[0].file_id, "caption": "Hell World!"}));
+        .then(data)
+        .then(x => api.sendMessage(x))
+
+        .then(data)
+        .then(x => {
+            x.photo = file;
+            api.sendPhoto(x);
+        });
+});
 ```
+
+[Telegram Bot API][2]
+
+* Stream: +
+* Server: +
+* Promise: +
+* ES6: +
+* Analytics: +
 
 
 #### Polling 
 
 ```js
-objBot
-    .webhook()
-    .then(() => objBot.polling())
+var api = objBot.api;
+
+api
+    .setWebhook()
+    .then(() => api.getUpdates())
     .then(JSON.parse)
     .then(console.log, console.error);
-
 ```
 
 
@@ -55,21 +56,21 @@ Used [Botan SDK][3]
 
 ```js
 objBot
-    .createServer(gBotSrvOptions, cbMsg)
+    .server(objSrvOptions, cbMsg)
     .analytics("apiKey", "appName")
-    .command("feedback", cbCmdFeedback);
+    .command("start", cbCmdStart);
 ```
 
 
-#### Server (RC 4)
+#### Server
 
 ```js
 var rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-var objBotServer    = new rBot();
-var gBotSrvOptions  = {
+var objBotFather    = rBot();
+var objSrvOptions   = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -86,24 +87,25 @@ var gBotSrvOptions  = {
 
 //------------------]>
 
-var objMyBot    = new rBot(process.env.TG_BOT_TOKEN_MY),
-    objOtherBot = new rBot(process.env.TG_BOT_TOKEN_OTHER);
+var objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
+    objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-var objSrv = objBotServer.createServer(gBotSrvOptions);
+var objSrv = objBotFather.server(objSrvOptions);
 
 objSrv
-    .bot(objMyBot, "/MyBot", cbMyBot) // <-- Auto-Webhook
+    .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
     .analytics("apiKey", "appNameMyBot")
-    .command("feedback", cbCmdFeedback);
+    
+    .command("start", cbCmdStart)
+    .command("stop", cbCmdStop);
 
 objSrv
     .bot(objOtherBot, "/OtherBot", cbOtherBot)
-    .analytics("apiKey", "appNameOtherBot")
-    .command("feedback", cbCmdFeedback);
+    .analytics("apiKey", "appNameOtherBot");
     
 //------------------]>
 
-function cbMyBot(data) {
+function cbOtherBot(data) {
     var msg         = data.message;
 
     var msgChat     = msg.chat,
@@ -113,7 +115,7 @@ function cbMyBot(data) {
 
     this.id = msgChat.id;
 
-    this.i()
+    this.api.getMe()
         .then(() => {
             this.data.chatAction = "typing";
             return this.send();
@@ -131,7 +133,9 @@ function cbMyBot(data) {
             this.from = msgChat.id;
             this.to = msgText;
 
-            return this.forward();
+            return this.forward()
+                .then(JSON.parse)
+                .then(console.log, console.error);
 
         })
         .then(() => {
@@ -142,17 +146,15 @@ function cbMyBot(data) {
         .then(console.log, console.error);
 }
 
-//---------)>
+//--------------)>
 
-function cbOtherBot(data) {
+function cbCmdStart(data, params) {
     this.id = data.message.chat.id;
-    this.data.message = "cbOtherBot";
+    this.data.message = "cbCmdStart";
     this.send();
 }
 
-//--------------)>
-
-function cbCmdFeedback(data, params) {
+function cbCmdStop(data, params) {
     this.id = data.message.chat.id;
     this.data.message = params;
     this.send();
@@ -163,44 +165,42 @@ function cbCmdFeedback(data, params) {
 #### mServer
 
 ```js
-var objBotServer = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBot = new rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-objBotServer
-    .webhook("site.xx/myBot")
-
+objBot.api
+    .setWebhook("site.xx/myBot")
+    
     .then(JSON.parse)
     .then(response => {
         if(!response.ok)
             throw new Error("Oops...problems with webhook...");
 
-        objBotServer
-            .createServer(gBotSrvOptions, cbMsg)
-            .command("feedback", cbCmdFeedback);
+        objBot
+            .server(objSrvOptions, cbMsg)
+            .command("start", cbCmdStart);
     });
 ```
 
 
-[Telegram Bot API][2]
+#### Instance 
+
+| Attribute         | Type           | Note                              |
+|-------------------|----------------|-----------------------------------|
+|                   | -              |                                   |
+| api               | Object         | See [Telegram Bot API][2]         |
 
 
-| Method          | Arguments                                                           | Return                            |
-|-----------------|---------------------------------------------------------------------|-----------------------------------|
-|                 | -                                                                   |                                   |
-| call            | method, data[, callback(error, buffer, response)*1]                 |                                   |
-| callJson        | method, data[, callback(error, json, response)]                     |                                   |
-|                 | -                                                                   |                                   |
-| forward         | mid, chatFrom, chatTo, [, callback*1]                               | promise or undefined              |
-| send            | id, data[, callback*1]                                              | promise or undefined              |
-| i               | [callback*1]                                                        | promise or undefined              |
-|                 | -                                                                   |                                   |
-| profilePhotos   | uid[, offset][, limit][, callback*1]                                | promise or undefined              |
-|                 | -                                                                   |                                   |
-| webhook         | url, cert[, callback*1]                                             | promise or undefined              |
-| polling         | [offset][, limit][, timeout][, callback*1]                          | promise or undefined              |
-|                 | -                                                                   |                                   |
-| setToken        | token                                                               | this                              |
-|                 | -                                                                   |                                   |
-| createServer    | options, callback(json, request)                                    | new instance of https.Server      |
+| Method            | Arguments                                                             | Return                            |
+|-------------------|-----------------------------------------------------------------------|-----------------------------------|
+|                   | -                                                                     |                                   |
+| setToken          | token                                                                 | this                              |
+|                   | -                                                                     |                                   |
+| call              | method, data[, callback(error, buffer, response)]                     |                                   |
+| callJson          | method, data[, callback(error, json, response)]                       |                                   |
+|                   | -                                                                     |                                   |
+| send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
+|                   | -                                                                     |                                   |
+| createServer      | [options][, callback(json, request)]                                  | ~                                 |
 
 
 #### Methods: send

@@ -14,68 +14,73 @@ var rBot = require("./../index");
 //-----------------------------------------------------
 
 var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+var api = objBot.api;
+
+//-----------------------------------------------------
+
+objBot.call("sendMessage", {
+    "chat_id":      "-34042985",
+    "text":         "*bold Just* _italic markdown_ [Daeren](666.io)",
+    "parse_mode":   "markdown"
+});
+
+return;
+
+
+api
+    .setWebhook()
+    .then(() => api.getUpdates())
+    .then(JSON.parse)
+    .then(console.log, console.error);
+
+return;
+
+
+var file    = __dirname + "/MiElPotato.jpg",
+    data    = () => ({"chat_id": "-34042985", "text": "Date: " + Date.now()});
+
+
+api.sendMessage(data(), function() {
+    api.sendMessage(data())
+
+        .then(data)
+        .then(x => api.sendMessage(x))
+
+        .then(data)
+        .then(x => {
+            x.photo = file;
+            api.sendPhoto(x);
+        });
+});
+
+return;
+
 
 var id      = "59725308",
-
     file    = __dirname + "/MiElPotato.jpg",
 
-    i       = objBot.i,
     send    = objBot.send;
 
-//------------------]>
-
-i()
+api.getMe()
     .then(JSON.parse)
-    .then(function(json) {
-        return send(id, [{"chatAction": "upload_photo"}, {"message": ""}, {"message": json}]);
-    })
-    .then(function(results) {
+    .then(data => send(id, [{"chatAction": "upload_photo"}, {"message": data}]))
+
+    .then(results => {
         for(var name in results)
             console.log("Name: %s\n%s\n\n", name, results[name].toString());
     })
+
+    .then(() => send(id, {"photo": require("fs").createReadStream(file)}))
+    .then(() => send(id, {"photo": file}))
+    .then(JSON.parse)
+    .then(data => send(id, {"photo": data.result.photo[0].file_id, "caption": "Hell World!"}))
+
     .then(function() {
-        return send(id, {"photo": require("fs").createReadStream(file)});
-    })
-    //.then(function() {
-    //    return send(id, {"photo": file});
-    //})
-    //.then(JSON.parse)
-    //.then(function(json) {
-    //    return send(id, {"photo": json.result.photo[0].file_id, "caption": "Hell World!"});
-    //})
-    //.then(function() {
         //return send(id, {"location": {"latitude": "57.0061726", "longitude": "40.9821055"}});
-        //return send(id, {"location": "57.0061726 40.9821055"});
+        return send(id, {"location": "57.0061726 40.9821055"});
         //return send(id, {"location": true, "latitude": "57.0061726", "longitude": "40.9821055"});
-
+        //
         //return send(id, {"photo": "AgADAgADy6cxG8ZgFQgTCrxCN-ApkUHUWSoABElgRLZEQgpbZqUBAAEC"});
-    //})
-    .then(JSON.parse)
-    .then(console.info, console.error);
+    });
 
 return;
-
-
-objBot.forward(msg.message_id, msgChat.id, "-20838162");
-
-return;
-
-
-objBot
-    .profilePhotos("59725308")
-    .then(JSON.parse)
-    .then((r) => {
-        console.log(r.result.photos);
-    }, console.error);
-
-return;
-
-
-var data = {
-    "chat_id":  id,
-    "action":   "typing"
-};
-
-objBot.call("sendChatAction", data, function(error, body, response) {});
-
-

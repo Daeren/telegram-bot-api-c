@@ -31,6 +31,13 @@ var gReSplitCmd     = /\s+([\s\S]+)?/,
     gReVideoExt     = /\.(mp4)$/i,
     gReVoiceExt     = /\.(ogg)$/i;
 
+var gApiMethods     = [
+    "getMe", "forwardMessage",
+    "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
+    "getUserProfilePhotos", "getUpdates",
+    "setWebhook"
+];
+
 var gMethodsMap     = {
     "message":      "sendMessage",
     "photo":        "sendPhoto",
@@ -48,27 +55,11 @@ var gMMTypesKeys    = Object.keys(gMethodsMap),
 
 //-----------------------------------------------------
 
-var CBot = function(token) {
-    this.call           = callAPI;
-    this.callJson       = callAPIJson;
+module.exports = main;
 
-    this.forward        = forwardMessage;
-    this.send           = send;
-    this.i              = getMe;
+//-----------------------------------------------------
 
-    this.profilePhotos  = getUserProfilePhotos;
-
-    this.webhook        = setWebhook;
-    this.polling        = getUpdates;
-
-    this.setToken       = setToken;
-
-    this.createServer   = createServer;
-
-    //--------------------]>
-
-    var self = this;
-
+function main(token) {
     var gBoundaryKey, gBoundaryDiv, gBoundaryEnd,
 
         gBoundaryUDate,
@@ -78,7 +69,28 @@ var CBot = function(token) {
 
     updateBoundary();
 
-    //--------------------]>
+    //---------)>
+
+    var CMain = function() {
+        this.api = genApi();
+    };
+
+    CMain.prototype = {
+        "setToken":     function(t) { token = t; return this; },
+
+        "call":         callAPI,
+        "callJson":     callAPIJson,
+
+        "send":         send,
+
+        "server":       server
+    };
+
+    //-------------------------]>
+
+    return new CMain();
+
+    //-------------------------]>
 
     function request(api, callback) {
         if(!api)
@@ -558,6 +570,10 @@ var CBot = function(token) {
                 break;
 
             case "getUpdates":
+                if(!data) break;
+
+                //------]>
+
                 var t, result = "";
 
                 if(t = data.offset)
@@ -575,6 +591,10 @@ var CBot = function(token) {
                 break;
 
             case "setWebhook":
+                if(!data) break;
+
+                //------]>
+
                 var t, result;
 
                 file = data.certificate;
@@ -654,7 +674,9 @@ var CBot = function(token) {
     }
 
     function callAPIJson(method, data, callback) {
-        return callAPI(method, data, function(error, result, response) {
+        return callAPI(method, data, cbCallAPI);
+
+        function cbCallAPI(error, result, response) {
             if(result) {
                 try {
                     result = JSON.parse(result);
@@ -666,30 +688,10 @@ var CBot = function(token) {
                 result = null;
 
             callback(error, result, response)
-        });
+        }
     }
 
     //-----------[L2]----------}>
-
-    function forwardMessage(mid, chatFrom, chatTo, callback) {
-        var defer;
-
-        if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
-
-        //-------------------------]>
-
-        return defer;
-
-        //-------------------------]>
-
-        function cbPromise(resolve, reject) {
-            callAPI("forwardMessage", {"chat_id": chatTo, "from_chat_id": chatFrom, "message_id": mid}, callback ? callback : function(error, body) {
-                if(error)
-                    reject(error); else resolve(body);
-            });
-        }
-    }
 
     function send(id, data, callback) {
         var defer;
@@ -721,7 +723,7 @@ var CBot = function(token) {
                         var stack = results[cmdName] = results[cmdName] || [];
                         stack.push(body);
 
-                        next(error);
+                        next(error, results);
                     });
                 }, cbEnd);
             } else
@@ -755,414 +757,49 @@ var CBot = function(token) {
         }
     }
 
-    function getMe(callback) {
-        var defer;
-
-        if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
-
-        //-------------------------]>
-
-        return defer;
-
-        //-------------------------]>
-
-        function cbPromise(resolve, reject) {
-            callAPI("getMe", callback ? callback : function(error, body) {
-                if(error)
-                    reject(error); else resolve(body);
-            });
-        }
-    }
-
-    //----)>
-
-    function getUserProfilePhotos(uid, offset, limit, callback) {
-        var defer;
-
-        if(typeof(limit) === "function") {
-            callback = limit;
-            limit = undefined;
-        } else if(typeof(offset) === "function") {
-            callback = offset;
-            offset = undefined;
-        }
-
-        if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
-
-        //-------------------------]>
-
-        return defer;
-
-        //-------------------------]>
-
-        function cbPromise(resolve, reject) {
-            callAPI("getUserProfilePhotos", {"user_id": uid, "offset": offset, "limit": limit}, callback ? callback : function(error, body) {
-                if(error)
-                    reject(error); else resolve(body);
-            });
-        }
-    }
-
-    //----)>
-
-    function setWebhook(url, cert, callback) {
-        var defer;
-
-        if(typeof(cert) === "function") {
-            callback = cert;
-            cert = undefined;
-        }
-
-        if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
-
-        //-------------------------]>
-
-        return defer;
-
-        //-------------------------]>
-
-        function cbPromise(resolve, reject) {
-            callAPI("setWebhook", {"url": url, "certificate": cert}, callback ? callback : function(error, body) {
-                if(error)
-                    reject(error); else resolve(body);
-            });
-        }
-    }
-
-    function getUpdates(offset, limit, timeout, callback) {
-        var defer;
-
-        if(typeof(offset) === "function") {
-            callback = offset;
-            offset = undefined;
-        } else if(typeof(limit) === "function") {
-            callback = limit;
-            limit = undefined;
-        } else if(typeof(timeout) === "function") {
-            callback = timeout;
-            timeout = undefined;
-        }
-
-        if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
-
-        //-------------------------]>
-
-        return defer;
-
-        //-------------------------]>
-
-        function cbPromise(resolve, reject) {
-            callAPI("getUpdates", {"offset": offset, "limit": limit, "timeout": timeout}, callback ? callback : function(error, body) {
-                if(error)
-                    reject(error); else resolve(body);
-            });
-        }
-    }
-
     //-----------[L3]----------}>
 
-    function setToken(t) {
-        token = t;
-        return self;
+    function server(params, callback) {
+        return createServer(this, params, callback);
     }
 
-    //-----------)>
+    //-------------------------]>
 
-    function createServer(params, callback) {
-        var srv,
+    function genApi() {
+        var result = {};
 
-            srvAnTrack      = null,
-            srvBots         = {},
-            srvCommands     = {};
+        gApiMethods.forEach(add);
 
-        var ctxSend     = createCtxSend(self);
+        function add(method) {
+            result[method] = function(data, callback) {
+                var defer;
 
-        //----------)>
+                if(typeof(callback) !== "undefined")
+                    cbPromise(); else defer = new Promise(cbPromise);
 
-        params.port = params.port || 88;
+                //-------------------------]>
 
-        //----------)>
+                return defer;
 
-        if(params.http) {
-            srv = rHttp.createServer(cbServer);
-        } else {
-            var certDir = params.certDir || "";
+                //-------------------------]>
 
-            var optKey  = rFs.readFileSync(certDir + params.key),
-                optCert = rFs.readFileSync(certDir + params.cert),
-                optCa   = params.ca;
+                function cbPromise(resolve, reject) {
+                    if(!callback)
+                        callback = function(error, body) {
+                            if(error)
+                                reject(error); else resolve(body);
+                        };
 
-            if(optCa) {
-                if(Array.isArray(optCa)) {
-                    optCa = optCa.map(function(e) {
-                        return rFs.readFileSync(certDir + e);
-                    });
-                } else if(typeof(optCa) === "string") {
-                    optCa = certDir + optCa;
-                }
-            }
-
-            var options = {
-                "key":    optKey,
-                "cert":   optCert,
-                "ca":     optCa,
-
-                "ciphers": [
-                    "ECDHE-RSA-AES256-SHA384",
-                    "DHE-RSA-AES256-SHA384",
-                    "ECDHE-RSA-AES256-SHA256",
-                    "DHE-RSA-AES256-SHA256",
-                    "ECDHE-RSA-AES128-SHA256",
-                    "DHE-RSA-AES128-SHA256",
-                    "HIGH",
-                    "!aNULL",
-                    "!eNULL",
-                    "!EXPORT",
-                    "!DES",
-                    "!RC4",
-                    "!MD5",
-                    "!PSK",
-                    "!SRP",
-                    "!CAMELLIA"
-                ].join(":"),
-
-                "honorCipherOrder":     true,
-
-                "requestCert":          true,
-                "rejectUnauthorized":   false
-            };
-
-            //------)>
-
-            srv = rHttps.createServer(options, cbServer);
-        }
-
-        srv.listen(params.port, params.host, cbListen);
-
-        //---)>
-
-        srv.bot = function(bot, path, cbMsg) {
-            if(!path)
-                throw new Error("Empty path!");
-
-            bot = srvBots[path] = {
-                "bot":          bot,
-                "anTrack":      null,
-                "cmd":          {},
-
-                "ctxSend":      createCtxSend(bot),
-                "onMsg":        cbMsg
-            };
-
-            bot.analytics = function(apiKey, appName) {
-                var rBotan = require("botanio");
-                rBotan = rBotan(apiKey);
-
-                this.anTrack = function(data) {
-                    return rBotan.track(data, appName || "Telegram Bot");
-                };
-
-                return this;
-            };
-
-            bot.command = function(cmd, cbCmd) {
-                this.cmd[cmd] = cbCmd;
-                return this;
-            };
-
-            if(params.host) {
-                var url = params.host + ":" + params.port + path;
-
-                bot.bot
-                    .webhook(url)
-                    .then(JSON.parse)
-                    .then(function(data) {
-                        if(data.ok)
-                            return;
-
-                        console.log("Webhook: %s", url);
-                        console.log(data.result);
-                    }, console.error);
-            } else {
-                console.log("[!] Warning | `host` not specified, Auto-Webhook not working")
-            }
-
-            return bot;
-        };
-
-        srv.analytics = function(apiKey, appName) {
-            var rBotan = require("botanio");
-            rBotan = rBotan(apiKey);
-
-            srvAnTrack = function(data) {
-                return rBotan.track(data, appName || "Telegram Bot");
-            };
-
-            return this;
-        };
-
-        srv.command = function(cmd, cb) {
-            srvCommands[cmd] = cb;
-            return this;
-        };
-
-        //-----------------]>
-
-        return srv;
-
-        //-----------------]>
-
-        function cbServer(req, res) {
-            if(req.method == "POST") {
-                var chunks = [];
-
-                req.on("data", function(chunk) {
-                    chunks.push(chunk);
-                });
-
-                req.on("end", function() {
-                    response();
-
-                    //------------]>
-
-                    var cmd,
-                        result = Buffer.concat(chunks);
-
-                    if(result) {
-                        try {
-                            result = JSON.parse(result);
-                        } catch(e) {
-                            result = null;
-                        }
-                    }
-
-                    if(!result)
-                        return;
-
-                    //-------------]>
-
-                    var ctx             = ctxSend,
-
-                        objBot          = srvBots[req.url],
-                        objAnalytics    = srvAnTrack,
-                        objCommands     = srvCommands;
-
-                    if(objBot) {
-                        ctx = objBot.ctxSend;
-
-                        objAnalytics = objBot.anTrack;
-                        objCommands = objBot.cmd;
-                    }
-
-                    ctx.data = {};
-
-                    //-------------]>
-
-                    if(objAnalytics)
-                        objAnalytics(result.message);
-
-                    //-------------]>
-
-                    if(cmd = parseCmd(result.message.text, objCommands))
-                        cmd.func.call(ctx, result, cmd.params, req);
-                    else {
-                        var evMsg = objBot ? objBot.onMsg : callback;
-
-                        if(evMsg)
-                            evMsg.call(ctx, result, req);
-                    }
-                });
-            } else
-                response();
-
-
-            function response(code) {
-                res.writeHead(code || 200, {"Content-Type": "text/plain"});
-                res.end("");
-            }
-        }
-
-        function cbListen() {
-            var host = srv.address().address;
-            var port = srv.address().port;
-
-            console.log("\n-----------------------------------------\n");
-            console.log("> Server run: [%s:%s]", host, port);
-            console.log("> Date: %s", getTime());
-            console.log("\n-----------------------------------------\n");
-
-            process.on("SIGINT", function() {
-                console.log("\n-----------------------------------------\n");
-                console.log("> SIGINT");
-                console.log("> Date: %s", getTime());
-                console.log("\n-----------------------------------------\n");
-
-                process.exit();
-            });
-
-            function getTime() {
-                return new Date().toISOString().replace(/T/, " ").replace(/\..+/, "");
-            }
-        }
-
-        //-----------------]>
-
-        function parseCmd(text, src) {
-            if(!text || text[0] !== "/")
-                return null;
-
-            var t       = text.split(gReSplitCmd, 2);
-
-            var name    = t[0].substr(1),
-                cmdFunc = src[name];
-
-            if(!cmdFunc)
-                return null;
-
-            return {
-                "func":     cmdFunc,
-
-                "params":   {
-                    "cmd":  t[0],
-                    "text": t[1] || "",
-                    "name": name
+                    callAPI(method, data, callback);
                 }
             };
         }
 
-        function createCtxSend(parent) {
-            var result = {
-                "send": function(callback) {
-                    var d = this.data;
-                    this.data = {};
-
-                    return parent.send(this.id, d, callback);
-                },
-
-                "forward": function(callback) {
-                    var to = this.to;
-                    this.to = undefined;
-
-                    return parent.forward(this.mid, this.from, to, callback);
-                }
-            };
-
-            result.__proto__ = parent;
-
-            return result;
-        }
+        return result;
     }
-};
+}
 
-//-----------------------------------------------------
-
-module.exports = CBot;
-
-//-----------------------------------------------------
+//-------------------------------------------]>
 
 function forEachAsync(data, iter, cbEnd) {
     var i   = 0,
@@ -1268,4 +905,281 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
     }
 
     return data;
+}
+
+//---------------------------]>
+
+function createServer(botFather, params, callback) {
+    if(!params) {
+        callback = params;
+        params = {"http": true};
+    }
+
+    params.port = params.port || 88;
+
+    //----------)>
+
+    var srv,
+        srvBots,
+        srvBotDefault = createSrvBot(botFather, callback);
+
+    //----------)>
+
+    if(params.http) {
+        srv = rHttp.createServer(cbServer);
+    } else {
+        var certDir = params.certDir || "";
+
+        var optKey  = rFs.readFileSync(certDir + params.key),
+            optCert = rFs.readFileSync(certDir + params.cert),
+            optCa   = params.ca;
+
+        if(optCa) {
+            if(Array.isArray(optCa)) {
+                optCa = optCa.map(function(e) {
+                    return rFs.readFileSync(certDir + e);
+                });
+            } else if(typeof(optCa) === "string") {
+                optCa = certDir + optCa;
+            }
+        }
+
+        var options = {
+            "key":    optKey,
+            "cert":   optCert,
+            "ca":     optCa,
+
+            "ciphers": [
+                "ECDHE-RSA-AES256-SHA384",
+                "DHE-RSA-AES256-SHA384",
+                "ECDHE-RSA-AES256-SHA256",
+                "DHE-RSA-AES256-SHA256",
+                "ECDHE-RSA-AES128-SHA256",
+                "DHE-RSA-AES128-SHA256",
+                "HIGH",
+                "!aNULL",
+                "!eNULL",
+                "!EXPORT",
+                "!DES",
+                "!RC4",
+                "!MD5",
+                "!PSK",
+                "!SRP",
+                "!CAMELLIA"
+            ].join(":"),
+
+            "honorCipherOrder":     true,
+
+            "requestCert":          true,
+            "rejectUnauthorized":   false
+        };
+
+        //------)>
+
+        srv = rHttps.createServer(options, cbServer);
+    }
+
+    srv.listen(params.port, params.host, cbListen);
+
+    //-----------------]>
+
+    srvBotDefault.__proto__ = srv;
+
+    srv = {
+        "bot":      srvBot
+    };
+
+    srv.__proto__ = srvBotDefault;
+
+    //-----------------]>
+
+    return srv;
+
+    //-----------------]>
+
+    function cbServer(req, res) {
+        if(req.method !== "POST")
+            return response();
+
+        var chunks = [];
+
+        //----------]>
+
+        req
+            .on("data", onData)
+            .on("end", onEnd);
+
+        //----------]>
+
+        function onData(chunk) {
+            chunks.push(chunk);
+        }
+
+        function onEnd() {
+            response();
+
+            //--------]>
+
+            var cmd, result;
+
+            try {
+                result = JSON.parse(Buffer.concat(chunks));
+            } catch(e) {
+                result = null;
+            }
+
+            if(!result)
+                return;
+
+            //--------]>
+
+            var objBot  = srvBots && srvBots[req.url] || srvBotDefault;
+
+            //--------]>
+
+            if(objBot.anTrack)
+                objBot.anTrack(result.message);
+
+            if(cmd = parseCmd(result.message.text, objBot.commands)) {
+                objBot.ctx.data = {};
+                cmd.func.call(objBot.ctx, result, cmd.params, req);
+            } else if(objBot.onMsg) {
+                objBot.ctx.data = {};
+                objBot.onMsg.call(objBot.ctx, result, req);
+            }
+        }
+
+        function response(code) {
+            res.writeHead(code || 200, {"Content-Type": "text/plain"});
+            res.end("");
+        }
+    }
+
+    function cbListen() {
+        var host = srv.address().address;
+        var port = srv.address().port;
+
+        console.log("\n-----------------------------------------\n");
+        console.log("> Server run: [%s://%s:%s]", params.http ? "http" : "https", host, port);
+        console.log("> Date: %s", getTime());
+        console.log("\n-----------------------------------------\n");
+
+        process.on("SIGINT", function() {
+            console.log("\n-----------------------------------------\n");
+            console.log("> SIGINT");
+            console.log("> Date: %s", getTime());
+            console.log("\n-----------------------------------------\n");
+
+            process.exit();
+        });
+
+        function getTime() {
+            return new Date().toISOString().replace(/T/, " ").replace(/\..+/, "");
+        }
+    }
+
+    //-----------------]>
+
+    function parseCmd(text, src) {
+        if(!text || !src || text[0] !== "/")
+            return null;
+
+        var t       = text.split(gReSplitCmd, 2);
+
+        var name    = t[0].substr(1),
+            cmdFunc = src[name];
+
+        if(!cmdFunc)
+            return null;
+
+        return {
+            "func":     cmdFunc,
+
+            "params":   {
+                "cmd":  t[0],
+                "text": t[1] || "",
+                "name": name
+            }
+        };
+    }
+
+    function createSrvBot(bot, onMsg) {
+        var ctx = {
+            "data":     null,
+
+            "send": function(callback) {
+                var d = this.data;
+                this.data = {};
+
+                return bot.send(this.id, d, callback);
+            },
+
+            "forward": function(callback) {
+                return bot.api.forwardMessage({
+                    "chat_id":      this.to,
+                    "from_chat_id": this.from,
+                    "message_id":   this.mid
+                }, callback);
+            }
+        };
+
+        ctx.__proto__ = bot;
+
+        return {
+            "bot":          bot,
+
+            "anTrack":      null,
+            "commands":     {},
+
+            "ctx":          ctx,
+            "onMsg":        onMsg,
+
+            "analytics":    srvAnalytics,
+            "command":      srvCommand
+        };
+    }
+
+    //-----------------]>
+
+    function srvBot(bot, path, callback) {
+        srvBots = srvBots || {};
+        srvBots[path] = bot = createSrvBot(bot, callback);
+
+        if(params.host) {
+            var url = params.host + ":" + params.port + path;
+
+            bot.bot.api
+                .setWebhook({"url": url})
+
+                .then(JSON.parse)
+                .then(function(data) {
+                    if(data.ok)
+                        return;
+
+                    console.log("Webhook: %s", url);
+                    console.log(data.result);
+                }, console.error);
+        } else {
+            console.log("[!] Warning | `host` not specified, Auto-Webhook not working")
+        }
+
+        return bot;
+    }
+
+    function srvAnalytics(apiKey, appName) {
+        var rBotan = require("botanio");
+        rBotan = rBotan(apiKey);
+
+        this.anTrack = function(data) {
+            return rBotan.track(data, appName || "Telegram Bot");
+        };
+
+        return this;
+    }
+
+    function srvCommand(name, callback) {
+        this.commands[name] = callback;
+
+        return this;
+    }
 }

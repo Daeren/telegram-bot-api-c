@@ -13,8 +13,8 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBotServer    = new rBot();
-var gBotSrvOptions  = {
+var objBot = rBot();
+var objSrvOptions  = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -29,39 +29,39 @@ var gBotSrvOptions  = {
     "host":     "site.xx"
 };
 
-//------------------]>
-
 var objMyBot    = new rBot(process.env.TELEGRAM_BOT_TOKEN_MY),
     objOtherBot = new rBot(process.env.TELEGRAM_BOT_TOKEN_OTHER);
 
-var objSrv = objBotServer.createServer(gBotSrvOptions);
+var objSrv = objBot.server(objSrvOptions);
+
 
 objSrv
-    .bot(objMyBot, "/MyBot", cbMyBot)
-    .analytics("apiKey", "appNameOtherBot")
-    .command("feedback", cbCmdFeedback);
+    .bot(objMyBot, "/myBot")
+
+    .command("start", cbCmdStart)
+    .command("stop", cbCmdStop);
 
 objSrv
-    .bot(objOtherBot, "/OtherBot", cbOtherBot)
-    .analytics("apiKey", "appNameOtherBot")
-    .command("feedback", cbCmdFeedback);
+    .bot(objOtherBot, "/myOtherBot", cbMsg)
+    .analytics("apiKey", "appNameOtherBot");
 
-//------------------]>
 
-function cbMyBot(data) {
+function cbMsg(data) {
+    console.log("cbMsg");
+    console.log(data);
+
+    //----------------]>
+
     var msg         = data.message;
 
-    var msgFrom     = msg.from,
-        msgChat     = msg.chat,
-
-        msgText     = msg.text,
-        msgDate     = msg.date;
+    var msgChat     = msg.chat,
+        msgText     = msg.text;
 
     //----------------]>
 
     this.id = msgChat.id;
 
-    this.i()
+    this.api.getMe()
         .then(() => {
             this.data.chatAction = "typing";
             return this.send();
@@ -79,7 +79,9 @@ function cbMyBot(data) {
             this.from = msgChat.id;
             this.to = msgText;
 
-            return this.forward();
+            return this.forward()
+                .then(JSON.parse)
+                .then(console.log, console.error);
 
         })
         .then(() => {
@@ -88,25 +90,29 @@ function cbMyBot(data) {
         })
         .then(JSON.parse)
         .then(console.log, console.error);
+
+
 }
 
-//---------)>
-
-function cbOtherBot(data) {
-    this.id = data.message.chat.id;
-    this.data.message = "cbOtherBot";
-    this.send();
-}
-
-//--------------)>
-
-function cbCmdFeedback(data, params) {
-    var msg         = data.message;
-    var msgChat     = msg.chat;
+function cbCmdStart(data, params) {
+    console.log("cbCmdStart");
+    console.log(data);
 
     //----------------]>
 
-    this.id = msgChat.id;
+    this.id = data.message.chat.id;
+    this.data.message = "Hello";
+
+    this.send().then(JSON.parse).then(console.log, console.error);
+}
+
+function cbCmdStop(data, params) {
+    console.log("cbCmdStop");
+    console.log(data);
+
+    //----------------]>
+
+    this.id = data.message.chat.id;
     this.data.message = params;
 
     this.send();
