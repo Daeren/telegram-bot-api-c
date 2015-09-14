@@ -64,7 +64,6 @@ var CBot = function(token) {
     this.setToken       = setToken;
 
     this.createServer   = createServer;
-    this.analytics      = analytics;
 
     //--------------------]>
 
@@ -74,8 +73,6 @@ var CBot = function(token) {
 
         gBoundaryUDate,
         gBoundaryUIntr  = 1000 * 60 * 5;
-
-    var objAnalytics;
 
     //---------)>
 
@@ -878,8 +875,9 @@ var CBot = function(token) {
     function createServer(params, callback) {
         var srv,
 
-            srvBots     = {},
-            srvCommands = {};
+            srvAnTrack      = null,
+            srvBots         = {},
+            srvCommands     = {};
 
         var ctxSend     = createCtxSend(self);
 
@@ -952,15 +950,28 @@ var CBot = function(token) {
                 throw new Error("Empty path!");
 
             bot = srvBots[path] = {
-                "bot":      bot,
-                "cmd":      {},
-                "ctxSend":  createCtxSend(bot),
+                "bot":          bot,
+                "anTrack":      null,
+                "cmd":          {},
 
-                "onMsg":    cbMsg
+                "ctxSend":      createCtxSend(bot),
+                "onMsg":        cbMsg
+            };
+
+            bot.analytics = function(apiKey, appName) {
+                var rBotan = require("botanio");
+                rBotan = rBotan(apiKey);
+
+                this.anTrack = function(data) {
+                    return rBotan.track(data, appName || "Telegram Bot");
+                };
+
+                return this;
             };
 
             bot.command = function(cmd, cbCmd) {
                 this.cmd[cmd] = cbCmd;
+                return this;
             };
 
             if(params.host) {
@@ -983,8 +994,20 @@ var CBot = function(token) {
             return bot;
         };
 
+        srv.analytics = function(apiKey, appName) {
+            var rBotan = require("botanio");
+            rBotan = rBotan(apiKey);
+
+            srvAnTrack = function(data) {
+                return rBotan.track(data, appName || "Telegram Bot");
+            };
+
+            return this;
+        };
+
         srv.command = function(cmd, cb) {
             srvCommands[cmd] = cb;
+            return this;
         };
 
         //-----------------]>
@@ -1022,12 +1045,17 @@ var CBot = function(token) {
 
                     //-------------]>
 
-                    var ctx     = ctxSend,
-                        objBot  = srvBots[req.url];
+                    var ctx             = ctxSend,
+
+                        objBot          = srvBots[req.url],
+                        objAnalytics    = srvAnTrack,
+                        objCommands     = srvCommands;
 
                     if(objBot) {
                         ctx = objBot.ctxSend;
-                        srvCommands = objBot.cmd;
+
+                        objAnalytics = objBot.anTrack;
+                        objCommands = objBot.cmd;
                     }
 
                     ctx.data = {};
@@ -1039,7 +1067,7 @@ var CBot = function(token) {
 
                     //-------------]>
 
-                    if(cmd = parseCmd(result.message.text, srvCommands))
+                    if(cmd = parseCmd(result.message.text, objCommands))
                         cmd.func.call(ctx, result, cmd.params, req);
                     else {
                         var evMsg = objBot ? objBot.onMsg : callback;
@@ -1127,17 +1155,6 @@ var CBot = function(token) {
 
             return result;
         }
-    }
-
-    function analytics(apiKey, appName) {
-        var rBotan = require("botanio");
-        rBotan = rBotan(apiKey);
-
-        objAnalytics = function(data) {
-            return rBotan.track(data, appName || "Telegram Bot");
-        };
-
-        return self;
     }
 };
 

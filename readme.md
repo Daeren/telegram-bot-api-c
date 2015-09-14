@@ -55,8 +55,8 @@ Used [Botan SDK][3]
 
 ```js
 objBot
-    .analytics("apiKey", "appName")
     .createServer(gBotSrvOptions, cbMsg)
+    .analytics("apiKey", "appName")
     .command("feedback", cbCmdFeedback);
 ```
 
@@ -93,12 +93,14 @@ var objSrv = objBotServer.createServer(gBotSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot", cbMyBot) // <-- Auto-Webhook
+    .analytics("apiKey", "appNameMyBot")
     .command("feedback", cbCmdFeedback);
 
 objSrv
     .bot(objOtherBot, "/OtherBot", cbOtherBot)
+    .analytics("apiKey", "appNameOtherBot")
     .command("feedback", cbCmdFeedback);
-
+    
 //------------------]>
 
 function cbMyBot(data) {
@@ -199,10 +201,9 @@ objBotServer
 | setToken        | token                                                               | this                              |
 |                 | -                                                                   |                                   |
 | createServer    | options, callback(json, request)                                    | new instance of https.Server      |
-| analytics       | apiKey[, appName="Telegram Bot"]                                    | this                              |
 
 
-#### Method: send
+#### Methods: send
 
 | Name          | Type                                  | Note                                      |
 |---------------|---------------------------------------|-------------------------------------------|
@@ -216,6 +217,15 @@ objBotServer
 | voice         | string, stream                        | Ext: ogg                                  |
 | location      | string, json                          |                                           |
 | chatAction    | string                                |                                           |
+
+#### Methods: server
+
+| Name          | Arguments                             | Note                                      |
+|---------------|---------------------------------------|-------------------------------------------|
+|               | -                                     |                                           |
+| bot           | bot, path, callback(json, request)    |                                           |
+| analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
+| command       | cmd, callback(data, params, request)  |                                           |
 
 
 ## License

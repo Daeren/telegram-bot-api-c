@@ -38,10 +38,12 @@ var objSrv = objBotServer.createServer(gBotSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot", cbMyBot)
+    .analytics("apiKey", "appNameOtherBot")
     .command("feedback", cbCmdFeedback);
 
 objSrv
     .bot(objOtherBot, "/OtherBot", cbOtherBot)
+    .analytics("apiKey", "appNameOtherBot")
     .command("feedback", cbCmdFeedback);
 
 //------------------]>
