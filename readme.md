@@ -8,17 +8,22 @@ var rBot = require("telegram-bot-api-c");
 
 var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
 
+objBot.call("sendMessage", {
+    "chat_id":      cid,
+    "text":         "*bold Just* _italic markdown_ [Daeren](666.io)",
+    "parse_mode":   "markdown"
+});
+    
+//------------------]>
+
 var id      = "59725308",
     file    = __dirname + "/MiElPotato.jpg",
 
-    i       = objBot.i,
     send    = objBot.send;
 
-//------------------]>
-
-i()
+objBot.i()
     .then(JSON.parse)
-    .then(data => send(id, [{"chatAction": "upload_photo"}, {"message": ""}, {"message": data}]))
+    .then(data => send(id, [{"chatAction": "upload_photo"}, {"message": data}]))
     
     .then(results => {
         for(var name in results)
@@ -29,15 +34,6 @@ i()
     .then(() => send(id, {"photo": file}))
     .then(JSON.parse)
     .then(data => send(id, {"photo": data.result.photo[0].file_id, "caption": "Hell World!"}));
-
-//-----------------------------]>
-
-var data = {
-    "chat_id":  id,
-    "action":   "typing"
-};
-
-objBot.call("sendChatAction", data);
 ```
 
 
@@ -50,6 +46,18 @@ objBot
     .then(JSON.parse)
     .then(console.log, console.error);
 
+```
+
+
+#### Analytics 
+
+Used [Botan SDK][3]
+
+```js
+objBot
+    .analytics("apiKey", "appName")
+    .createServer(gBotSrvOptions, cbMsg)
+    .command("feedback", cbCmdFeedback);
 ```
 
 
@@ -164,7 +172,7 @@ objBotServer
             throw new Error("Oops...problems with webhook...");
 
         objBotServer
-            .createServer(gBotSrvOptions, cbCommonMsg)
+            .createServer(gBotSrvOptions, cbMsg)
             .command("feedback", cbCmdFeedback);
     });
 ```
@@ -191,6 +199,7 @@ objBotServer
 | setToken        | token                                                               | this                              |
 |                 | -                                                                   |                                   |
 | createServer    | options, callback(json, request)                                    | new instance of https.Server      |
+| analytics       | apiKey[, appName="Telegram Bot"]                                    | this                              |
 
 
 #### Method: send
@@ -219,3 +228,4 @@ MIT
 
 [1]: http://666.io
 [2]: https://core.telegram.org/bots/api
+[3]: https://github.com/botanio/sdk#js

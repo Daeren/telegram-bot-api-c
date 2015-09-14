@@ -49,21 +49,22 @@ var gMMTypesKeys    = Object.keys(gMethodsMap),
 //-----------------------------------------------------
 
 var CBot = function(token) {
-    this.call = callAPI;
-    this.callJson = callAPIJson;
+    this.call           = callAPI;
+    this.callJson       = callAPIJson;
 
-    this.forward = forwardMessage;
-    this.send = send;
-    this.i = getMe;
+    this.forward        = forwardMessage;
+    this.send           = send;
+    this.i              = getMe;
 
-    this.profilePhotos = getUserProfilePhotos;
+    this.profilePhotos  = getUserProfilePhotos;
 
-    this.webhook = setWebhook;
-    this.polling = getUpdates;
+    this.webhook        = setWebhook;
+    this.polling        = getUpdates;
 
-    this.setToken = setToken;
+    this.setToken       = setToken;
 
-    this.createServer = createServer;
+    this.createServer   = createServer;
+    this.analytics      = analytics;
 
     //--------------------]>
 
@@ -73,6 +74,8 @@ var CBot = function(token) {
 
         gBoundaryUDate,
         gBoundaryUIntr  = 1000 * 60 * 5;
+
+    var objAnalytics;
 
     //---------)>
 
@@ -222,6 +225,9 @@ var CBot = function(token) {
 
                 if((t = data.text) && typeof(t) !== "undefined")
                     body += genBodyField("text", "text", t);
+
+                if((t = data.parse_mode) && typeof(t) !== "undefined")
+                    body += genBodyField("text", "parse_mode", t);
 
                 if(t = data.disable_web_page_preview)
                     body += genBodyField("text", "disable_web_page_preview", "1");
@@ -970,6 +976,8 @@ var CBot = function(token) {
                         console.log("Webhook: %s", url);
                         console.log(data.result);
                     }, console.error);
+            } else {
+                console.log("[!] Warning | `host` not specified, Auto-Webhook not working")
             }
 
             return bot;
@@ -1023,6 +1031,11 @@ var CBot = function(token) {
                     }
 
                     ctx.data = {};
+
+                    //-------------]>
+
+                    if(objAnalytics)
+                        objAnalytics(result.message);
 
                     //-------------]>
 
@@ -1114,6 +1127,17 @@ var CBot = function(token) {
 
             return result;
         }
+    }
+
+    function analytics(apiKey, appName) {
+        var rBotan = require("botanio");
+        rBotan = rBotan(apiKey);
+
+        objAnalytics = function(data) {
+            return rBotan.track(data, appName || "Telegram Bot");
+        };
+
+        return self;
     }
 };
 

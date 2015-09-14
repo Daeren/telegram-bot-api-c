@@ -40,15 +40,15 @@ objBotServer
             throw new Error("Oops...problems with webhook...");
 
         objBotServer
-            .createServer(gBotSrvOptions, cbCommonMsg)
+            .createServer(gBotSrvOptions, cbMsg)
             .command("feedback", cbCmdFeedback);
     });
 
 //------------------]>
 
-function cbCommonMsg(data) {
+function cbMsg(data) {
     this.id = data.message.chat.id;
-    this.data.message = "cbCommonMsg";
+    this.data.message = "cbMsg";
     this.send();
 }
 
