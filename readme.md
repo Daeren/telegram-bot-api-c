@@ -60,7 +60,7 @@ var rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-var objBotServer    = new rBot(process.env.TG_BOT_TOKEN_COMMON_CAN_EMPTY);
+var objBotServer    = new rBot();
 var gBotSrvOptions  = {
     "certDir":  "/www/site",
 
@@ -81,7 +81,7 @@ var gBotSrvOptions  = {
 var objMyBot    = new rBot(process.env.TG_BOT_TOKEN_MY),
     objOtherBot = new rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-var objSrv = objBotServer.createServer(gBotSrvOptions, cbCommonMsg);
+var objSrv = objBotServer.createServer(gBotSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot", cbMyBot) // <-- Auto-Webhook
@@ -92,14 +92,6 @@ objSrv
     .command("feedback", cbCmdFeedback);
 
 //------------------]>
-
-function cbCommonMsg(data) {
-    this.id = data.message.chat.id;
-    this.data.message = "cbCommonMsg";
-    this.send();
-}
-
-//---------)>
 
 function cbMyBot(data) {
     var msg         = data.message;
