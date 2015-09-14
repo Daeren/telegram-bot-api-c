@@ -652,14 +652,11 @@ var CBot = function(token) {
 
     function callAPIJson(method, data, callback) {
         return callAPI(method, data, function(error, result, response) {
-            if(error)
-                return callback(error);
-
-            if(result && typeof(result) === "string") {
+            if(result) {
                 try {
                     result = JSON.parse(result);
                 } catch(e) {
-                    error = e;
+                    error = error || e;
                     result = null;
                 }
             } else
@@ -831,7 +828,7 @@ var CBot = function(token) {
             });
         }
     }
-    
+
     function getUpdates(offset, limit, timeout, callback) {
         var defer;
 
@@ -874,7 +871,15 @@ var CBot = function(token) {
 
     function createServer(params, callback) {
         var srv,
+
+            srvBots     = {},
             srvCommands = {};
+
+        var ctxSend     = createCtxSend(self);
+
+        //----------)>
+
+        params.port = params.port || 88;
 
         //----------)>
 
@@ -932,33 +937,47 @@ var CBot = function(token) {
             srv = rHttps.createServer(options, cbServer);
         }
 
-        srv.listen(params.port || 88, params.host, cbListen);
+        srv.listen(params.port, params.host, cbListen);
 
         //---)>
 
-        srv.command = function command(cmd, cb) {
+        srv.bot = function(bot, path, cbMsg) {
+            if(!path)
+                throw new Error("Empty path!");
+
+            bot = srvBots[path] = {
+                "bot":      bot,
+                "cmd":      {},
+                "ctxSend":  createCtxSend(bot),
+
+                "onMsg":    cbMsg
+            };
+
+            bot.command = function(cmd, cbCmd) {
+                this.cmd[cmd] = cbCmd;
+            };
+
+            if(params.host) {
+                var url = params.host + ":" + params.port + path;
+
+                bot.bot
+                    .webhook(url)
+                    .then(JSON.parse)
+                    .then(function(data) {
+                        if(data.ok)
+                            return;
+
+                        console.log("Webhook: %s", url);
+                        console.log(data.result);
+                    }, console.error);
+            }
+
+            return bot;
+        };
+
+        srv.command = function(cmd, cb) {
             srvCommands[cmd] = cb;
         };
-
-        //----------)>
-
-        var ctxSend = {
-            "send": function(callback) {
-                var d = this.data;
-                this.data = {};
-
-                return self.send(this.id, d, callback);
-            },
-
-            "forward": function(callback) {
-                var to = this.to;
-                this.to = undefined;
-
-                return self.forward(this.mid, this.from, to, callback);
-            }
-        };
-
-        ctxSend.__proto__ = self;
 
         //-----------------]>
 
@@ -980,7 +999,7 @@ var CBot = function(token) {
                     //------------]>
 
                     var cmd,
-                        result = Buffer.concat(chunks).toString();
+                        result = Buffer.concat(chunks);
 
                     if(result) {
                         try {
@@ -995,12 +1014,26 @@ var CBot = function(token) {
 
                     //-------------]>
 
-                    ctxSend.data = {};
+                    var ctx     = ctxSend,
+                        objBot  = srvBots[req.url];
+
+                    if(objBot) {
+                        ctx = objBot.ctxSend;
+                        srvCommands = objBot.cmd;
+                    }
+
+                    ctx.data = {};
 
                     //-------------]>
 
-                    if(cmd = parseCmd(result.message.text))
-                        cmd.func.call(ctxSend, result, cmd.params, req); else callback.call(ctxSend, result, req);
+                    if(cmd = parseCmd(result.message.text, srvCommands))
+                        cmd.func.call(ctx, result, cmd.params, req);
+                    else {
+                        var evMsg = objBot ? objBot.onMsg : callback;
+
+                        if(evMsg)
+                            evMsg.call(ctx, result, req);
+                    }
                 });
             } else
                 response();
@@ -1037,14 +1070,14 @@ var CBot = function(token) {
 
         //-----------------]>
 
-        function parseCmd(text) {
+        function parseCmd(text, src) {
             if(!text || text[0] !== "/")
                 return null;
 
             var t       = text.split(gReSplitCmd, 2);
 
             var name    = t[0].substr(1),
-                cmdFunc = srvCommands[name];
+                cmdFunc = src[name];
 
             if(!cmdFunc)
                 return null;
@@ -1058,6 +1091,28 @@ var CBot = function(token) {
                     "name": name
                 }
             };
+        }
+
+        function createCtxSend(parent) {
+            var result = {
+                "send": function(callback) {
+                    var d = this.data;
+                    this.data = {};
+
+                    return parent.send(this.id, d, callback);
+                },
+
+                "forward": function(callback) {
+                    var to = this.to;
+                    this.to = undefined;
+
+                    return parent.forward(this.mid, this.from, to, callback);
+                }
+            };
+
+            result.__proto__ = parent;
+
+            return result;
         }
     }
 };

@@ -18,7 +18,7 @@ var id      = "59725308",
 
 i()
     .then(JSON.parse)
-    .then(json => send(id, [{"chatAction": "upload_photo"}, {"message": ""}, {"message": json}]))
+    .then(data => send(id, [{"chatAction": "upload_photo"}, {"message": ""}, {"message": data}]))
     
     .then(results => {
         for(var name in results)
@@ -27,12 +27,8 @@ i()
     
     .then(() => send(id, {"photo": require("fs").createReadStream(file)}))
     .then(() => send(id, {"photo": file}))
-    
     .then(JSON.parse)
-    .then(json => send(id, {"photo": json.result.photo[0].file_id, "caption": "Hell World!"}))
-
-    .then(JSON.parse)
-    .then(console.info, console.error);
+    .then(data => send(id, {"photo": data.result.photo[0].file_id, "caption": "Hell World!"}));
 
 //-----------------------------]>
 
@@ -46,6 +42,7 @@ objBot.call("sendChatAction", data);
 
 
 #### Polling 
+
 ```js
 objBot
     .webhook()
@@ -56,16 +53,15 @@ objBot
 ```
 
 
-#### Server (RC 3)
+#### Server (RC 4)
 
 ```js
 var rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
-
-var gSrvOptions = {
+var objBotServer    = new rBot(process.env.TG_BOT_TOKEN_COMMON_CAN_EMPTY);
+var gBotSrvOptions  = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -82,21 +78,30 @@ var gSrvOptions = {
 
 //------------------]>
 
-objBot
-    .webhook("site.xx/myBot")
-    .then(JSON.parse)
-    .then(response => {
-        if(!response.ok)
-            throw new Error("Oops...problems with webhook...");
+var objMyBot    = new rBot(process.env.TG_BOT_TOKEN_MY),
+    objOtherBot = new rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-        objBot
-            .createServer(gSrvOptions, cbMsg)
-            .command("feedback", cbCmdFeedback);
-    });
+var objSrv = objBotServer.createServer(gBotSrvOptions, cbCommonMsg);
+
+objSrv
+    .bot(objMyBot, "/MyBot", cbMyBot) // <-- Auto-Webhook
+    .command("feedback", cbCmdFeedback);
+
+objSrv
+    .bot(objOtherBot, "/OtherBot", cbOtherBot)
+    .command("feedback", cbCmdFeedback);
 
 //------------------]>
 
-function cbMsg(data) {
+function cbCommonMsg(data) {
+    this.id = data.message.chat.id;
+    this.data.message = "cbCommonMsg";
+    this.send();
+}
+
+//---------)>
+
+function cbMyBot(data) {
     var msg         = data.message;
 
     var msgChat     = msg.chat,
@@ -135,13 +140,43 @@ function cbMsg(data) {
         .then(console.log, console.error);
 }
 
+//---------)>
+
+function cbOtherBot(data) {
+    this.id = data.message.chat.id;
+    this.data.message = "cbOtherBot";
+    this.send();
+}
+
+//--------------)>
+
 function cbCmdFeedback(data, params) {
     this.id = data.message.chat.id;
     this.data.message = params;
-
     this.send();
 }
 ```
+
+
+#### mServer
+
+```js
+var objBotServer = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+
+objBotServer
+    .webhook("site.xx/myBot")
+
+    .then(JSON.parse)
+    .then(response => {
+        if(!response.ok)
+            throw new Error("Oops...problems with webhook...");
+
+        objBotServer
+            .createServer(gBotSrvOptions, cbCommonMsg)
+            .command("feedback", cbCmdFeedback);
+    });
+```
+
 
 [Telegram Bot API][2]
 
@@ -149,17 +184,17 @@ function cbCmdFeedback(data, params) {
 | Method          | Arguments                                                           | Return                            |
 |-----------------|---------------------------------------------------------------------|-----------------------------------|
 |                 | -                                                                   |                                   |
-| call            | method, data[, callback(error, buffer, response)]                   |                                   |
+| call            | method, data[, callback(error, buffer, response)*1]                 |                                   |
 | callJson        | method, data[, callback(error, json, response)]                     |                                   |
 |                 | -                                                                   |                                   |
-| forward         | mid, chatFrom, chatTo, [, callback(error, buffer, response)]        | promise or undefined              |
-| send            | id, data[, callback(error, buffer, response)]                       | promise or undefined              |
-| i               | [callback(error, buffer, response)]                                 | promise or undefined              |
+| forward         | mid, chatFrom, chatTo, [, callback*1]                               | promise or undefined              |
+| send            | id, data[, callback*1]                                              | promise or undefined              |
+| i               | [callback*1]                                                        | promise or undefined              |
 |                 | -                                                                   |                                   |
-| profilePhotos   | uid[, offset][, limit][, callback(error, buffer, response)]         | promise or undefined              |
+| profilePhotos   | uid[, offset][, limit][, callback*1]                                | promise or undefined              |
 |                 | -                                                                   |                                   |
-| webhook         | url, cert[, callback(error, buffer, response)]                      | promise or undefined              |
-| polling         | [offset][, limit][, timeout][, callback(error, buffer, response)]   | promise or undefined              |
+| webhook         | url, cert[, callback*1]                                             | promise or undefined              |
+| polling         | [offset][, limit][, timeout][, callback*1]                          | promise or undefined              |
 |                 | -                                                                   |                                   |
 | setToken        | token                                                               | this                              |
 |                 | -                                                                   |                                   |

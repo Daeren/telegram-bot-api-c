@@ -13,9 +13,8 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
-
-var gSrvOptions = {
+var objBotServer    = new rBot();
+var gBotSrvOptions  = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -32,21 +31,30 @@ var gSrvOptions = {
 
 //------------------]>
 
-objBot
-    .webhook("site.xx/myBot")
-    .then(JSON.parse)
-    .then(response => {
-        if(!response.ok)
-            throw new Error("Oops...problems with webhook...");
+var objMyBot    = new rBot(process.env.TELEGRAM_BOT_TOKEN_MY),
+    objOtherBot = new rBot(process.env.TELEGRAM_BOT_TOKEN_OTHER);
 
-        objBot
-            .createServer(gSrvOptions, cbMsg)
-            .command("feedback", cbCmdFeedback);
-    });
+var objSrv = objBotServer.createServer(gBotSrvOptions, cbCommonMsg);
+
+objSrv
+    .bot(objMyBot, "/MyBot", cbMyBot)
+    .command("feedback", cbCmdFeedback);
+
+objSrv
+    .bot(objOtherBot, "/OtherBot", cbOtherBot)
+    .command("feedback", cbCmdFeedback);
 
 //------------------]>
 
-function cbMsg(data) {
+function cbCommonMsg(data) {
+    this.id = data.message.chat.id;
+    this.data.message = "cbCommonMsg";
+    this.send();
+}
+
+//---------)>
+
+function cbMyBot(data) {
     var msg         = data.message;
 
     var msgFrom     = msg.from,
@@ -87,6 +95,16 @@ function cbMsg(data) {
         .then(JSON.parse)
         .then(console.log, console.error);
 }
+
+//---------)>
+
+function cbOtherBot(data) {
+    this.id = data.message.chat.id;
+    this.data.message = "cbOtherBot";
+    this.send();
+}
+
+//--------------)>
 
 function cbCmdFeedback(data, params) {
     var msg         = data.message;
