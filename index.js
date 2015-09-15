@@ -1223,6 +1223,14 @@ function createServer(botFather, params, callback) {
 
     function srvBot(bot, path, callback) {
         srvBots = srvBots || {};
+
+        //-------------]>
+
+        if(Object.prototype.hasOwnProperty.call(srvBots, path))
+            return srvBots[path];
+
+        //-------------]>
+
         srvBots[path] = bot = createSrvBot(bot, callback);
 
         if(params.host) {

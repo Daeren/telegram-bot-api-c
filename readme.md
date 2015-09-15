@@ -29,7 +29,7 @@ objBotApi.sendMessage(data(), function() {
 });
 ```
 
-[Telegram Bot API][2]
+[Telegram Bot API][3]
 
 * Stream: +
 * Server: +
@@ -54,7 +54,7 @@ api
 
 #### Analytics 
 
-Used [Botan SDK][3]
+Used [Botan SDK][4]
 
 ```js
 objBot
@@ -182,7 +182,7 @@ objBot.api
 | Attribute         | Type           | Note                              |
 |-------------------|----------------|-----------------------------------|
 |                   | -              |                                   |
-| api               | Object         | See [Telegram Bot API][2]         |
+| api               | Object         | See [Telegram Bot API][3]         |
 
 
 | Method            | Arguments                                                             | Return                            |
@@ -232,5 +232,6 @@ MIT
 
 
 [1]: http://666.io
-[2]: https://core.telegram.org/bots/api
-[3]: https://github.com/botanio/sdk#js
+[2]: https://telegram.me/io666
+[3]: https://core.telegram.org/bots/api
+[4]: https://github.com/botanio/sdk#js
