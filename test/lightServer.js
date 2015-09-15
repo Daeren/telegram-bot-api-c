@@ -50,7 +50,7 @@ function cbMsg(data) {
     console.log(data);
 
     this.id = data.message.chat.id;
-    this.data.message = "cbMsg";
+    this.data.message = "Hell Word!";
     this.send();
 }
 

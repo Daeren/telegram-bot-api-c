@@ -14,6 +14,8 @@ var rHttp           = require("http"),
     rFs             = require("fs"),
     rStream         = require("stream");
 
+//-----------------------------------------------------
+
 var gCRLF           = "\r\n";
 
 var gPipeOptions    = {"end": false};
@@ -662,10 +664,12 @@ function main(token) {
                 }
             }
 
-            file.pipe(req, gPipeOptions);
             file
                 .on("error", function(error) {
                     req.end(bodyEnd);
+                })
+                .on("open", function() {
+                    file.pipe(req, gPipeOptions);
                 })
                 .on("end", function() {
                     req.end(bodyEnd);

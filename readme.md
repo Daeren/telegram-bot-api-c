@@ -6,17 +6,15 @@ var rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-var objBot =  rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBotApi =  rBot(process.env.TELEGRAM_BOT_TOKEN).api;
 
-var api     = objBot.api,
+var file    = __dirname + "/MiElPotato.jpg",
+    data    = () => ({"chat_id": -34042985, "text": Date.now(), "parse_mode": "markdown"});
 
-    file    = __dirname + "/MiElPotato.jpg",
-    data    = () => ({"chat_id": "-34042985", "text": "Date: " + Date.now()});
-
-
-api.sendMessage(data(), function justCallback() {
-    api.sendMessage(data())
-    
+objBotApi.sendMessage(data(), function() {
+    objBotApi
+        .sendMessage(data())
+        
         .then(data)
         .then(x => api.sendMessage(x))
 
@@ -133,10 +131,7 @@ function cbOtherBot(data) {
             this.from = msgChat.id;
             this.to = msgText;
 
-            return this.forward()
-                .then(JSON.parse)
-                .then(console.log, console.error);
-
+            return this.forward();
         })
         .then(() => {
             this.data.message = ">_>";
@@ -169,7 +164,6 @@ var objBot = new rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 objBot.api
     .setWebhook("site.xx/myBot")
-    
     .then(JSON.parse)
     .then(response => {
         if(!response.ok)
@@ -178,7 +172,7 @@ objBot.api
         objBot
             .server(objSrvOptions, cbMsg)
             .command("start", cbCmdStart);
-    });
+    }, console.error);
 ```
 
 
