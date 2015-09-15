@@ -59,7 +59,7 @@ function cbMsg(data) {
 
     //----------------]>
 
-    this.id = msgChat.id;
+    // this.id = msgChat.id; <-- Default: chat_id in message
 
     this.api
         .getMe()
@@ -76,10 +76,10 @@ function cbMsg(data) {
             return this.send();
         })
         .then(() => {
-            this.mid = msg.message_id;
-            this.from = msgChat.id;
-            this.to = msgText;
+            // this.mid = msg.message_id; <-- Default: message_id in message
+            // this.from = msgChat.id; <-- Default: chat_id in message
 
+            this.to = msgText;
             return this.forward();
         })
         .then(() => {
@@ -96,9 +96,7 @@ function cbCmdStart(data, params) {
 
     //----------------]>
 
-    this.id = data.message.chat.id;
     this.data.message = "Hello";
-
     this.send().then(JSON.parse).then(console.log, console.error);
 }
 
@@ -108,8 +106,6 @@ function cbCmdStop(data, params) {
 
     //----------------]>
 
-    this.id = data.message.chat.id;
     this.data.message = params;
-
     this.send();
 }

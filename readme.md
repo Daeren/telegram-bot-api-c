@@ -106,20 +106,16 @@ objSrv
 function cbOtherBot(data) {
     var msg         = data.message;
 
-    var msgChat     = msg.chat,
-        msgText     = msg.text;
+    // this.id = msgChat.id; <-- Default: chat_id in message
 
-    //----------------]>
-
-    this.id = msgChat.id;
-
-    this.api.getMe()
+    this.api
+        .getMe()
         .then(() => {
             this.data.chatAction = "typing";
             return this.send();
         })
         .then(() => {
-            this.data.message = "Use: /feedback";
+            this.data.message = "Use: /start";
             return this.send();
         })
         .then(() => {
@@ -127,10 +123,10 @@ function cbOtherBot(data) {
             return this.send();
         })
         .then(() => {
-            this.mid = msg.message_id;
-            this.from = msgChat.id;
-            this.to = msgText;
-
+            // this.mid = msg.message_id; <-- Default: message_id in message
+            // this.from = msgChat.id; <-- Default: chat_id in message
+            
+            this.to = msg.text;
             return this.forward();
         })
         .then(() => {
@@ -144,13 +140,11 @@ function cbOtherBot(data) {
 //--------------)>
 
 function cbCmdStart(data, params) {
-    this.id = data.message.chat.id;
-    this.data.message = "cbCmdStart";
+    this.data.message = "Cmd: " + params.name + params.text;
     this.send();
 }
 
 function cbCmdStop(data, params) {
-    this.id = data.message.chat.id;
     this.data.message = params;
     this.send();
 }

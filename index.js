@@ -1024,7 +1024,7 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var cmd, result;
+            var msg, cmd, result;
 
             try {
                 result = JSON.parse(Buffer.concat(chunks));
@@ -1039,17 +1039,29 @@ function createServer(botFather, params, callback) {
 
             var objBot  = srvBots && srvBots[req.url] || srvBotDefault;
 
+            msg = result.message;
+
             //--------]>
 
             if(objBot.anTrack)
-                objBot.anTrack(result.message);
+                objBot.anTrack(msg);
 
-            if(cmd = parseCmd(result.message.text, objBot.commands)) {
-                objBot.ctx.data = {};
-                cmd.func.call(objBot.ctx, result, cmd.params, req);
+            if(cmd = parseCmd(msg.text, objBot.commands)) {
+                var ctx = objBot.ctx;
+
+                ctx.from = ctx.id = msg.chat.id;
+                ctx.mid = msg.message_id;
+                ctx.data = {};
+
+                cmd.func.call(ctx, result, cmd.params, req);
             } else if(objBot.onMsg) {
-                objBot.ctx.data = {};
-                objBot.onMsg.call(objBot.ctx, result, req);
+                var ctx = objBot.ctx;
+
+                ctx.from = ctx.id = msg.chat.id;
+                ctx.mid = msg.message_id;
+                ctx.data = {};
+
+                objBot.onMsg.call(ctx, result, req);
             }
         }
 
