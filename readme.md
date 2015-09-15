@@ -1,4 +1,4 @@
-```js
+```
 npm install telegram-bot-api-c
 git clone https://github.com/Daeren/telegram-bot-api-c.git
 ```
@@ -196,6 +196,7 @@ objBot.api
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
 |                   | -                                                                     |                                   |
 | createServer      | [options][, callback(json, request)]                                  | ~                                 |
+| parseCmd          | text, commands                                                        | object {func, params}             |
 
 
 #### Methods: send
@@ -229,6 +230,7 @@ MIT
 
 ----------------------------------
 [@ Daeren Torn][1]
+[@ Telegram][2]
 
 
 [1]: http://666.io

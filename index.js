@@ -87,7 +87,8 @@ function main(token) {
 
         "send":         send,
 
-        "server":       server
+        "server":       server,
+        "parseCmd":     parseCmd
     };
 
     //-------------------------]>
@@ -1127,62 +1128,6 @@ function createServer(botFather, params, callback) {
 
     //-----------------]>
 
-    function parseCmd(text, src) {
-        if(!text || !src || text[0] !== "/" && text[0] !== "@")
-            return null;
-
-        //---------]>
-
-        var t,
-            name,
-            cmd, cmdFunc, cmdText;
-
-        switch(text[0]) {
-            case "/":
-                t = text.match(gReFindCmd);
-
-                if(t) {
-                    cmd = t[1];
-                    cmdText = t[2];
-                }
-
-                break;
-
-            case "@":
-                text = text.replace(gReReplaceCmd, "");
-
-                if(text[0] !== "/")
-                    return null;
-
-                break;
-        }
-
-        if(!t) {
-            t = text.split(gReSplitCmd, 2);
-
-            cmd = t[0];
-            cmdText = t[1];
-        }
-
-        //---------]>
-
-        name = cmd.substr(1);
-        cmdFunc = src[name];
-
-        if(!cmdFunc)
-            return null;
-
-        return {
-            "func":     cmdFunc,
-
-            "params":   {
-                "cmd":  cmd,
-                "text": cmdText || "",
-                "name": name
-            }
-        };
-    }
-
     function createSrvBot(bot, onMsg) {
         var ctx = {
             "data":     null,
@@ -1270,4 +1215,60 @@ function createServer(botFather, params, callback) {
 
         return this;
     }
+}
+
+function parseCmd(text, commands) {
+    if(!text || !commands || text[0] !== "/" && text[0] !== "@")
+        return null;
+
+    //---------]>
+
+    var t,
+        name,
+        cmd, cmdFunc, cmdText;
+
+    switch(text[0]) {
+        case "/":
+            t = text.match(gReFindCmd);
+
+            if(t) {
+                cmd = t[1];
+                cmdText = t[2];
+            }
+
+            break;
+
+        case "@":
+            text = text.replace(gReReplaceCmd, "");
+
+            if(text[0] !== "/")
+                return null;
+
+            break;
+    }
+
+    if(!t) {
+        t = text.split(gReSplitCmd, 2);
+
+        cmd = t[0];
+        cmdText = t[1];
+    }
+
+    //---------]>
+
+    name = cmd.substr(1);
+    cmdFunc = commands[name];
+
+    if(!cmdFunc)
+        return null;
+
+    return {
+        "func":     cmdFunc,
+
+        "params":   {
+            "cmd":  cmd,
+            "text": cmdText || "",
+            "name": name
+        }
+    };
 }

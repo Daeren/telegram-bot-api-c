@@ -50,6 +50,22 @@ function cbMsg(data) {
     console.log("\ncbMsg");
     console.log(data);
 
+    //--------------]>
+
+    var commands = {
+        "help": x => {
+            this.data.message = "This is HELP!";
+            this.send();
+        }
+    };
+
+    var cmd = this.parseCmd(data.message.text, commands);
+
+    if(cmd)
+        return cmd.func(data, cmd.params);
+
+    //--------------]>
+
     this.id = data.message.chat.id;
     this.data.message = "Hell Word!";
     this.send();
