@@ -24,7 +24,9 @@ var gReqOptions     = {
     "method":       "POST"
 };
 
-var gReSplitCmd     = /\s+([\s\S]+)?/,
+var gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
+    gReReplaceCmd   = /^@\S+\s/,
+    gReSplitCmd     = /\s+([\s\S]+)?/,
 
     gRePhotoExt     = /\.(jp[e]?g|[gt]if|png|bmp)$/i,
     gReAudioExt     = /\.(mp3)$/i,
@@ -1126,13 +1128,46 @@ function createServer(botFather, params, callback) {
     //-----------------]>
 
     function parseCmd(text, src) {
-        if(!text || !src || text[0] !== "/")
+        if(!text || !src || text[0] !== "/" && text[0] !== "@")
             return null;
 
-        var t       = text.split(gReSplitCmd, 2);
+        //---------]>
 
-        var name    = t[0].substr(1),
-            cmdFunc = src[name];
+        var t,
+            name,
+            cmd, cmdFunc, cmdText;
+
+        switch(text[0]) {
+            case "/":
+                t = text.match(gReFindCmd);
+
+                if(t) {
+                    cmd = t[1];
+                    cmdText = t[2];
+                }
+
+                break;
+
+            case "@":
+                text = text.replace(gReReplaceCmd, "");
+
+                if(text[0] !== "/")
+                    return null;
+
+                break;
+        }
+
+        if(!t) {
+            t = text.split(gReSplitCmd, 2);
+
+            cmd = t[0];
+            cmdText = t[1];
+        }
+
+        //---------]>
+
+        name = cmd.substr(1);
+        cmdFunc = src[name];
 
         if(!cmdFunc)
             return null;
@@ -1141,8 +1176,8 @@ function createServer(botFather, params, callback) {
             "func":     cmdFunc,
 
             "params":   {
-                "cmd":  t[0],
-                "text": t[1] || "",
+                "cmd":  cmd,
+                "text": cmdText || "",
                 "name": name
             }
         };

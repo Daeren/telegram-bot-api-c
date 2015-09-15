@@ -14,7 +14,7 @@ var rBot = require("./../index");
 //-----------------------------------------------------
 
 var objBot = new rBot(process.env.TELEGRAM_BOT_TOKEN);
-var objSrvOptions  = {
+var objSrvOptions   = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -42,11 +42,12 @@ objBot.api
         objBot
             .server(objSrvOptions, cbMsg)
             .command("start", cbCmdStart);
-    });
+    }, console.error);
 
 //------------------]>
 
 function cbMsg(data) {
+    console.log("\ncbMsg");
     console.log(data);
 
     this.id = data.message.chat.id;
@@ -55,6 +56,7 @@ function cbMsg(data) {
 }
 
 function cbCmdStart(data, params) {
+    console.log("\ncbCmdStart");
     console.log(data);
 
     this.id = data.message.chat.id;

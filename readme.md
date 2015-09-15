@@ -36,6 +36,7 @@ objBotApi.sendMessage(data(), function() {
 * Promise: +
 * ES6: +
 * Analytics: +
+* BotCommands: /start [text], /start@bot [text], @bot /start [text]
 
 
 #### Polling 
