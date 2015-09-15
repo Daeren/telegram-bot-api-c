@@ -88,6 +88,8 @@ function main(token) {
         "send":         send,
 
         "server":       server,
+        "polling":      polling,
+
         "parseCmd":     parseCmd
     };
 
@@ -797,6 +799,100 @@ function main(token) {
         return createServer(this, params, callback);
     }
 
+    function polling(params, callback) {
+        if(typeof(params) === "function") {
+            callback = params;
+            params = undefined;
+        }
+
+        if(!params) {
+            params = {};
+        }
+
+        params.interval = params.interval || 5;
+
+        if(!callback)
+            throw new Error("Polling without `callback`!");
+
+        //----------------]>
+
+        var api         = this.api,
+
+            objBot      = createSrvBot(this, callback),
+            tmPolling   = setInterval(load, 1000 * params.interval);
+
+        objBot.stop = tmStop;
+
+        //------)>
+
+        if(params.firstLoad)
+            load();
+
+        //----------------]>
+
+        return objBot;
+
+        //----------------]>
+
+        function load() {
+            api
+                .getUpdates(params)
+                .then(JSON.parse)
+                .then(onLoadSuccess, console.error);
+        }
+
+        function onLoadSuccess(data) {
+            if(!data.ok)
+                return;
+
+            data.result.forEach(onMsg);
+
+            function onMsg(data) {
+                params.offset = data.update_id + 1;
+
+                //--------]>
+
+                var msg,
+                    cmdParams, cmdFunc;
+
+                var objCmds = objBot.commands;
+
+                msg = data.message;
+
+                //--------]>
+
+                if(objBot.anTrack)
+                    objBot.anTrack(msg);
+
+                if(objCmds) {
+                    cmdParams = parseCmd(msg.text);
+
+                    if(cmdParams)
+                        cmdFunc = objCmds[cmdParams.name];
+                }
+
+                if(cmdFunc || objBot.onMsg) {
+                    var ctx = objBot.ctx;
+
+                    ctx.from = ctx.id = msg.chat.id;
+                    ctx.mid = msg.message_id;
+                    ctx.data = {};
+
+                    if(cmdFunc) {
+                        cmdFunc.call(ctx, data, cmdParams);
+                        return;
+                    }
+
+                    objBot.onMsg.call(ctx, data);
+                }
+            }
+        }
+
+        function tmStop() {
+            clearInterval(tmPolling);
+        }
+    }
+
     //-------------------------]>
 
     function genApi() {
@@ -944,8 +1040,12 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
 //---------------------------]>
 
 function createServer(botFather, params, callback) {
-    if(!params) {
+    if(typeof(params) === "function") {
         callback = params;
+        params = undefined;
+    }
+
+    if(!params) {
         params = {"http": true};
     }
 
@@ -1020,7 +1120,7 @@ function createServer(botFather, params, callback) {
     srvBotDefault.__proto__ = srv;
 
     srv = {
-        "bot":      srvBot
+        "bot":      addBot
     };
 
     srv.__proto__ = srvBotDefault;
@@ -1138,45 +1238,7 @@ function createServer(botFather, params, callback) {
 
     //-----------------]>
 
-    function createSrvBot(bot, onMsg) {
-        var ctx = {
-            "data":     null,
-
-            "send": function(callback) {
-                var d = this.data;
-                this.data = {};
-
-                return bot.send(this.id, d, callback);
-            },
-
-            "forward": function(callback) {
-                return bot.api.forwardMessage({
-                    "chat_id":      this.to,
-                    "from_chat_id": this.from,
-                    "message_id":   this.mid
-                }, callback);
-            }
-        };
-
-        ctx.__proto__ = bot;
-
-        return {
-            "bot":          bot,
-
-            "anTrack":      null,
-            "commands":     {},
-
-            "ctx":          ctx,
-            "onMsg":        onMsg,
-
-            "analytics":    srvAnalytics,
-            "command":      srvCommand
-        };
-    }
-
-    //-----------------]>
-
-    function srvBot(bot, path, callback) {
+    function addBot(bot, path, callback) {
         srvBots = srvBots || {};
 
         //-------------]>
@@ -1208,6 +1270,48 @@ function createServer(botFather, params, callback) {
 
         return bot;
     }
+}
+
+//-----------------]>
+
+function createSrvBot(bot, onMsg) {
+    var ctx = {
+        "data":     null,
+
+        "send": function(callback) {
+            var d = this.data;
+            this.data = {};
+
+            return bot.send(this.id, d, callback);
+        },
+
+        "forward": function(callback) {
+            return bot.api.forwardMessage({
+                "chat_id":      this.to,
+                "from_chat_id": this.from,
+                "message_id":   this.mid
+            }, callback);
+        }
+    };
+
+    ctx.__proto__ = bot;
+
+    //-----------]>
+
+    return {
+        "bot":          bot,
+
+        "anTrack":      null,
+        "commands":     {},
+
+        "ctx":          ctx,
+        "onMsg":        onMsg,
+
+        "analytics":    srvAnalytics,
+        "command":      srvCommand
+    };
+
+    //-----------]>
 
     function srvAnalytics(apiKey, appName) {
         var rBotan = require("botanio");
@@ -1226,6 +1330,8 @@ function createServer(botFather, params, callback) {
         return this;
     }
 }
+
+//-----------------]>
 
 function parseCmd(text) {
     if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)

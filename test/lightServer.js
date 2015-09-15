@@ -13,7 +13,7 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 var objSrvOptions   = {
     "certDir":  "/www/site",
 

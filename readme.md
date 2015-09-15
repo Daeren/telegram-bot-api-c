@@ -3,19 +3,23 @@ npm install telegram-bot-api-c
 git clone https://github.com/Daeren/telegram-bot-api-c.git
 ```
 
+#### OneShot (Server:LongPolling)
 
 ```js
-var rBot = require("telegram-bot-api-c");
+require("telegram-bot-api-c")("TOKEN").polling(function(x) {this.data.message = x; this.send();});
+```
 
-//-----------------------------------------------------
+#### Send some stuff
 
-var objBotApi =  rBot(process.env.TELEGRAM_BOT_TOKEN).api;
+```js
+var rBot    = require("telegram-bot-api-c");
+var objApi  = rBot(process.env.TELEGRAM_BOT_TOKEN).api;
 
 var file    = __dirname + "/MiElPotato.jpg",
-    data    = () => ({"chat_id": -34042985, "text": Date.now(), "parse_mode": "markdown"});
+    data    = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 
-objBotApi.sendMessage(data(), function() {
-    objBotApi
+objApi.sendMessage(data(), function() {
+    objApi
         .sendMessage(data())
         
         .then(data)
@@ -33,22 +37,45 @@ objBotApi.sendMessage(data(), function() {
 
 * Stream: +
 * Server: +
+* LongPolling: +
+* Analytics: +
 * Promise: +
 * ES6: +
-* Analytics: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 
 
 #### Polling 
 
 ```js
-var api = objBot.api;
+var objSrv;
 
-api
+var objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objOptions  = {
+    "limit":    100,
+    "timeout":  0,
+    "interval": 5 // <-- Sec.
+};
+
+objBot.api
     .setWebhook()
-    .then(() => api.getUpdates())
-    .then(JSON.parse)
-    .then(console.log, console.error);
+    .then(x => {
+        objSrv = objBot
+            .polling(objOptions, cbMsg)
+            .analytics("apiKey", "appName")
+            .command("stop", cbCmdStop);
+    });
+
+function cbMsg(data) {
+    this.data.message = data;
+    this.send();
+}
+
+function cbCmdStop(data, params) {
+    this.data.message = "cbCmdStop";
+    this.send();
+
+    objSrv.stop();
+}
 ```
 
 
@@ -157,7 +184,7 @@ function cbCmdStop(data, params) {
 #### mServer
 
 ```js
-var objBot = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 objBot.api
     .setWebhook({"url": "site.xx/myBot"})
@@ -191,7 +218,9 @@ objBot.api
 |                   | -                                                                     |                                   |
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
 |                   | -                                                                     |                                   |
-| createServer      | [options][, callback(json, request)]                                  | ~                                 |
+| server            | [options][, callback(json, request)]                                  | ~                                 |
+| polling           | [options][, callback(json)]                                           | ~                                 |
+|                   | -                                                                     |                                   |
 | parseCmd          | text                                                                  | object {name, text, cmd}          |
 
 
@@ -209,6 +238,16 @@ objBot.api
 | voice         | string, stream                        | Ext: ogg                                  |
 | location      | string, json                          |                                           |
 | chatAction    | string                                |                                           |
+
+#### Methods: polling
+
+| Name          | Arguments                             | Note                                      |
+|---------------|---------------------------------------|-------------------------------------------|
+|               | -                                     |                                           |
+| stop          |                                       |                                           |
+|               | -                                     |                                           |
+| analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
+| command       | cmd, callback(data, params)           |                                           |
 
 #### Methods: server
 
