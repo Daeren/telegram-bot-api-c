@@ -156,7 +156,7 @@ function cbOtherBot(data) {
             return this.forward();
         })
         .then(() => {
-            this.data.message = "Use: /start;
+            this.data.message = "Use: /start";
             return this.send();
         })
         .then(JSON.parse)
