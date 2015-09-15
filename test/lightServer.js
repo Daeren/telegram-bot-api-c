@@ -32,7 +32,7 @@ var objSrvOptions  = {
 //------------------]>
 
 objBot.api
-    .setWebhook("site.xx/myBot")
+    .setWebhook({"url": "site.xx/myBot"})
 
     .then(JSON.parse)
     .then(response => {

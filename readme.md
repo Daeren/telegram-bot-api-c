@@ -160,7 +160,7 @@ function cbCmdStop(data, params) {
 var objBot = new rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 objBot.api
-    .setWebhook("site.xx/myBot")
+    .setWebhook({"url": "site.xx/myBot"})
     .then(JSON.parse)
     .then(response => {
         if(!response.ok)
