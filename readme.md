@@ -9,8 +9,6 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 require("telegram-bot-api-c")("TOKEN").polling(function(x) {this.data.message = x; this.send();});
 ```
 
-#### Send some stuff
-
 ```js
 var rBot    = require("telegram-bot-api-c");
 var objApi  = rBot(process.env.TELEGRAM_BOT_TOKEN).api;
@@ -42,6 +40,7 @@ objApi.sendMessage(data(), function() {
 * Promise: +
 * ES6: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
+* LoadFileByUrl: photo, audio, document, sticker, voice
 
 
 #### Polling 

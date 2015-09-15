@@ -13,10 +13,51 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot  = new rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 var api = objBot.api;
 
 //-----------------------------------------------------
+
+
+objBot.call("sendAudio", {
+    "chat_id":      "-20838162",
+    "audio":        "https://www."
+}, function(e, r) {
+    console.log(e, r && r.toString());
+});
+
+return;
+
+
+objBot.call("sendPhoto", {
+    "chat_id":      "-34042985",
+    //"photo":        "http://t06.deviantart.net/qyUrU3vLOjw1UcX6r5HPZO1Xat4=/300x200/filters:fixed_height(100,100):origin()/pre09/4e03/th/pre/i/2011/281/a/2/superman__s_profile_picture_by_agustinus-d4c6c97.jpg"
+    "photo":        "https://www.google.ru/images/logos/ps_logo2.png"
+}, function(e, r) {
+    console.log(e, r && r.toString());
+});
+
+return;
+
+
+var options = {
+    host: "t06.deviantart.net",
+    path: "qyUrU3vLOjw1UcX6r5HPZO1Xat4=/300x200/filters:fixed_height(100,100):origin()/pre09/4e03/th/pre/i/2011/281/a/2/superman__s_profile_picture_by_agustinus-d4c6c97.jpg"
+};
+
+var request = require("http").get(options);
+
+request.on("response", function(res) {
+    objBot.call("sendPhoto", {
+        "chat_id":      "-34042985",
+        "photo":        res
+    }, function(e, r) {
+        console.log(e, r && r.toString());
+    });
+});
+
+return;
+
 
 objBot.call("sendMessage", {
     "chat_id":      "-34042985",

@@ -11,6 +11,7 @@
 
 var rHttp           = require("http"),
     rHttps          = require("https"),
+    rUrl            = require("url"),
     rFs             = require("fs"),
     rStream         = require("stream");
 
@@ -264,6 +265,9 @@ function main(token) {
                 file = data.photo;
 
                 if(typeof(file) === "string") {
+                    if(getReadStreamByUrl(file, "photo", method, data, callback))
+                        return;
+
                     fileName = data.name || file;
 
                     if(!gRePhotoExt.test(fileName))
@@ -310,6 +314,9 @@ function main(token) {
                 file = data.audio;
 
                 if(typeof(file) === "string") {
+                    if(getReadStreamByUrl(file, "audio", method, data, callback))
+                        return;
+
                     fileName = data.name || file;
 
                     if(!gReAudioExt.test(fileName))
@@ -362,6 +369,9 @@ function main(token) {
                 file = data.document;
 
                 if(typeof(file) === "string") {
+                    if(getReadStreamByUrl(file, "document", method, data, callback))
+                        return;
+
                     fileName = data.name || file;
 
                     if(!gReDocumentExt.test(fileName))
@@ -405,6 +415,9 @@ function main(token) {
                 file = data.sticker;
 
                 if(typeof(file) === "string") {
+                    if(getReadStreamByUrl(file, "document", method, data, callback))
+                        return;
+
                     fileName = data.name || file;
 
                     if(!gReStickerExt.test(fileName))
@@ -448,6 +461,9 @@ function main(token) {
                 file = data.video;
 
                 if(typeof(file) === "string") {
+                    if(getReadStreamByUrl(file, "video", method, data, callback))
+                        return;
+
                     fileName = data.name || file;
 
                     if(!gReVideoExt.test(fileName))
@@ -497,6 +513,9 @@ function main(token) {
                 file = data.voice;
 
                 if(typeof(file) === "string") {
+                    if(getReadStreamByUrl(file, "voice", method, data, callback))
+                        return;
+
                     fileName = data.name || file;
 
                     if(!gReVoiceExt.test(fileName))
@@ -689,11 +708,10 @@ function main(token) {
 
             if(typeof(file) === "string")
                 file = rFs.createReadStream(file);
-            else {
-                if(file.closed) {
-                    req.end(bodyEnd);
-                    return;
-                }
+            else
+            if(file.closed) {
+                req.end(bodyEnd);
+                return;
             }
 
             file
@@ -701,11 +719,13 @@ function main(token) {
                     req.end(bodyEnd);
                 })
                 .on("open", function() {
-                    file.pipe(req, gPipeOptions);
+
                 })
                 .on("end", function() {
                     req.end(bodyEnd);
                 });
+
+            file.pipe(req, gPipeOptions);
         }
     }
 
@@ -927,6 +947,29 @@ function main(token) {
 
         return result;
     }
+
+    function getReadStreamByUrl(url, type, method, data, callback) {
+        if(!(/^https?:\/\//).test(url))
+            return false;
+
+        createReadStreamByUrl(url, function(error, stream) {
+            if(error) {
+                if(callback)
+                    callback(error);
+
+                return;
+            }
+
+            var r = {};
+
+            r[type] = stream;
+            r.__proto__ = data;
+
+            callAPI(method, r, callback);
+        });
+
+        return true;
+    }
 }
 
 //-------------------------------------------]>
@@ -958,6 +1001,25 @@ function forEachAsync(data, iter, cbEnd) {
 }
 
 //---------------------------]>
+
+function createReadStreamByUrl(url, callback) {
+    url = rUrl.parse(url);
+
+    var isSSL = url.protocol && (/^https/).test(url.protocol);
+    var options = {
+        "host": url.hostname,
+        "port": url.port,
+        "path": url.path
+    };
+
+    var request = (isSSL ? rHttps : rHttp).get(options);
+
+    request
+        .on("error", callback)
+        .on("response", function(res) {
+            callback(null, res);
+        });
+}
 
 function prepareDataForSendApi(id, cmdName, cmdData, data) {
     data.chat_id = id;

@@ -13,8 +13,8 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot          = rBot();
-var objSrvOptions   = {
+var objBot = rBot();
+var objSrvOptions  = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -74,7 +74,7 @@ function cbMsg(data) {
             return this.send();
         })
         .then(() => {
-            this.data.photo = __dirname + "/MiElPotato.jpg";
+            this.data.photo = "https://www.google.ru/images/logos/ps_logo2.png";
             return this.send();
         })
         .then(() => {
