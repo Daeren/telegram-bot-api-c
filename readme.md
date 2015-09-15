@@ -69,6 +69,9 @@ var rBot = require("telegram-bot-api-c");
 
 var objBotFather    = rBot();
 var objSrvOptions   = {
+    // For Self-signed certificate, you need to upload your public key certificate
+    // "selfSigned":  "fullPath/stream/string-key",
+
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",

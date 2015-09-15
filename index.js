@@ -452,6 +452,7 @@ function main(token) {
                 } else {
                     fileName = data.name || "video.mp4";
                 }
+
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
@@ -597,9 +598,32 @@ function main(token) {
 
                 //------]>
 
-                var t, result;
+                var t, result,
+                    certLikeStrKey;
 
                 file = data.certificate;
+
+                //---)>
+
+                if(file) {
+                    if(typeof(file) === "string") {
+                        file = file.trim();
+
+                        if(file[0] !== "." && file[0] !== "/" && file[1] !== ":") {
+                            if(file[0] !== "-")
+                                file = "-----BEGIN RSA PUBLIC KEY-----\r\n" + file + "\r\n-----END RSA PUBLIC KEY-----";
+
+                            certLikeStrKey = file;
+                            file = undefined;
+                        }
+
+                        fileName = data.name || file || "certificate.key";
+                    } else {
+                        fileName = data.name || "certificate.key";
+                    }
+                }
+
+                //---)>
 
                 if((t = data.url) && typeof(t) === "string") {
                     result = "https://api.telegram.org/bot" + token + "/setWebhook?url=";
@@ -613,8 +637,13 @@ function main(token) {
 
                 result = genBodyField("text", "url", t || "");
 
-                if(t = data.certificate)
-                    result += genBodyField("text", "certificate", t);
+                if(fileName)
+                    result += genBodyField("certificate", fileName);
+
+                if(certLikeStrKey)
+                    result += certLikeStrKey;
+
+                //---)>
 
                 if(file) {
                     bodyBegin = result;
@@ -1165,7 +1194,7 @@ function createServer(botFather, params, callback) {
             var url = params.host + ":" + params.port + path;
 
             bot.bot.api
-                .setWebhook({"url": url})
+                .setWebhook({"url": url, "certificate": params.selfSigned})
 
                 .then(JSON.parse)
                 .then(function(data) {
