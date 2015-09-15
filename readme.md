@@ -65,12 +65,12 @@ objBot.api
     });
 
 function cbMsg(data) {
-    this.data.message = data;
+    this.data.message = "Stop me: /stop";
     this.send();
 }
 
 function cbCmdStop(data, params) {
-    this.data.message = "cbCmdStop";
+    this.data.message = params;
     this.send();
 
     objSrv.stop();

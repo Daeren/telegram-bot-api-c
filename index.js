@@ -831,9 +831,6 @@ function main(token) {
 
         params.interval = params.interval || 5;
 
-        if(!callback)
-            throw new Error("Polling without `callback`!");
-
         //----------------]>
 
         var api         = this.api,
@@ -865,7 +862,10 @@ function main(token) {
             if(!data.ok)
                 return;
 
-            data.result.forEach(onMsg);
+            if(data.result.length) {
+                data.result.forEach(onMsg);
+                load();
+            }
 
             function onMsg(data) {
                 params.offset = data.update_id + 1;
