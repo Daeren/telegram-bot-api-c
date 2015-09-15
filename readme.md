@@ -1,4 +1,7 @@
-`npm install telegram-bot-api-c`
+```js
+npm install telegram-bot-api-c
+git clone https://github.com/Daeren/telegram-bot-api-c.git
+```
 
 
 ```js
