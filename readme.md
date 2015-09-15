@@ -122,14 +122,6 @@ function cbOtherBot(data) {
             return this.send();
         })
         .then(() => {
-            this.data.message = "Use: /start";
-            return this.send();
-        })
-        .then(() => {
-            this.data.photo = __dirname + "/MiElPotato.jpg";
-            return this.send();
-        })
-        .then(() => {
             // this.mid = msg.message_id; <-- Default: message_id in message
             // this.from = msgChat.id; <-- Default: chat_id in message
             
@@ -137,7 +129,7 @@ function cbOtherBot(data) {
             return this.forward();
         })
         .then(() => {
-            this.data.message = ">_>";
+            this.data.message = "Use: /start;
             return this.send();
         })
         .then(JSON.parse)
@@ -152,7 +144,11 @@ function cbCmdStart(data, params) {
 }
 
 function cbCmdStop(data, params) {
-    this.data.message = params;
+    this.data = [
+        {"message": params},
+        {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
+    ];
+
     this.send();
 }
 ```

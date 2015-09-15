@@ -13,8 +13,8 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot = rBot();
-var objSrvOptions  = {
+var objBot          = rBot();
+var objSrvOptions   = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -29,8 +29,10 @@ var objSrvOptions  = {
     "host":     "site.xx"
 };
 
-var objMyBot    = new rBot(process.env.TELEGRAM_BOT_TOKEN_MY),
-    objOtherBot = new rBot(process.env.TELEGRAM_BOT_TOKEN_OTHER);
+//------------------]>
+
+var objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
+    objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
 var objSrv = objBot.server(objSrvOptions);
 
@@ -106,6 +108,10 @@ function cbCmdStop(data, params) {
 
     //----------------]>
 
-    this.data.message = params;
+    this.data = [
+        {"message": params},
+        {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
+    ];
+
     this.send();
 }

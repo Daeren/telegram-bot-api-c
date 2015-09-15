@@ -118,7 +118,8 @@ function main(token) {
         //--------------]>
 
         function cbRequest(response) {
-            var error, chunks;
+            var error,
+                firstChunk, chunks;
 
             if(response.statusCode === 403)
                 error = new Error("Check the Access Token: " + token);
@@ -132,20 +133,17 @@ function main(token) {
 
             //---------]>
 
-            chunks = [];
-
-            //---------]>
-
             response.on("data", function(chunk) {
-                chunks.push(chunk);
+                if(!firstChunk)
+                    firstChunk = chunk;
+                else {
+                    chunks = chunks || [firstChunk];
+                    chunks.push(chunk);
+                }
             });
 
             response.on("end", function() {
-                var result = Buffer.concat(chunks);
-
-                response.body = result;
-
-                callback(error || null, result, response);
+                callback(error || null, chunks ? Buffer.concat(chunks) : firstChunk, response);
             });
         }
     }
@@ -1037,7 +1035,7 @@ function createServer(botFather, params, callback) {
         if(req.method !== "POST")
             return response();
 
-        var chunks = [];
+        var firstChunk, chunks;
 
         //----------]>
 
@@ -1048,7 +1046,12 @@ function createServer(botFather, params, callback) {
         //----------]>
 
         function onData(chunk) {
-            chunks.push(chunk);
+            if(!firstChunk)
+                firstChunk = chunk;
+            else {
+                chunks = chunks || [firstChunk];
+                chunks.push(chunk);
+            }
         }
 
         function onEnd() {
@@ -1061,7 +1064,7 @@ function createServer(botFather, params, callback) {
                 result;
 
             try {
-                result = JSON.parse(Buffer.concat(chunks));
+                result = JSON.parse(chunks ? Buffer.concat(chunks) : firstChunk);
             } catch(e) {
                 result = null;
             }
