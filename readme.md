@@ -196,7 +196,7 @@ objBot.api
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
 |                   | -                                                                     |                                   |
 | createServer      | [options][, callback(json, request)]                                  | ~                                 |
-| parseCmd          | text, commands                                                        | object {func, params}             |
+| parseCmd          | text                                                                  | object {name, text, cmd}          |
 
 
 #### Methods: send

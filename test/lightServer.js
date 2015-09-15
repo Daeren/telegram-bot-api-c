@@ -54,15 +54,16 @@ function cbMsg(data) {
 
     var commands = {
         "help": x => {
-            this.data.message = "This is HELP!";
+            this.data.message = x;
             this.send();
         }
     };
 
-    var cmd = this.parseCmd(data.message.text, commands);
+    var cmdFunc,
+        cmdParams = this.parseCmd(data.message.text);
 
-    if(cmd)
-        return cmd.func(data, cmd.params);
+    if(cmdParams)
+         (cmdFunc = commands[cmdParams.name]) ? cmdFunc(cmdParams) : console.log(cmdParams);
 
     //--------------]>
 

@@ -1056,7 +1056,9 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var msg, cmd, result;
+            var msg,
+                cmdParams, cmdFunc,
+                result;
 
             try {
                 result = JSON.parse(Buffer.concat(chunks));
@@ -1069,7 +1071,8 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var objBot  = srvBots && srvBots[req.url] || srvBotDefault;
+            var objBot  = srvBots && srvBots[req.url] || srvBotDefault,
+                objCmds = objBot.commands;
 
             msg = result.message;
 
@@ -1078,20 +1081,24 @@ function createServer(botFather, params, callback) {
             if(objBot.anTrack)
                 objBot.anTrack(msg);
 
-            if(cmd = parseCmd(msg.text, objBot.commands)) {
+            if(objCmds) {
+                cmdParams = parseCmd(msg.text);
+
+                if(cmdParams)
+                    cmdFunc = objCmds[cmdParams.name];
+            }
+
+            if(cmdFunc || objBot.onMsg) {
                 var ctx = objBot.ctx;
 
                 ctx.from = ctx.id = msg.chat.id;
                 ctx.mid = msg.message_id;
                 ctx.data = {};
 
-                cmd.func.call(ctx, result, cmd.params, req);
-            } else if(objBot.onMsg) {
-                var ctx = objBot.ctx;
-
-                ctx.from = ctx.id = msg.chat.id;
-                ctx.mid = msg.message_id;
-                ctx.data = {};
+                if(cmdFunc) {
+                    cmdFunc.call(ctx, result, cmdParams, req);
+                    return;
+                }
 
                 objBot.onMsg.call(ctx, result, req);
             }
@@ -1217,15 +1224,14 @@ function createServer(botFather, params, callback) {
     }
 }
 
-function parseCmd(text, commands) {
-    if(!text || !commands || text[0] !== "/" && text[0] !== "@")
+function parseCmd(text) {
+    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)
         return null;
 
     //---------]>
 
     var t,
-        name,
-        cmd, cmdFunc, cmdText;
+        name, cmd, cmdText;
 
     switch(text[0]) {
         case "/":
@@ -1257,18 +1263,10 @@ function parseCmd(text, commands) {
     //---------]>
 
     name = cmd.substr(1);
-    cmdFunc = commands[name];
-
-    if(!cmdFunc)
-        return null;
 
     return {
-        "func":     cmdFunc,
-
-        "params":   {
-            "cmd":  cmd,
-            "text": cmdText || "",
-            "name": name
-        }
+        "name": name,
+        "text": cmdText || "",
+        "cmd":  cmd
     };
 }
