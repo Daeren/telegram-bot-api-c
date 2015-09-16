@@ -930,8 +930,15 @@ function main(token) {
         }
 
         function onLoadSuccess(data) {
-            if(!data.ok)
+            if(!data.ok) {
+                if(data.error_code === 409) {
+                    api.setWebhook(function() {
+                        load();
+                    });
+                }
+
                 return;
+            }
 
             if(data.result.length) {
                 data.result.forEach(onMsg);
