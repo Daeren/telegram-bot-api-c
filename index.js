@@ -58,6 +58,65 @@ var gMethodsMap     = {
 var gMMTypesKeys    = Object.keys(gMethodsMap),
     gMMTypesLen     = gMMTypesKeys.length;
 
+var gKeyboard       = {
+    "bin": {
+        "ox": ["\u2B55\uFE0F", "\u274C"],
+        "pn": ["\u2795", "\u2796"],
+        "lr": ["\u25C0\uFE0F", "\u25B6\uFE0F"],
+        "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"],
+    },
+
+    "norm": {
+        "numpad": [
+            ["7", "8", "9"],
+            ["4", "5", "6"],
+            ["1", "2", "3"],
+            ["0"]
+        ]
+    },
+
+    "ignore": {
+        "hide": {"hide_keyboard": true}
+    }
+};
+
+//-------------------]>
+
+gKeyboard = (function compileKeyboard(input) {
+    var result  = {},
+        map     = {};
+
+    for(var name in input.bin) {
+        var kb = input.bin[name];
+
+        name = name[0].toUpperCase() + name.substr(1);
+
+        map["v" + name] = kb.map(x => [x]);
+        map["h" + name] = [kb];
+    }
+
+    for(var name in map) {
+        var kb = map[name];
+
+        result[name] = {"keyboard": kb};
+        result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
+    }
+
+    for(var name in input.norm) {
+        var kb = input.norm[name];
+
+        result[name] = {"keyboard": kb};
+        result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
+    }
+
+    for(var name in input.ignore) {
+        var kb = input.ignore[name];
+        result[name] = kb;
+    }
+
+    return result;
+})(gKeyboard);
+
 //-----------------------------------------------------
 
 module.exports = main;
@@ -77,7 +136,8 @@ function main(token) {
     //---------)>
 
     var CMain = function() {
-        this.api = genApi();
+        this.api        = genApi();
+        this.keyboard   = gKeyboard;
     };
 
     CMain.prototype = {
@@ -718,9 +778,7 @@ function main(token) {
                 .on("error", function(error) {
                     req.end(bodyEnd);
                 })
-                .on("open", function() {
-
-                })
+                //.on("open", function() {})
                 .on("end", function() {
                     req.end(bodyEnd);
                 });
@@ -829,7 +887,7 @@ function main(token) {
             params = {};
         }
 
-        params.interval = params.interval || 5;
+        params.interval = params.interval || 3;
 
         //----------------]>
 
@@ -852,10 +910,23 @@ function main(token) {
         //----------------]>
 
         function load() {
-            api
-                .getUpdates(params)
-                .then(JSON.parse)
-                .then(onLoadSuccess, console.error);
+            api.getUpdates(params, onParseUpdates);
+        }
+
+        function onParseUpdates(error, data) {
+            if(objBot.cbLogger)
+                objBot.cbLogger(error, data);
+
+            if(error)
+                return;
+
+            try {
+                data = JSON.parse(data);
+            } catch(e) {
+                return;
+            }
+
+            onLoadSuccess(data);
         }
 
         function onLoadSuccess(data) {
@@ -1005,7 +1076,12 @@ function forEachAsync(data, iter, cbEnd) {
 function createReadStreamByUrl(url, callback) {
     url = rUrl.parse(url);
 
-    var isSSL = url.protocol && (/^https/).test(url.protocol);
+    if(!url.protocol || !(/^http/).test(url.protocol)) {
+        callback(new Error("Use the links only with HTTP/HTTPS protocol!"));
+        return;
+    }
+
+    var isSSL = url.protocol === "https:";
     var options = {
         "host": url.hostname,
         "port": url.port,
@@ -1225,19 +1301,23 @@ function createServer(botFather, params, callback) {
                 cmdParams, cmdFunc,
                 result;
 
+            var objBot      = srvBots && srvBots[req.url] || srvBotDefault,
+
+                cbLogger    = objBot.cbLogger,
+                objCmds     = objBot.commands;
+
+            result = chunks ? Buffer.concat(chunks) : firstChunk;
+
+            if(cbLogger)
+                cbLogger(null, result);
+
             try {
-                result = JSON.parse(chunks ? Buffer.concat(chunks) : firstChunk);
+                result = JSON.parse(result);
             } catch(e) {
-                result = null;
+                return;
             }
 
-            if(!result)
-                return;
-
             //--------]>
-
-            var objBot  = srvBots && srvBots[req.url] || srvBotDefault,
-                objCmds = objBot.commands;
 
             msg = result.message;
 
@@ -1337,59 +1417,71 @@ function createServer(botFather, params, callback) {
 //-----------------]>
 
 function createSrvBot(bot, onMsg) {
-    var ctx = {
-        "data":     null,
+    var result,
 
-        "send": function(callback) {
-            var d = this.data;
-            this.data = {};
+        ctx = {
+            "data":     null,
 
-            return bot.send(this.id, d, callback);
-        },
+            "send": function(callback) {
+                var d = this.data;
+                this.data = {};
 
-        "forward": function(callback) {
-            return bot.api.forwardMessage({
-                "chat_id":      this.to,
-                "from_chat_id": this.from,
-                "message_id":   this.mid
-            }, callback);
-        }
-    };
+                return bot.send(this.id, d, callback);
+            },
+
+            "forward": function(callback) {
+                return bot.api.forwardMessage({
+                    "chat_id":      this.to,
+                    "from_chat_id": this.from,
+                    "message_id":   this.mid
+                }, callback);
+            }
+        };
 
     ctx.__proto__ = bot;
 
-    //-----------]>
-
-    return {
+    result = {
         "bot":          bot,
-
-        "anTrack":      null,
-        "commands":     {},
 
         "ctx":          ctx,
         "onMsg":        onMsg,
 
+        "cbLogger":     null,
+        "anTrack":      null,
+        "commands":     {},
+
+        "logger":       srvLogger,
         "analytics":    srvAnalytics,
         "command":      srvCommand
     };
 
     //-----------]>
 
+    return result;
+
+    //-----------]>
+
+    function srvLogger(callback) {
+        result.cbLogger = callback;
+
+        return result;
+    }
+
     function srvAnalytics(apiKey, appName) {
         var rBotan = require("botanio");
         rBotan = rBotan(apiKey);
 
-        this.anTrack = function(data) {
+        result.anTrack = function(data) {
             return rBotan.track(data, appName || "Telegram Bot");
         };
 
-        return this;
+        return result;
     }
 
     function srvCommand(name, callback) {
-        this.commands[name] = callback;
+        result.commands[name] = callback;
 
-        return this;
+        return result;
     }
 }
 

@@ -13,7 +13,7 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
+var objBot          = rBot(process.env.TELEGRAM_BOT_TOKEN);
 var objSrvOptions   = {
     "certDir":  "/www/site",
 
@@ -39,19 +39,21 @@ objBot.api
         if(!response.ok)
             throw new Error("Oops...problems with webhook...");
 
-        objBot
-            .server(objSrvOptions, cbMsg)
-            .command("start", cbCmdStart);
     }, console.error);
+
+
+objBot
+    .server(objSrvOptions, cbMsg)
+    .logger(cbLogger)
+    .command("start", cbCmdStart);
 
 //------------------]>
 
+function cbLogger(error, data) {
+    console.log("LOG: ", error, data && data.toString());
+}
+
 function cbMsg(data) {
-    console.log("\ncbMsg");
-    console.log(data);
-
-    //--------------]>
-
     var commands = {
         "help": x => {
             this.data.message = x;
@@ -73,9 +75,6 @@ function cbMsg(data) {
 }
 
 function cbCmdStart(data, params) {
-    console.log("\ncbCmdStart");
-    console.log(data);
-
     this.id = data.message.chat.id;
     this.data.message = params;
     this.send();

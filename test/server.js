@@ -39,14 +39,25 @@ var objSrv = objBot.server(objSrvOptions);
 
 objSrv
     .bot(objMyBot, "/myBot")
+    .logger(cbMyBotLogger)
 
     .command("start", cbCmdStart)
     .command("stop", cbCmdStop);
 
 objSrv
     .bot(objOtherBot, "/myOtherBot", cbMsg)
+    .logger(cbOtherBotLogger)
     .analytics("apiKey", "appNameOtherBot");
 
+
+
+function cbMyBotLogger(error, data) {
+    console.log("cbMyBotLogger");
+}
+
+function cbOtherBotLogger(error, data) {
+    console.log("cbOtherBotLogger");
+}
 
 function cbMsg(data) {
     console.log("cbMsg");

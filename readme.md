@@ -11,13 +11,13 @@ require("telegram-bot-api-c")("TOKEN").polling(function(x) {this.data.message = 
 
 ```js
 var rBot    = require("telegram-bot-api-c");
-var objApi  = rBot(process.env.TELEGRAM_BOT_TOKEN).api;
 
+var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api;
 var file    = __dirname + "/MiElPotato.jpg",
     data    = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 
-objApi.sendMessage(data(), function() {
-    objApi
+api.sendMessage(data(), function() {
+    api
         .sendMessage(data())
         
         .then(data)
@@ -43,6 +43,59 @@ objApi.sendMessage(data(), function() {
 * LoadFileByUrl: photo, audio, document, sticker, voice
 
 
+#### Logger 
+
+```js
+objBot
+    .polling(objOptions, cbMsg)
+    .logger(cbLogger);
+    
+objBot
+    .server(objOptions, cbMsg)
+    .logger(cbLogger);
+    
+objBot
+    .server(objOptions)
+    .bot(objMyBot, "/MyBot")
+    .logger(cbLogger);
+    
+```
+
+
+#### Keyboard 
+
+```js
+rBot.keyboard.numpadOnce;
+
+function cbMsg(data) {
+    this.data.message = "Stop me: /stop";
+    this.data.reply_markup = this.keyboard.hOx;
+    
+    this.send();
+}
+
+// v - vertically; h - horizontally; Once - one_time_keyboard
+
+// vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
+// numpad, hide
+
+// vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
+// numpadOnce
+```
+
+| Name              | Note                                 |
+|-------------------|--------------------------------------|
+|                   | -                                    |
+| ox                |                                      |
+| pn                | + / -                                |
+| lr                | Left / Right arrow                   |
+| gb                | Like / Dislike                       |
+|                   | -                                    |
+| numpad            | 0-9                                  |
+|                   | -                                    |
+| hide              |                                      |
+
+
 #### Polling 
 
 ```js
@@ -52,7 +105,7 @@ var objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
 var objOptions  = {
     "limit":    100,
     "timeout":  0,
-    "interval": 5 // <-- Sec.
+    "interval": 3 // <-- Sec.
 };
 
 objBot.api
@@ -121,7 +174,7 @@ var objSrvOptions   = {
 var objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
     objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-var objSrv = objBotFather.server(objSrvOptions);
+var objSrv      = objBotFather.server(objSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
@@ -201,10 +254,11 @@ objBot.api
 
 #### Instance 
 
-| Attribute         | Type           | Note                              |
-|-------------------|----------------|-----------------------------------|
-|                   | -              |                                   |
-| api               | Object         | See [Telegram Bot API][3]         |
+| Attribute         | Type           | Note                                 |
+|-------------------|----------------|--------------------------------------|
+|                   | -              |                                      |
+| api               | Object         | See [Telegram Bot API][3]            |
+| keyboard          | Object         |                                      |
 
 
 | Method            | Arguments                                                             | Return                            |
