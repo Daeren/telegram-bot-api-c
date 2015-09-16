@@ -12,7 +12,9 @@ require("telegram-bot-api-c")("TOKEN").polling(function(x) {this.data.message = 
 ```js
 var rBot    = require("telegram-bot-api-c");
 
-var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api;
+var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
+    buttons = rBot.keyboard;
+
 var file    = __dirname + "/MiElPotato.jpg",
     data    = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 
@@ -26,6 +28,8 @@ api.sendMessage(data(), function() {
         .then(data)
         .then(x => {
             x.photo = file;
+            x.reply_markup = buttons.hOxOnce;
+
             api.sendPhoto(x);
         });
 });
@@ -41,59 +45,6 @@ api.sendMessage(data(), function() {
 * ES6: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
-
-
-#### Logger 
-
-```js
-objBot
-    .polling(objOptions, cbMsg)
-    .logger(cbLogger);
-    
-objBot
-    .server(objOptions, cbMsg)
-    .logger(cbLogger);
-    
-objBot
-    .server(objOptions)
-    .bot(objMyBot, "/MyBot")
-    .logger(cbLogger);
-    
-```
-
-
-#### Keyboard 
-
-```js
-rBot.keyboard.numpadOnce;
-
-function cbMsg(data) {
-    this.data.message = "Stop me: /stop";
-    this.data.reply_markup = this.keyboard.hOx;
-    
-    this.send();
-}
-
-// v - vertically; h - horizontally; Once - one_time_keyboard
-
-// vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
-// numpad, hide
-
-// vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
-// numpadOnce
-```
-
-| Name              | Note                                 |
-|-------------------|--------------------------------------|
-|                   | -                                    |
-| ox                |                                      |
-| pn                | + / -                                |
-| lr                | Left / Right arrow                   |
-| gb                | Like / Dislike                       |
-|                   | -                                    |
-| numpad            | 0-9                                  |
-|                   | -                                    |
-| hide              |                                      |
 
 
 #### Polling 
@@ -250,6 +201,62 @@ objBot.api
             .command("start", cbCmdStart);
     }, console.error);
 ```
+
+
+#### Logger 
+
+```js
+objBot
+    .polling(objOptions, cbMsg)
+    .logger(cbLogger);
+    
+objBot
+    .server(objOptions, cbMsg)
+    .logger(cbLogger);
+    
+objBot
+    .server(objOptions)
+    .bot(objMyBot, "/MyBot")
+    .logger(cbLogger);
+    
+```
+
+
+#### Keyboard 
+
+```js
+var rBot = require("telegram-bot-api-c");
+
+rBot.keyboard.numpadOnce;
+
+function cbMsg(data) {
+    this.data.message = "Stop me: /stop";
+    this.data.reply_markup = this.keyboard.hOx;
+    
+    this.send();
+}
+
+// v - vertically; h - horizontally; Once - one_time_keyboard
+
+// vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
+// numpad, hide
+
+// vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
+// numpadOnce
+```
+
+| Name              | Note                                 |
+|-------------------|--------------------------------------|
+|                   | -                                    |
+| _Ox               |                                      |
+| _Pn               | + / -                                |
+| _Lr               | Left / Right arrow                   |
+| _Gb               | Like / Dislike                       |
+|                   | -                                    |
+| numpad            | 0-9                                  |
+|                   | -                                    |
+| hide              |                                      |
+
 
 
 #### Instance 
