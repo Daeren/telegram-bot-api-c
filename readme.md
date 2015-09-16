@@ -59,14 +59,10 @@ var objOptions  = {
     "interval": 3 // <-- Sec.
 };
 
-objBot.api
-    .setWebhook()
-    .then(x => {
-        objSrv = objBot
-            .polling(objOptions, cbMsg)
-            .analytics("apiKey", "appName")
-            .command("stop", cbCmdStop);
-    });
+objSrv = objBot
+    .polling(objOptions, cbMsg)
+    .analytics("apiKey", "appName")
+    .command("stop", cbCmdStop);
 
 function cbMsg(data) {
     this.data.message = "Stop me: /stop";
