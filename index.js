@@ -30,10 +30,10 @@ var gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
     gReSplitCmd     = /\s+([\s\S]+)?/,
 
     gRePhotoExt     = /\.(jp[e]?g|[gt]if|png|bmp)$/i,
-    gReAudioExt     = /\.(mp3)$/i,
+    gReAudioExt     = /[\\\/\.]|\.(mp3)$/i,
     gReDocumentExt  = /[\\\/\.]/,
     gReStickerExt   = /\.(jp[e]?g|[gt]if|png|bmp|webp)$/i,
-    gReVideoExt     = /\.(mp4)$/i,
+    gReVideoExt     = /\.(mp4|mp4v|mpg4)$/i,
     gReVoiceExt     = /\.(ogg)$/i;
 
 var gApiMethods     = [
@@ -63,7 +63,7 @@ var gKeyboard       = {
         "ox": ["\u2B55\uFE0F", "\u274C"],
         "pn": ["\u2795", "\u2796"],
         "lr": ["\u25C0\uFE0F", "\u25B6\uFE0F"],
-        "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"],
+        "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"]
     },
 
     "norm": {
@@ -231,7 +231,11 @@ function main(token) {
                 break;
 
             case "json":
+                if(value && typeof(value) !== "string")
+                    value = JSON.stringify(value);
+
                 value = "Content-Disposition: form-data; name=\"" + field + "\"\r\nContent-Type: application/json\r\n\r\n" + value;
+
                 break;
 
             case "photo":
@@ -314,12 +318,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     body += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     body += genBodyField("json", "reply_markup", t);
-                }
 
                 break;
 
@@ -327,6 +327,11 @@ function main(token) {
                 var t, result;
 
                 file = data.photo;
+
+                if(!file) {
+                    callback(new Error("Required: photo"));
+                    return;
+                }
 
                 if(typeof(file) === "string") {
                     if(getReadStreamByUrl(file, "photo", method, data, callback))
@@ -337,7 +342,12 @@ function main(token) {
                     if(!gRePhotoExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "file";
+                    fileName = data.name || file.path;
+
+                    if(!gRePhotoExt.test(fileName)) {
+                        callback(new Error("Photo has unsupported extension. Use one of .jpg, .jpeg, .gif, .png, .tif or .bmp"));
+                        return;
+                    }
                 }
 
                 //-------------------]>
@@ -350,12 +360,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     result += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     result += genBodyField("json", "reply_markup", t);
-                }
 
                 //-------------------]>
 
@@ -377,6 +383,11 @@ function main(token) {
 
                 file = data.audio;
 
+                if(!file) {
+                    callback(new Error("Required: audio"));
+                    return;
+                }
+
                 if(typeof(file) === "string") {
                     if(getReadStreamByUrl(file, "audio", method, data, callback))
                         return;
@@ -386,7 +397,7 @@ function main(token) {
                     if(!gReAudioExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "file.mp3";
+                    fileName = data.name || file.path || "file";
                 }
 
                 //-------------------]>
@@ -405,12 +416,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     result += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     result += genBodyField("json", "reply_markup", t);
-                }
 
                 //-------------------]>
 
@@ -432,6 +439,11 @@ function main(token) {
 
                 file = data.document;
 
+                if(!file) {
+                    callback(new Error("Required: document"));
+                    return;
+                }
+
                 if(typeof(file) === "string") {
                     if(getReadStreamByUrl(file, "document", method, data, callback))
                         return;
@@ -441,7 +453,7 @@ function main(token) {
                     if(!gReDocumentExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "document";
+                    fileName = data.name || file.path || "file";
                 }
 
                 //-------------------]>
@@ -451,12 +463,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     result += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     result += genBodyField("json", "reply_markup", t);
-                }
 
                 //-------------------]>
 
@@ -478,6 +486,11 @@ function main(token) {
 
                 file = data.sticker;
 
+                if(!file) {
+                    callback(new Error("Required: sticker"));
+                    return;
+                }
+
                 if(typeof(file) === "string") {
                     if(getReadStreamByUrl(file, "document", method, data, callback))
                         return;
@@ -487,7 +500,7 @@ function main(token) {
                     if(!gReStickerExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "file";
+                    fileName = data.name || file.path || "file";
                 }
 
                 //-------------------]>
@@ -497,12 +510,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     result += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     result += genBodyField("json", "reply_markup", t);
-                }
 
                 //-------------------]>
 
@@ -524,6 +533,11 @@ function main(token) {
 
                 file = data.video;
 
+                if(!file) {
+                    callback(new Error("Required: video"));
+                    return;
+                }
+
                 if(typeof(file) === "string") {
                     if(getReadStreamByUrl(file, "video", method, data, callback))
                         return;
@@ -533,7 +547,12 @@ function main(token) {
                     if(!gReVideoExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "file.mp4";
+                    fileName = data.name || file.path || "file";
+
+                    if(!gReVideoExt.test(fileName)) {
+                        callback(new Error("Video has unsupported extension. Use .mp4"));
+                        return;
+                    }
                 }
 
                 //-------------------]>
@@ -549,12 +568,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     result += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     result += genBodyField("json", "reply_markup", t);
-                }
 
                 //-------------------]>
 
@@ -576,6 +591,11 @@ function main(token) {
 
                 file = data.voice;
 
+                if(!file) {
+                    callback(new Error("Required: voice"));
+                    return;
+                }
+
                 if(typeof(file) === "string") {
                     if(getReadStreamByUrl(file, "voice", method, data, callback))
                         return;
@@ -585,7 +605,7 @@ function main(token) {
                     if(!gReVoiceExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "file.ogg";
+                    fileName = data.name || file.path || "file";
                 }
 
                 //-------------------]>
@@ -598,12 +618,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     result += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     result += genBodyField("json", "reply_markup", t);
-                }
 
                 //-------------------]>
 
@@ -630,12 +646,8 @@ function main(token) {
                 if(t = data.reply_to_message_id)
                     body += genBodyField("text", "reply_to_message_id", t);
 
-                if(t = data.reply_markup) {
-                    if(t && typeof(t) !== "string")
-                        t = JSON.stringify(t);
-
+                if(t = data.reply_markup)
                     body += genBodyField("json", "reply_markup", t);
-                }
 
                 break;
 
@@ -703,9 +715,9 @@ function main(token) {
                             file = undefined;
                         }
 
-                        fileName = data.name || file || "certificate.key";
+                        fileName = data.name || file;
                     } else {
-                        fileName = data.name || "certificate.key";
+                        fileName = data.name || "file.key";
                     }
                 }
 
@@ -1047,8 +1059,11 @@ function main(token) {
 
             //--------------]>
 
-            if(!error && data.maxSize && contentLength > data.maxSize) {
-                error = new Error("maxSize");
+            if(!error && data.maxSize) {
+                if(!contentLength)
+                    error = new Error("Unknown size");
+                else if(contentLength > data.maxSize)
+                    error = new Error("maxSize");
             }
 
             if(error) {
@@ -1064,7 +1079,7 @@ function main(token) {
 
             r[type] = response;
 
-            if(contentType && typeof(contentType) === "string")
+            if(!r.name && contentType && typeof(contentType) === "string")
                 r.name = contentType.replace("/", ".");
 
             callAPI(method, r, callback);
@@ -1108,7 +1123,7 @@ function createReadStreamByUrl(url, callback) {
     url = rUrl.parse(url);
 
     if(!url.protocol || !(/^http/).test(url.protocol)) {
-        callback(new Error("Use the links only with HTTP/HTTPS protocol!"));
+        callback(new Error("Use the links only with HTTP/HTTPS protocol"));
         return;
     }
 
