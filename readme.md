@@ -6,7 +6,7 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 #### OneShot (Server:LongPolling)
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(function(x) {this.data.message = x; this.send();});
+require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send();});
 ```
 
 ```js
@@ -47,7 +47,14 @@ api.sendMessage(data(), function() {
 * LoadFileByUrl: photo, audio, document, sticker, voice
 
 
-#### Polling 
+#### 1.x.x -> 2.x.x
+
+* Do not use: "this.[_]"
+* this.id -> bot.cid
+* this.message -> bot.data.text
+
+
+#### Polling
 
 ```js
 var objSrv;
@@ -61,32 +68,19 @@ var objOptions  = {
 
 objSrv = objBot
     .polling(objOptions, cbMsg)
-    .analytics("apiKey", "appName")
     .command("stop", cbCmdStop);
 
-function cbMsg(data) {
-    this.data.message = "Stop me: /stop";
-    this.send();
+function cbMsg(bot) {
+    bot.data.text = "Stop me: /stop";
+    bot.send();
 }
 
-function cbCmdStop(data, params) {
-    this.data.message = params;
-    this.send();
+function cbCmdStop(bot, params) {
+    bot.data.text = params;
+    bot.send();
 
     objSrv.stop();
 }
-```
-
-
-#### Analytics 
-
-Used [Botan SDK][4]
-
-```js
-objBot
-    .server(objSrvOptions, cbMsg)
-    .analytics("apiKey", "appName")
-    .command("start", cbCmdStart);
 ```
 
 
@@ -125,38 +119,33 @@ var objSrv      = objBotFather.server(objSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
-    .analytics("apiKey", "appNameMyBot")
-    
     .command("start", cbCmdStart)
     .command("stop", cbCmdStop);
 
 objSrv
-    .bot(objOtherBot, "/OtherBot", cbOtherBot)
-    .analytics("apiKey", "appNameOtherBot");
+    .bot(objOtherBot, "/OtherBot", cbOtherBot);
     
 //------------------]>
 
-function cbOtherBot(data) {
-    var msg         = data.message;
+function cbOtherBot(bot) {
+    // bot.cid = bot.message.chat.id; <-- Default
 
-    // this.id = msgChat.id; <-- Default: chat_id in message
-
-    this.api
+    bot.api
         .getMe()
         .then(() => {
-            this.data.chatAction = "typing";
-            return this.send();
+            bot.data.chatAction = "typing";
+            return bot.send();
         })
         .then(() => {
-            // this.mid = msg.message_id; <-- Default: message_id in message
-            // this.from = msgChat.id; <-- Default: chat_id in message
+            // bot.mid = bot.message.message_id; <-- Default
+            // bot.from = bot.message.chat.id; <-- Default
             
-            this.to = msg.text;
-            return this.forward();
+            bot.to = bot.message.text;
+            return bot.forward();
         })
         .then(() => {
-            this.data.message = "Use: /start";
-            return this.send();
+            bot.data.text = "Use: /start";
+            return bot.send();
         })
         .then(JSON.parse)
         .then(console.log, console.error);
@@ -164,18 +153,27 @@ function cbOtherBot(data) {
 
 //--------------)>
 
-function cbCmdStart(data, params) {
-    this.data.message = "Cmd: " + params.name + params.text;
-    this.send();
+function cbCmdStart(bot, params) {
+    bot.data = [
+        {"chatAction": "typing"},
+        {"text": params.name + " " + params.text},
+        {
+            "photo":        "https://www.google.ru/images/logos/ps_logo2.png",
+            "maxSize":      26189, // <-- decimal number of OCTETs
+            "reply_markup": bot.keyboard.hOxOnce
+        }
+    ];
+
+    bot.send();
 }
 
-function cbCmdStop(data, params) {
-    this.data = [
-        {"message": params},
+function cbCmdStop(bot, params) {
+    bot.data = [
+        {"text": params},
         {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
     ];
 
-    this.send();
+    bot.send();
 }
 ```
 
@@ -192,10 +190,28 @@ objBot.api
         if(!response.ok)
             throw new Error("Oops...problems with webhook...");
 
-        objBot
-            .server(objSrvOptions, cbMsg)
-            .command("start", cbCmdStart);
-    }, console.error);
+        objBot.server(objSrvOptions, cbMsg);
+    });
+```
+
+
+#### Analytics 
+
+Used [Botan SDK][4]
+
+```js
+objBot
+    .polling(objSrvOptions, cbMsg)
+    .analytics("apiKey", "appName");
+    
+objBot
+    .server(objSrvOptions, cbMsg)
+    .analytics("apiKey", "appName");
+
+objBot
+    .server(objOptions)
+    .bot(objMyBot, "/MyBot", cbMyBot)
+    .analytics("apiKey", "appName");
 ```
 
 
@@ -225,11 +241,11 @@ var rBot = require("telegram-bot-api-c");
 
 rBot.keyboard.numpadOnce;
 
-function cbMsg(data) {
-    this.data.message = "Stop me: /stop";
-    this.data.reply_markup = this.keyboard.hOx;
+function cbMsg(bot) {
+    bot.data.text = "Hell Word!";
+    bot.data.reply_markup = bot.keyboard.hOx;
     
-    this.send();
+    bot.send();
 }
 
 // v - vertically; h - horizontally; Once - one_time_keyboard
@@ -285,7 +301,7 @@ function cbMsg(data) {
 | Name          | Type                                  | Note                                      |
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
-| message       | string, json                          |                                           |
+| text          | string, json                          |                                           |
 | photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp        |
 | audio         | string, stream                        | Ext: mp3                                  |
 | document      | string, stream                        |                                           |
@@ -302,6 +318,7 @@ function cbMsg(data) {
 |               | -                                     |                                           |
 | stop          |                                       |                                           |
 |               | -                                     |                                           |
+| logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
 | command       | cmd, callback(data, params)           |                                           |
 
@@ -311,6 +328,7 @@ function cbMsg(data) {
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
 | bot           | bot, path, callback(json, request)    |                                           |
+| logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
 | command       | cmd, callback(data, params, request)  |                                           |
 

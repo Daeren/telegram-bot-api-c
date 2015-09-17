@@ -39,13 +39,13 @@ objBot.api
         if(!response.ok)
             throw new Error("Oops...problems with webhook...");
 
+        objBot
+            .server(objSrvOptions, cbMsg)
+            .logger(cbLogger)
+            .command("start", cbCmdStart);
     }, console.error);
 
 
-objBot
-    .server(objSrvOptions, cbMsg)
-    .logger(cbLogger)
-    .command("start", cbCmdStart);
 
 //------------------]>
 
@@ -53,29 +53,27 @@ function cbLogger(error, data) {
     console.log("LOG: ", error, data && data.toString());
 }
 
-function cbMsg(data) {
+function cbMsg(bot) {
     var commands = {
         "help": x => {
-            this.data.message = x;
-            this.send();
+            bot.data.text = x;
+            bot.send();
         }
     };
 
     var cmdFunc,
-        cmdParams = this.parseCmd(data.message.text);
+        cmdParams = bot.parseCmd(bot.message.text);
 
     if(cmdParams)
          (cmdFunc = commands[cmdParams.name]) ? cmdFunc(cmdParams) : console.log(cmdParams);
 
     //--------------]>
 
-    this.id = data.message.chat.id;
-    this.data.message = "Hell Word!";
-    this.send();
+    bot.data.text = "Hell Word!";
+    bot.send();
 }
 
-function cbCmdStart(data, params) {
-    this.id = data.message.chat.id;
-    this.data.message = params;
-    this.send();
+function cbCmdStart(bot, params) {
+    bot.data.text = params;
+    bot.send();
 }

@@ -13,8 +13,8 @@ var rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot = rBot();
-var objSrvOptions  = {
+var objBot          = rBot();
+var objSrvOptions   = {
     "certDir":  "/www/site",
 
     "key":       "/3_site.xx.key",
@@ -59,70 +59,65 @@ function cbOtherBotLogger(error, data) {
     console.log("cbOtherBotLogger");
 }
 
-function cbMsg(data) {
+function cbMsg(bot) {
     console.log("cbMsg");
-    console.log(data);
+    console.log(bot);
 
     //----------------]>
 
-    var msg         = data.message;
+    var msg         = bot.message;
 
     var msgChat     = msg.chat,
         msgText     = msg.text;
 
     //----------------]>
 
-    // this.id = msgChat.id; <-- Default: chat_id in message
-
-    this.api
+    bot.api
         .getMe()
         .then(() => {
-            this.data.chatAction = "typing";
-            return this.send();
+            bot.data.chatAction = "typing";
+            return bot.send();
         })
         .then(() => {
-            this.data.message = "Use: /start";
-            return this.send();
+            bot.data.text = "Use: /start";
+            return bot.send();
         })
         .then(() => {
-            this.data.photo = "https://www.google.ru/images/logos/ps_logo2.png";
-            return this.send();
+            bot.data.photo = "https://www.google.ru/images/logos/ps_logo2.png";
+            return bot.send();
         })
         .then(() => {
-            // this.mid = msg.message_id; <-- Default: message_id in message
-            // this.from = msgChat.id; <-- Default: chat_id in message
-
-            this.to = msgText;
-            return this.forward();
+            bot.to = msgText;
+            return bot.forward();
         })
         .then(() => {
-            this.data.message = ">_>";
-            return this.send();
+            bot.data.text = ">_>";
+            return bot.send();
         })
         .then(JSON.parse)
         .then(console.log, console.error);
 }
 
-function cbCmdStart(data, params) {
+function cbCmdStart(bot, params) {
     console.log("cbCmdStart");
-    console.log(data);
+    console.log(bot);
 
     //----------------]>
 
-    this.data.message = "Hello";
-    this.send().then(JSON.parse).then(console.log, console.error);
+    bot.data.text = "Hello";
+    bot.send().then(JSON.parse).then(console.log, console.error);
 }
 
-function cbCmdStop(data, params) {
+function cbCmdStop(bot, params) {
     console.log("cbCmdStop");
-    console.log(data);
+    console.log(bot);
 
     //----------------]>
 
-    this.data = [
-        {"message": params},
+    bot.data = [
+        {"text": params},
         {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
     ];
 
-    this.send();
+    bot.send();
 }

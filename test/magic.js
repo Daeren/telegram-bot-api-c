@@ -21,7 +21,9 @@ var api = objBot.api;
 
 objBot.call("sendAudio", {
     "chat_id":      "-20838162",
-    "audio":        "https://www."
+    "audio":        "https://www.",
+    "title":        "MiElPotato",
+    "duration":     1 // <-- Sec.
 }, function(e, r) {
     console.log(e, r && r.toString());
 });
@@ -104,7 +106,7 @@ var id      = "59725308",
 
 api.getMe()
     .then(JSON.parse)
-    .then(data => send(id, [{"chatAction": "upload_photo"}, {"message": data}]))
+    .then(data => send(id, [{"chatAction": "upload_photo"}, {"text": data}]))
 
     .then(results => {
         for(var name in results)

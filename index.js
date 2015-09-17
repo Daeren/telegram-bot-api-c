@@ -44,7 +44,7 @@ var gApiMethods     = [
 ];
 
 var gMethodsMap     = {
-    "message":      "sendMessage",
+    "text":         "sendMessage",
     "photo":        "sendPhoto",
     "audio":        "sendAudio",
     "document":     "sendDocument",
@@ -298,13 +298,17 @@ function main(token) {
 
                 body = genBodyField("text", "chat_id", data.chat_id);
 
-                if((t = data.text) && typeof(t) !== "undefined")
+                if((t = data.text) && typeof(t) !== "undefined") {
+                    if(t && typeof(t) === "object")
+                        t = JSON.stringify(t);
+
                     body += genBodyField("text", "text", t);
+                }
 
                 if((t = data.parse_mode) && typeof(t) !== "undefined")
                     body += genBodyField("text", "parse_mode", t);
 
-                if(t = data.disable_web_page_preview)
+                if(data.disable_web_page_preview)
                     body += genBodyField("text", "disable_web_page_preview", "1");
 
                 if(t = data.reply_to_message_id)
@@ -333,7 +337,7 @@ function main(token) {
                     if(!gRePhotoExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "photo.png";
+                    fileName = data.name || "file";
                 }
 
                 //-------------------]>
@@ -382,7 +386,7 @@ function main(token) {
                     if(!gReAudioExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "audio.mp3";
+                    fileName = data.name || "file.mp3";
                 }
 
                 //-------------------]>
@@ -483,7 +487,7 @@ function main(token) {
                     if(!gReStickerExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "sticker.webp";
+                    fileName = data.name || "file";
                 }
 
                 //-------------------]>
@@ -529,7 +533,7 @@ function main(token) {
                     if(!gReVideoExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "video.mp4";
+                    fileName = data.name || "file.mp4";
                 }
 
                 //-------------------]>
@@ -581,7 +585,7 @@ function main(token) {
                     if(!gReVoiceExt.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || "voice.ogg";
+                    fileName = data.name || "file.ogg";
                 }
 
                 //-------------------]>
@@ -768,10 +772,11 @@ function main(token) {
 
             if(typeof(file) === "string")
                 file = rFs.createReadStream(file);
-            else
-            if(file.closed) {
-                req.end(bodyEnd);
-                return;
+            else {
+                if(file.closed) {
+                    req.end(bodyEnd);
+                    return;
+                }
             }
 
             file
@@ -801,7 +806,7 @@ function main(token) {
             } else
                 result = null;
 
-            callback(error, result, response)
+            callback(error, result, response);
         }
     }
 
@@ -946,16 +951,16 @@ function main(token) {
             }
 
             function onMsg(data) {
-                params.offset = data.update_id + 1;
-
-                //--------]>
-
-                var msg,
-                    cmdParams, cmdFunc;
+                var cmdParams, cmdFunc;
 
                 var objCmds = objBot.commands;
 
-                msg = data.message;
+                var upId    = data.update_id,
+                    msg     = data.message;
+
+                //--------]>
+
+                params.offset = upId + 1;
 
                 //--------]>
 
@@ -972,16 +977,20 @@ function main(token) {
                 if(cmdFunc || objBot.onMsg) {
                     var ctx = objBot.ctx;
 
-                    ctx.from = ctx.id = msg.chat.id;
+                    ctx.from = ctx.cid = msg.chat.id;
                     ctx.mid = msg.message_id;
+
+                    ctx.update_id = upId;
+                    ctx.message = msg;
+
                     ctx.data = {};
 
                     if(cmdFunc) {
-                        cmdFunc.call(ctx, data, cmdParams);
+                        cmdFunc(ctx, cmdParams);
                         return;
                     }
 
-                    objBot.onMsg.call(ctx, data);
+                    objBot.onMsg(ctx);
                 }
             }
         }
@@ -1030,7 +1039,18 @@ function main(token) {
         if(!(/^https?:\/\//).test(url))
             return false;
 
-        createReadStreamByUrl(url, function(error, stream) {
+        createReadStreamByUrl(url, function(error, response) {
+            var headers         = response.headers;
+
+            var contentType     = headers["content-type"],
+                contentLength   = headers["content-length"];
+
+            //--------------]>
+
+            if(!error && data.maxSize && contentLength > data.maxSize) {
+                error = new Error("maxSize");
+            }
+
             if(error) {
                 if(callback)
                     callback(error);
@@ -1038,10 +1058,14 @@ function main(token) {
                 return;
             }
 
-            var r = {};
+            //--------------]>
 
-            r[type] = stream;
-            r.__proto__ = data;
+            var r = Object.create(data);
+
+            r[type] = response;
+
+            if(contentType && typeof(contentType) === "string")
+                r.name = contentType.replace("/", ".");
 
             callAPI(method, r, callback);
         });
@@ -1110,21 +1134,6 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
     switch(typeof(cmdData)) {
         case "string":
             switch(cmdName) {
-                case "message":
-                    data.text = cmdData;
-
-                    break;
-
-                case "photo":
-                case "audio":
-                case "document":
-                case "sticker":
-                case "video":
-                case "voice":
-                    data[cmdName] = cmdData;
-
-                    break;
-
                 case "location":
                     cmdData = cmdData.split(/\s+/);
 
@@ -1137,18 +1146,17 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
                     data.action = cmdData;
 
                     break;
+
+                default:
+                    data[cmdName] = cmdData;
+
+                    break;
             }
 
             break;
 
         case "object":
             switch(cmdName) {
-                case "message":
-                    if(cmdData && typeof(cmdData) === "object")
-                        data.text = JSON.stringify(cmdData);
-
-                    break;
-
                 case "location":
                     if(Array.isArray(cmdData)) {
                         data.latitude = cmdData[0];
@@ -1264,11 +1272,8 @@ function createServer(botFather, params, callback) {
 
     srvBotDefault.__proto__ = srv;
 
-    srv = {
-        "bot":      addBot
-    };
-
-    srv.__proto__ = srvBotDefault;
+    srv = Object.create(srvBotDefault);
+    srv.bot = addBot;
 
     //-----------------]>
 
@@ -1304,8 +1309,7 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var msg,
-                cmdParams, cmdFunc,
+            var cmdParams, cmdFunc,
                 result;
 
             var objBot      = srvBots && srvBots[req.url] || srvBotDefault,
@@ -1326,7 +1330,8 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            msg = result.message;
+            var upId    = result.update_id,
+                msg     = result.message;
 
             //--------]>
 
@@ -1343,16 +1348,20 @@ function createServer(botFather, params, callback) {
             if(cmdFunc || objBot.onMsg) {
                 var ctx = objBot.ctx;
 
-                ctx.from = ctx.id = msg.chat.id;
+                ctx.from = ctx.cid = msg.chat.id;
                 ctx.mid = msg.message_id;
+
+                ctx.update_id = upId;
+                ctx.message = msg;
+
                 ctx.data = {};
 
                 if(cmdFunc) {
-                    cmdFunc.call(ctx, result, cmdParams, req);
+                    cmdFunc(ctx, cmdParams, req);
                     return;
                 }
 
-                objBot.onMsg.call(ctx, result, req);
+                objBot.onMsg(ctx, req);
             }
         }
 
@@ -1414,7 +1423,7 @@ function createServer(botFather, params, callback) {
                     console.log(data.result);
                 }, console.error);
         } else {
-            console.log("[!] Warning | `host` not specified, Auto-Webhook not working")
+            console.log("[!] Warning | `host` not specified, Auto-Webhook not working");
         }
 
         return bot;
@@ -1425,27 +1434,26 @@ function createServer(botFather, params, callback) {
 
 function createSrvBot(bot, onMsg) {
     var result,
+        ctx = Object.create(bot);
 
-        ctx = {
-            "data":     null,
+    //--------------]>
 
-            "send": function(callback) {
-                var d = this.data;
-                this.data = {};
+    ctx.send = function(callback) {
+        var d = ctx.data;
+        ctx.data = {};
 
-                return bot.send(this.id, d, callback);
-            },
+        return bot.send(ctx.cid, d, callback);
+    };
 
-            "forward": function(callback) {
-                return bot.api.forwardMessage({
-                    "chat_id":      this.to,
-                    "from_chat_id": this.from,
-                    "message_id":   this.mid
-                }, callback);
-            }
-        };
+    ctx.forward = function(callback) {
+        return bot.api.forwardMessage({
+            "chat_id":      ctx.to,
+            "from_chat_id": ctx.from,
+            "message_id":   ctx.mid
+        }, callback);
+    };
 
-    ctx.__proto__ = bot;
+    //--------------]>
 
     result = {
         "bot":          bot,
@@ -1530,9 +1538,9 @@ function parseCmd(text) {
         cmdText = t[1];
     }
 
-    //---------]>
-
     name = cmd.substr(1);
+
+    //---------]>
 
     return {
         "name": name,

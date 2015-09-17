@@ -38,9 +38,9 @@ function cbLogger(error, data) {
     console.log(error, data && data.toString());
 }
 
-function cbMsg(data) {
-    this.data.message = data;
-    this.data.reply_markup = this.keyboard[data.message.text];
+function cbMsg(bot) {
+    bot.data.text = bot.message;
+    bot.data.reply_markup = bot.keyboard[bot.message.text];
 
     // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
     // numpad, hide
@@ -48,12 +48,12 @@ function cbMsg(data) {
     // vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
     // numpadOnce
 
-    this.send();
+    bot.send();
 }
 
-function cbCmdStop(data, params) {
-    this.data.message = "cbCmdStop";
-    this.send();
+function cbCmdStop(bot, params) {
+    bot.data.text = "cbCmdStop";
+    bot.send();
 
     objSrv.stop();
 }
