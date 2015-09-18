@@ -29,9 +29,10 @@ var gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
     gReReplaceCmd   = /^@\S+\s/,
     gReSplitCmd     = /\s+([\s\S]+)?/,
 
+    gReIsFilePath   = /[\\\/\.]/,
+
     gRePhotoExt     = /\.(jp[e]?g|[gt]if|png|bmp)$/i,
-    gReAudioExt     = /[\\\/\.]|\.(mp3)$/i,
-    gReDocumentExt  = /[\\\/\.]/,
+    gReAudioExt     = /\.(mp3)$/i,
     gReStickerExt   = /\.(jp[e]?g|[gt]if|png|bmp|webp)$/i,
     gReVideoExt     = /\.(mp4|mp4v|mpg4)$/i,
     gReVoiceExt     = /\.(ogg)$/i;
@@ -339,15 +340,10 @@ function main(token) {
 
                     fileName = data.name || file;
 
-                    if(!gRePhotoExt.test(fileName))
+                    if(!gReIsFilePath.test(fileName))
                         fileId = fileName;
                 } else {
-                    fileName = data.name || file.path;
-
-                    if(!gRePhotoExt.test(fileName)) {
-                        callback(new Error("Photo has unsupported extension. Use one of .jpg, .jpeg, .gif, .png, .tif or .bmp"));
-                        return;
-                    }
+                    fileName = data.name || file.path || "file";
                 }
 
                 //-------------------]>
@@ -394,7 +390,7 @@ function main(token) {
 
                     fileName = data.name || file;
 
-                    if(!gReAudioExt.test(fileName))
+                    if(!gReIsFilePath.test(fileName))
                         fileId = fileName;
                 } else {
                     fileName = data.name || file.path || "file";
@@ -450,7 +446,7 @@ function main(token) {
 
                     fileName = data.name || file;
 
-                    if(!gReDocumentExt.test(fileName))
+                    if(!gReIsFilePath.test(fileName))
                         fileId = fileName;
                 } else {
                     fileName = data.name || file.path || "file";
@@ -497,7 +493,7 @@ function main(token) {
 
                     fileName = data.name || file;
 
-                    if(!gReStickerExt.test(fileName))
+                    if(!gReIsFilePath.test(fileName))
                         fileId = fileName;
                 } else {
                     fileName = data.name || file.path || "file";
@@ -544,15 +540,10 @@ function main(token) {
 
                     fileName = data.name || file;
 
-                    if(!gReVideoExt.test(fileName))
+                    if(!gReIsFilePath.test(fileName))
                         fileId = fileName;
                 } else {
                     fileName = data.name || file.path || "file";
-
-                    if(!gReVideoExt.test(fileName)) {
-                        callback(new Error("Video has unsupported extension. Use .mp4"));
-                        return;
-                    }
                 }
 
                 //-------------------]>
@@ -602,7 +593,7 @@ function main(token) {
 
                     fileName = data.name || file;
 
-                    if(!gReVoiceExt.test(fileName))
+                    if(!gReIsFilePath.test(fileName))
                         fileId = fileName;
                 } else {
                     fileName = data.name || file.path || "file";
@@ -904,27 +895,36 @@ function main(token) {
             params = {};
         }
 
-        params.interval = params.interval || 3;
+        params.interval = (parseInt(params.interval, 10) || 3) * 1000;
 
         //----------------]>
 
         var api         = this.api,
 
             objBot      = createSrvBot(this, callback),
-            tmPolling   = setInterval(load, 1000 * params.interval);
+
+            isStopped   = false,
+            tmPolling;
 
         objBot.stop = tmStop;
 
         //------)>
 
         if(params.firstLoad)
-            load();
+            load(); else runTimer();
 
         //----------------]>
 
         return objBot;
 
         //----------------]>
+
+        function runTimer() {
+            if(isStopped)
+                return;
+
+            tmPolling = setTimeout(load, params.interval);
+        }
 
         function load() {
             api.getUpdates(params, onParseUpdates);
@@ -934,12 +934,16 @@ function main(token) {
             if(objBot.cbLogger)
                 objBot.cbLogger(error, data);
 
-            if(error)
-                return;
+            if(!error) {
+                try {
+                    data = JSON.parse(data);
+                } catch(e) {
+                    error = e;
+                }
+            }
 
-            try {
-                data = JSON.parse(data);
-            } catch(e) {
+            if(error) {
+                runTimer();
                 return;
             }
 
@@ -960,6 +964,8 @@ function main(token) {
             if(data.result.length) {
                 data.result.forEach(onMsg);
                 load();
+            } else {
+                runTimer();
             }
 
             function onMsg(data) {
@@ -1008,7 +1014,8 @@ function main(token) {
         }
 
         function tmStop() {
-            clearInterval(tmPolling);
+            isStopped = true;
+            clearTimeout(tmPolling);
         }
     }
 
