@@ -960,7 +960,7 @@ function main(token) {
                                 response.pipe(file);
                             });
                     })
-                    .on("close", function() {
+                    .on("finish", function() {
                         cbEnd(null, {
                             "id":   fileId,
                             "size": fileSize,
