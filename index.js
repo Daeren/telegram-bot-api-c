@@ -936,7 +936,7 @@ function main(token) {
                     fileName    = filePath.split("/").pop();
 
                 if(name) {
-                    fileName = fileName.match(/\.(.+)$/)
+                    fileName = fileName.match(/\.(.+)$/);
                     fileName = fileName && fileName[0] || "";
                 } else
                     name = Date.now();
