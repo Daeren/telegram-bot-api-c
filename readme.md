@@ -52,13 +52,6 @@ api.sendMessage(data(), function() {
 * LoadFileByUrl: photo, audio, document, sticker, voice
 
 
-#### 1.x.x -> 2.x.x
-
-* Do not use: "this.[_]"
-* this.id -> bot.cid
-* this.message -> bot.data.text
-
-
 #### Polling
 
 ```js
@@ -267,7 +260,8 @@ function cbMsg(bot) {
 |                   | -                                    |
 | _Ox               | O / X                                |
 | _Pn               | + / -                                |
-| _Lr               | Left / Right arrow                   |
+| _Ud               | Upwards / Downwards arrow            |
+| _Lr               | Leftwards / Rightwards arrow         |
 | _Gb               | Like / Dislike                       |
 |                   | -                                    |
 | numpad            | 0-9                                  |

@@ -66,6 +66,7 @@ var gKeyboard       = {
     "bin": {
         "ox": ["\u2B55\uFE0F", "\u274C"],
         "pn": ["\u2795", "\u2796"],
+        "ud": ["\uD83D\uDD3C", "\uD83D\uDD3D"],
         "lr": ["\u25C0\uFE0F", "\u25B6\uFE0F"],
         "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"]
     },
@@ -102,7 +103,7 @@ gKeyboard = (function compileKeyboard(input) {
     for(var name in map) {
         var kb = map[name];
 
-        result[name] = {"keyboard": kb};
+        result[name] = {"keyboard": kb, "resize_keyboard": true};
         result[name + "Once"] = {"keyboard": kb, "resize_keyboard": true, "one_time_keyboard": true};
     }
 
