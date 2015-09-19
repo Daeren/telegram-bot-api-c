@@ -3,7 +3,7 @@ npm install telegram-bot-api-c
 git clone https://github.com/Daeren/telegram-bot-api-c.git
 ```
 
-#### OneShot (Server:LongPolling)
+#### OneShot
 
 ```js
 require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send();});
