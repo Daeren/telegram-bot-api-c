@@ -1,6 +1,6 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "2.1.2",
+    "version": "2.1.3",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
     "homepage": "http://666.io",
@@ -37,6 +37,6 @@
         "url": "https://github.com/Daeren/telegram-bot-api-c/issues"
     },
 
-    "_id": "telegram-bot-api-c@2.1.2",
+    "_id": "telegram-bot-api-c@2.1.3",
     "_from": "telegram-bot-api-c@"
 }
