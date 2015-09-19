@@ -1183,8 +1183,18 @@ function main(token) {
 
             r[type] = response;
 
-            if(!r.name && contentType && typeof(contentType) === "string")
-                r.name = contentType.replace("/", ".");
+            if(!r.name && contentType && typeof(contentType) === "string") {
+                switch(contentType) {
+                    case "audio/mpeg":
+                    case "audio/MPA":
+                    case "audio/mpa-robust":
+                        r.name = "audio.mp3";
+                        break;
+
+                    default:
+                        r.name = contentType.replace("/", ".");
+                }
+            }
 
             callAPI(method, r, callback);
         });
