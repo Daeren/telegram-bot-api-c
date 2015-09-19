@@ -936,9 +936,12 @@ function main(token) {
                     fileName    = filePath.split("/").pop();
 
                 if(name) {
-                    dir += name + "." + fileName.split(".").pop();
+                    fileName = fileName.match(/\.(.+)$/)
+                    fileName = fileName && fileName[0] || "";
                 } else
-                    dir += Date.now() + fileName;
+                    name = Date.now();
+
+                dir += name + fileName;
 
                 var file = rFs.createWriteStream(dir);
 
