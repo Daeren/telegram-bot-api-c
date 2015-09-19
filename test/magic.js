@@ -18,6 +18,21 @@ var api = objBot.api;
 
 //-----------------------------------------------------
 
+objBot
+    .download("AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC", "O:/")
+    .then(console.log, console.error);
+
+return;
+
+
+objBot.call("getFile", {
+    "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
+}, function(e, r) {
+    console.log(e, r && r.toString());
+});
+
+return;
+
 
 objBot.call("sendAudio", {
     "chat_id":      "-20838162",

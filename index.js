@@ -17,11 +17,14 @@ var rHttp           = require("http"),
 
 //-----------------------------------------------------
 
+var gTgHostApi      = "api.telegram.org",
+    gTgHostFile     = "api.telegram.org";
+
 var gCRLF           = "\r\n";
 
 var gPipeOptions    = {"end": false};
 var gReqOptions     = {
-    "host":         "api.telegram.org",
+    "host":         gTgHostApi,
     "method":       "POST"
 };
 
@@ -40,7 +43,7 @@ var gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
 var gApiMethods     = [
     "getMe", "forwardMessage",
     "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
-    "getUserProfilePhotos", "getUpdates",
+    "getUserProfilePhotos", "getUpdates", "getFile",
     "setWebhook"
 ];
 
@@ -100,7 +103,7 @@ gKeyboard = (function compileKeyboard(input) {
         var kb = map[name];
 
         result[name] = {"keyboard": kb};
-        result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
+        result[name + "Once"] = {"keyboard": kb, "resize_keyboard": true, "one_time_keyboard": true};
     }
 
     for(var name in input.norm) {
@@ -148,6 +151,7 @@ function main(token) {
         "callJson":     callAPIJson,
 
         "send":         send,
+        "download":     download,
 
         "server":       server,
         "polling":      polling,
@@ -682,6 +686,18 @@ function main(token) {
 
                 break;
 
+            case "getFile":
+                if(!data) break;
+
+                //------]>
+
+                var t;
+
+                if(t = data.file_id)
+                    body = genBodyField("text", "file_id", t);
+
+                break;
+
             case "setWebhook":
                 if(!data) break;
 
@@ -876,6 +892,79 @@ function main(token) {
                         return type;
                 }
             }
+        }
+    }
+
+    function download(fid, dir, name, callback) {
+        var defer;
+
+        if(typeof(name) === "function") {
+            callback = name;
+            name = undefined;
+        }
+
+        if(typeof(callback) !== "undefined")
+            cbPromise(); else defer = new Promise(cbPromise);
+
+        //-------------------------]>
+
+        return defer;
+
+        //-------------------------]>
+
+        function cbPromise(resolve, reject) {
+            var cbEnd = callback ? callback : function(error, results) {
+                if(error)
+                    reject(error); else resolve(results);
+            };
+
+            //--------]>
+
+            callAPIJson("getFile", {"file_id": fid}, function(error, data) {
+                if(error || !data) {
+                    cbEnd(error || new Error("Problems with 'data'"), data);
+                    return;
+                }
+
+                //--------]>
+
+                var dataResult = data.result;
+
+                var fileId      = dataResult.file_id,
+                    fileSize    = dataResult.file_size,
+                    filePath    = dataResult.file_path,
+                    fileName    = filePath.split("/").pop();
+
+                if(name) {
+                    dir += name + "." + fileName.split(".").pop();
+                } else
+                    dir += Date.now() + fileName;
+
+                var file = rFs.createWriteStream(dir);
+
+                //--------]>
+
+                file
+                    .on("error", cbEnd)
+                    .on("open", function() {
+                        createReadStreamByUrl("https://" + gTgHostFile + "/file/bot" + token +"/" + filePath,
+                            function(error, response) {
+                                if(error) {
+                                    cbEnd(error);
+                                    return;
+                                }
+
+                                response.pipe(file);
+                            });
+                    })
+                    .on("close", function() {
+                        cbEnd(null, {
+                            "id":   fileId,
+                            "size": fileSize,
+                            "file": dir
+                        });
+                    });
+            });
         }
     }
 

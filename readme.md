@@ -10,6 +10,10 @@ require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send(
 ```
 
 ```js
+require("telegram-bot-api-c")("TOKEN").download("file_id", "dir");
+```
+
+```js
 var rBot    = require("telegram-bot-api-c");
 
 var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
@@ -43,6 +47,7 @@ api.sendMessage(data(), function() {
 * Analytics: +
 * Promise: +
 * ES6: +
+* DownloadFile: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 
@@ -260,7 +265,7 @@ function cbMsg(bot) {
 | Name              | Note                                 |
 |-------------------|--------------------------------------|
 |                   | -                                    |
-| _Ox               |                                      |
+| _Ox               | O / X                                |
 | _Pn               | + / -                                |
 | _Lr               | Left / Right arrow                   |
 | _Gb               | Like / Dislike                       |
@@ -289,6 +294,7 @@ function cbMsg(bot) {
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
+| download          | fid, dir[, name][, callback(error, info {id, size, file})]            | promise or undefined              |
 |                   | -                                                                     |                                   |
 | server            | [options][, callback(json, request)]                                  | ~                                 |
 | polling           | [options][, callback(json)]                                           | ~                                 |
