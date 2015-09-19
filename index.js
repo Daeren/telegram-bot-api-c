@@ -949,24 +949,29 @@ function main(token) {
 
                 file
                     .on("error", cbEnd)
-                    .on("open", function() {
-                        createReadStreamByUrl("https://" + gTgHostFile + "/file/bot" + token +"/" + filePath,
-                            function(error, response) {
-                                if(error) {
-                                    cbEnd(error);
-                                    return;
-                                }
+                    .on("open", load)
+                    .on("finish", finish);
 
-                                response.pipe(file);
-                            });
-                    })
-                    .on("finish", function() {
-                        cbEnd(null, {
-                            "id":   fileId,
-                            "size": fileSize,
-                            "file": dir
-                        });
+                //--------]>
+
+                function load() {
+                    createReadStreamByUrl("https://" + gTgHostFile + "/file/bot" + token +"/" + filePath, function(error, response) {
+                        if(error) {
+                            cbEnd(error);
+                            return;
+                        }
+
+                        response.pipe(file);
                     });
+                }
+
+                function finish() {
+                    cbEnd(null, {
+                        "id":   fileId,
+                        "size": fileSize,
+                        "file": dir
+                    });
+                }
             });
         }
     }
