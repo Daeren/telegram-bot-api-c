@@ -899,7 +899,10 @@ function main(token) {
     function download(fid, dir, name, callback) {
         var defer;
 
-        if(typeof(name) === "function") {
+        if(typeof(dir) === "function") {
+            callback = dir;
+            dir = undefined;
+        } else if(typeof(name) === "function") {
             callback = name;
             name = undefined;
         }
@@ -936,11 +939,33 @@ function main(token) {
                     filePath    = dataResult.file_path,
                     fileName    = filePath.split("/").pop();
 
+                var url         = "https://" + gTgHostFile + "/file/bot" + token +"/" + filePath;
+
                 if(name) {
                     fileName = fileName.match(/\.(.+)$/);
                     fileName = fileName && fileName[0] || "";
                 } else
                     name = Date.now();
+
+                //--------]>
+
+                if(typeof(dir) === "undefined" || typeof(name) === "undefined") {
+                    createReadStreamByUrl(url, function(error, response) {
+                        if(error)
+                            cbEnd(error);
+                        else
+                            cbEnd(null, {
+                                "id":       fileId,
+                                "size":     fileSize,
+                                "file":     fileName,
+                                "stream":   response
+                            });
+                    });
+
+                    return;
+                }
+
+                //--------]>
 
                 dir += name + fileName;
 
@@ -956,7 +981,7 @@ function main(token) {
                 //--------]>
 
                 function load() {
-                    createReadStreamByUrl("https://" + gTgHostFile + "/file/bot" + token +"/" + filePath, function(error, response) {
+                    createReadStreamByUrl(url, function(error, response) {
                         if(error) {
                             cbEnd(error);
                             return;

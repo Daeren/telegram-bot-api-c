@@ -19,6 +19,24 @@ var api = objBot.api;
 //-----------------------------------------------------
 
 objBot
+    .download("BQADAgADEwADb9HwBoAUlahFM8WGAg", function(error, info) {
+        console.log(info);
+        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+    });
+
+return;
+
+
+objBot
+    .download("BQADAgADEwADb9HwBoAUlahFM8WGAg")
+    .then(info => {
+        console.log(info);
+        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+    }, console.error);
+
+return;
+
+objBot
     .download("BQADAgADEwADb9HwBoAUlahFM8WGAg", "O:/")
     .then(console.log, console.error);
 

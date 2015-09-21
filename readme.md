@@ -10,10 +10,6 @@ require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send(
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").download("file_id", "dir");
-```
-
-```js
 var rBot    = require("telegram-bot-api-c");
 
 var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
@@ -46,10 +42,29 @@ api.sendMessage(data(), function() {
 * LongPolling: +
 * Analytics: +
 * Promise: +
-* ES6: +
-* DownloadFile: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
+
+
+#### Download
+
+```js
+objBot.download("file_id", "dir");
+objBot.download("file_id", "dir", "name.mp3");
+
+
+objBot
+    .download("file_id")
+    .then(info => {
+        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+    });
+    
+
+objBot
+    .download("file_id", function(error, info) {
+        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+    });
+```
 
 
 #### Polling
@@ -288,7 +303,7 @@ function cbMsg(bot) {
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
-| download          | fid, dir[, name][, callback(error, info {id, size, file})]            | promise or undefined              |
+| download          | fid, dir[, name][, callback(error, info {id,size,file,stream})]       | promise or undefined              |
 |                   | -                                                                     |                                   |
 | server            | [options][, callback(json, request)]                                  | ~                                 |
 | polling           | [options][, callback(json)]                                           | ~                                 |
