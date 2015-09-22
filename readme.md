@@ -56,9 +56,9 @@ objBot.download("file_id", "dir", "name.mp3");
 objBot
     .download("file_id")
     .then(info => {
-        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+        info.stream.pipe(require("fs").createWriteStream("O:/" + info.name));
     });
-    
+
 
 objBot
     .download("file_id", function(error, info) {
@@ -303,7 +303,7 @@ function cbMsg(bot) {
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
-| download          | fid, dir[, name][, callback(error, info {id,size,file,stream})]       | promise or undefined              |
+| download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
 | server            | [options][, callback(json, request)]                                  | ~                                 |
 | polling           | [options][, callback(json)]                                           | ~                                 |
