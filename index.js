@@ -62,65 +62,28 @@ var gMethodsMap     = {
 var gMMTypesKeys    = Object.keys(gMethodsMap),
     gMMTypesLen     = gMMTypesKeys.length;
 
-var gKeyboard       = {
-    "bin": {
-        "ox": ["\u2B55\uFE0F", "\u274C"],
-        "pn": ["\u2795", "\u2796"],
-        "ud": ["\uD83D\uDD3C", "\uD83D\uDD3D"],
-        "lr": ["\u25C0\uFE0F", "\u25B6\uFE0F"],
-        "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"]
-    },
+var gKeyboard       = compileKeyboard({
+        "bin": {
+            "ox": ["\u2B55\uFE0F", "\u274C"],
+            "pn": ["\u2795", "\u2796"],
+            "ud": ["\uD83D\uDD3C", "\uD83D\uDD3D"],
+            "lr": ["\u25C0\uFE0F", "\u25B6\uFE0F"],
+            "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"]
+        },
 
-    "norm": {
-        "numpad": [
-            ["7", "8", "9"],
-            ["4", "5", "6"],
-            ["1", "2", "3"],
-            ["0"]
-        ]
-    },
+        "norm": {
+            "numpad": [
+                ["7", "8", "9"],
+                ["4", "5", "6"],
+                ["1", "2", "3"],
+                ["0"]
+            ]
+        },
 
-    "ignore": {
-        "hide": {"hide_keyboard": true}
-    }
-};
-
-//-------------------]>
-
-gKeyboard = (function compileKeyboard(input) {
-    var result  = {},
-        map     = {};
-
-    for(var name in input.bin) {
-        var kb = input.bin[name];
-
-        name = name[0].toUpperCase() + name.substr(1);
-
-        map["v" + name] = kb.map(x => [x]);
-        map["h" + name] = [kb];
-    }
-
-    for(var name in map) {
-        var kb = map[name];
-
-        result[name] = {"keyboard": kb, "resize_keyboard": true};
-        result[name + "Once"] = {"keyboard": kb, "resize_keyboard": true, "one_time_keyboard": true};
-    }
-
-    for(var name in input.norm) {
-        var kb = input.norm[name];
-
-        result[name] = {"keyboard": kb};
-        result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
-    }
-
-    for(var name in input.ignore) {
-        var kb = input.ignore[name];
-        result[name] = kb;
-    }
-
-    return result;
-})(gKeyboard);
+        "ignore": {
+            "hide": {"hide_keyboard": true}
+        }
+    });
 
 //-----------------------------------------------------
 
@@ -142,7 +105,7 @@ function main(token) {
 
     var CMain = function() {
         this.api        = genApi();
-        this.keyboard   = gKeyboard;
+        this.keyboard   = Object.create(gKeyboard);
     };
 
     CMain.prototype = {
@@ -1231,122 +1194,6 @@ function main(token) {
 
 //-------------------------------------------]>
 
-function forEachAsync(data, iter, cbEnd) {
-    var i   = 0,
-        len = data.length;
-
-    run();
-
-    function run() {
-        iter(cbIter, data[i], i);
-    }
-
-    function cbIter(error, result) {
-        if(error) {
-            if(cbEnd) cbEnd(error);
-            return;
-        }
-
-        i++;
-
-        if(i >= len) {
-            if(cbEnd)
-                cbEnd(error, result);
-        } else
-            run();
-    }
-}
-
-//---------------------------]>
-
-function createReadStreamByUrl(url, callback) {
-    url = rUrl.parse(url);
-
-    if(!url.protocol || !(/^http/).test(url.protocol)) {
-        callback(new Error("Use the links only with HTTP/HTTPS protocol"));
-        return;
-    }
-
-    var isSSL = url.protocol === "https:";
-    var options = {
-        "host": url.hostname,
-        "port": url.port,
-        "path": url.path
-    };
-
-    var request = (isSSL ? rHttps : rHttp).get(options);
-
-    request
-        .on("error", callback)
-        .on("response", function(res) {
-            callback(null, res);
-        });
-}
-
-function prepareDataForSendApi(id, cmdName, cmdData, data) {
-    data.chat_id = id;
-
-    switch(typeof(cmdData)) {
-        case "string":
-            switch(cmdName) {
-                case "location":
-                    cmdData = cmdData.split(/\s+/);
-
-                    data.latitude = cmdData[0];
-                    data.longitude = cmdData[1];
-
-                    break;
-
-                case "chatAction":
-                    data.action = cmdData;
-
-                    break;
-
-                default:
-                    data[cmdName] = cmdData;
-
-                    break;
-            }
-
-            break;
-
-        case "object":
-            switch(cmdName) {
-                case "location":
-                    if(Array.isArray(cmdData)) {
-                        data.latitude = cmdData[0];
-                        data.longitude = cmdData[1];
-                    } else if(cmdData) {
-                        data.latitude = cmdData.latitude;
-                        data.longitude = cmdData.longitude;
-                    }
-
-                    break;
-
-                default:
-                    if(cmdData instanceof rStream.Stream) {
-                        switch(cmdName) {
-                            case "photo":
-                            case "audio":
-                            case "document":
-                            case "sticker":
-                            case "video":
-                            case "voice":
-                                data[cmdName] = cmdData;
-
-                                break;
-                        }
-                    }
-            }
-
-            break;
-    }
-
-    return data;
-}
-
-//---------------------------]>
-
 function createServer(botFather, params, callback) {
     if(typeof(params) === "function") {
         callback = params;
@@ -1585,7 +1432,144 @@ function createServer(botFather, params, callback) {
     }
 }
 
-//-----------------]>
+//---------)>
+
+function parseCmd(text) {
+    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)
+        return null;
+
+    //---------]>
+
+    var t,
+        name, cmd, cmdText;
+
+    switch(text[0]) {
+        case "/":
+            t = text.match(gReFindCmd);
+
+            if(t) {
+                cmd = t[1];
+                cmdText = t[2];
+            }
+
+            break;
+
+        case "@":
+            text = text.replace(gReReplaceCmd, "");
+
+            if(text[0] !== "/")
+                return null;
+
+            break;
+    }
+
+    if(!t) {
+        t = text.split(gReSplitCmd, 2);
+
+        cmd = t[0];
+        cmdText = t[1];
+    }
+
+    name = cmd.substr(1);
+
+    //---------]>
+
+    return {
+        "name": name,
+        "text": cmdText || "",
+        "cmd":  cmd
+    };
+}
+
+//---------------------------]>
+
+function createReadStreamByUrl(url, callback) {
+    url = rUrl.parse(url);
+
+    if(!url.protocol || !(/^http/).test(url.protocol)) {
+        callback(new Error("Use the links only with HTTP/HTTPS protocol"));
+        return;
+    }
+
+    var isSSL = url.protocol === "https:";
+    var options = {
+        "host": url.hostname,
+        "port": url.port,
+        "path": url.path
+    };
+
+    var request = (isSSL ? rHttps : rHttp).get(options);
+
+    request
+        .on("error", callback)
+        .on("response", function(res) {
+            callback(null, res);
+        });
+}
+
+function prepareDataForSendApi(id, cmdName, cmdData, data) {
+    data.chat_id = id;
+
+    switch(typeof(cmdData)) {
+        case "string":
+            switch(cmdName) {
+                case "location":
+                    cmdData = cmdData.split(/\s+/);
+
+                    data.latitude = cmdData[0];
+                    data.longitude = cmdData[1];
+
+                    break;
+
+                case "chatAction":
+                    data.action = cmdData;
+
+                    break;
+
+                default:
+                    data[cmdName] = cmdData;
+
+                    break;
+            }
+
+            break;
+
+        case "object":
+            switch(cmdName) {
+                case "location":
+                    if(Array.isArray(cmdData)) {
+                        data.latitude = cmdData[0];
+                        data.longitude = cmdData[1];
+                    } else if(cmdData) {
+                        data.latitude = cmdData.latitude;
+                        data.longitude = cmdData.longitude;
+                    }
+
+                    break;
+
+                default:
+                    if(cmdData instanceof rStream.Stream) {
+                        switch(cmdName) {
+                            case "photo":
+                            case "audio":
+                            case "document":
+                            case "sticker":
+                            case "video":
+                            case "voice":
+                                data[cmdName] = cmdData;
+
+                                break;
+                        }
+                    }
+            }
+
+            break;
+    }
+
+    return data;
+}
+
+//---------)>
 
 function createSrvBot(bot, onMsg) {
     var result,
@@ -1655,51 +1639,65 @@ function createSrvBot(bot, onMsg) {
     }
 }
 
-//-----------------]>
+function compileKeyboard(input) {
+    var result  = {},
+        map     = {};
 
-function parseCmd(text) {
-    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)
-        return null;
+    for(var name in input.bin) {
+        var kb = input.bin[name];
 
-    //---------]>
+        name = name[0].toUpperCase() + name.substr(1);
 
-    var t,
-        name, cmd, cmdText;
-
-    switch(text[0]) {
-        case "/":
-            t = text.match(gReFindCmd);
-
-            if(t) {
-                cmd = t[1];
-                cmdText = t[2];
-            }
-
-            break;
-
-        case "@":
-            text = text.replace(gReReplaceCmd, "");
-
-            if(text[0] !== "/")
-                return null;
-
-            break;
+        map["v" + name] = kb.map(x => [x]);
+        map["h" + name] = [kb];
     }
 
-    if(!t) {
-        t = text.split(gReSplitCmd, 2);
+    for(var name in map) {
+        var kb = map[name];
 
-        cmd = t[0];
-        cmdText = t[1];
+        result[name] = {"keyboard": kb, "resize_keyboard": true};
+        result[name + "Once"] = {"keyboard": kb, "resize_keyboard": true, "one_time_keyboard": true};
     }
 
-    name = cmd.substr(1);
+    for(var name in input.norm) {
+        var kb = input.norm[name];
 
-    //---------]>
+        result[name] = {"keyboard": kb};
+        result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
+    }
 
-    return {
-        "name": name,
-        "text": cmdText || "",
-        "cmd":  cmd
-    };
+    for(var name in input.ignore) {
+        var kb = input.ignore[name];
+        result[name] = kb;
+    }
+
+    return result;
+}
+
+//---------------------------]>
+
+function forEachAsync(data, iter, cbEnd) {
+    var i   = 0,
+        len = data.length;
+
+    run();
+
+    function run() {
+        iter(cbIter, data[i], i);
+    }
+
+    function cbIter(error, result) {
+        if(error) {
+            if(cbEnd) cbEnd(error);
+            return;
+        }
+
+        i++;
+
+        if(i >= len) {
+            if(cbEnd)
+                cbEnd(error, result);
+        } else
+            run();
+    }
 }
