@@ -1079,7 +1079,7 @@ function main(token) {
                 }
 
                 if(cmdFunc || objBot.onMsg) {
-                    var ctx = objBot.ctx;
+                    var ctx = Object.create(objBot.ctx);
 
                     ctx.from = ctx.cid = msg.chat.id;
                     ctx.mid = msg.message_id;
@@ -1348,7 +1348,7 @@ function createServer(botFather, params, callback) {
             }
 
             if(cmdFunc || objBot.onMsg) {
-                var ctx = objBot.ctx;
+                var ctx = Object.create(objBot.ctx);
 
                 ctx.from = ctx.cid = msg.chat.id;
                 ctx.mid = msg.message_id;
@@ -1368,8 +1368,8 @@ function createServer(botFather, params, callback) {
         }
 
         function response(code) {
-            res.writeHead(code || 200, {"Content-Type": "text/plain"});
-            res.end("");
+            res.writeHead(code || 200);
+            res.end();
         }
     }
 
@@ -1578,17 +1578,17 @@ function createSrvBot(bot, onMsg) {
     //--------------]>
 
     ctx.send = function(callback) {
-        var d = ctx.data;
-        ctx.data = {};
+        var d = this.data;
+        this.data = {};
 
-        return bot.send(ctx.cid, d, callback);
+        return bot.send(this.cid, d, callback);
     };
 
     ctx.forward = function(callback) {
         return bot.api.forwardMessage({
-            "chat_id":      ctx.to,
-            "from_chat_id": ctx.from,
-            "message_id":   ctx.mid
+            "chat_id":      this.to,
+            "from_chat_id": this.from,
+            "message_id":   this.mid
         }, callback);
     };
 
