@@ -85,6 +85,10 @@ var gKeyboard       = compileKeyboard({
         }
     });
 
+//-----------------------------]>
+
+main.parseCmd = parseCmd;
+
 //-----------------------------------------------------
 
 module.exports = main;

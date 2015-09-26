@@ -285,6 +285,14 @@ function cbMsg(bot) {
 
 
 
+#### Module 
+
+| Attribute         | Type           | Note                                 |
+|-------------------|----------------|--------------------------------------|
+|                   | -              |                                      |
+| parseCmd          | text           | object {name, text, cmd}             |
+
+
 #### Instance 
 
 | Attribute         | Type           | Note                                 |
