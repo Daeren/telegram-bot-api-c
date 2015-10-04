@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------
 //
-// Author: Daeren Torn
+// Author: Daeren
 // Site: 666.io
 //
 //-----------------------------------------------------
@@ -18,7 +18,8 @@ var rHttp           = require("http"),
 //-----------------------------------------------------
 
 var gTgHostApi      = "api.telegram.org",
-    gTgHostFile     = "api.telegram.org";
+    gTgHostFile     = "api.telegram.org",
+    gTgHostWebhook  = "api.telegram.org";
 
 var gCRLF           = "\r\n";
 
@@ -699,7 +700,7 @@ function main(token) {
                 //---)>
 
                 if((t = data.url) && typeof(t) === "string") {
-                    result = "https://api.telegram.org/bot" + token + "/setWebhook?url=";
+                    result = "https://" + gTgHostWebhook + "/bot" + token + "/setWebhook?url=";
 
                     if(!(/^https:\/\//i).test(t))
                         result += "https://";
@@ -942,29 +943,23 @@ function main(token) {
 
                 file
                     .on("error", cbEnd)
-                    .on("open", load)
-                    .on("finish", finish);
+                    .on("open", function() {
+                        createReadStreamByUrl(url, function(error, response) {
+                            if(error) {
+                                cbEnd(error);
+                                return;
+                            }
 
-                //--------]>
-
-                function load() {
-                    createReadStreamByUrl(url, function(error, response) {
-                        if(error) {
-                            cbEnd(error);
-                            return;
-                        }
-
-                        response.pipe(file);
+                            response.pipe(file);
+                        });
+                    })
+                    .on("finish", function() {
+                        cbEnd(null, {
+                            "id":   fileId,
+                            "size": fileSize,
+                            "file": dir
+                        });
                     });
-                }
-
-                function finish() {
-                    cbEnd(null, {
-                        "id":   fileId,
-                        "size": fileSize,
-                        "file": dir
-                    });
-                }
             });
         }
     }
@@ -976,137 +971,7 @@ function main(token) {
     }
 
     function polling(params, callback) {
-        if(typeof(params) === "function") {
-            callback = params;
-            params = undefined;
-        }
-
-        if(!params) {
-            params = {};
-        }
-
-        params.interval = (parseInt(params.interval, 10) || 3) * 1000;
-
-        //----------------]>
-
-        var api         = this.api,
-
-            objBot      = createSrvBot(this, callback),
-
-            isStopped   = false,
-            tmPolling;
-
-        objBot.stop = tmStop;
-
-        //------)>
-
-        if(params.firstLoad)
-            load(); else runTimer();
-
-        //----------------]>
-
-        return objBot;
-
-        //----------------]>
-
-        function runTimer() {
-            if(isStopped)
-                return;
-
-            tmPolling = setTimeout(load, params.interval);
-        }
-
-        function load() {
-            api.getUpdates(params, onParseUpdates);
-        }
-
-        function onParseUpdates(error, data) {
-            if(objBot.cbLogger)
-                objBot.cbLogger(error, data);
-
-            if(!error) {
-                try {
-                    data = JSON.parse(data);
-                } catch(e) {
-                    error = e;
-                }
-            }
-
-            if(error) {
-                runTimer();
-                return;
-            }
-
-            onLoadSuccess(data);
-        }
-
-        function onLoadSuccess(data) {
-            if(!data.ok) {
-                if(data.error_code === 409) {
-                    api.setWebhook(function() {
-                        load();
-                    });
-                }
-
-                return;
-            }
-
-            if(data.result.length) {
-                data.result.forEach(onMsg);
-                load();
-            } else {
-                runTimer();
-            }
-
-            function onMsg(data) {
-                var cmdParams, cmdFunc;
-
-                var objCmds = objBot.commands;
-
-                var upId    = data.update_id,
-                    msg     = data.message;
-
-                //--------]>
-
-                params.offset = upId + 1;
-
-                //--------]>
-
-                if(objBot.anTrack)
-                    objBot.anTrack(msg);
-
-                if(objCmds) {
-                    cmdParams = parseCmd(msg.text);
-
-                    if(cmdParams)
-                        cmdFunc = objCmds[cmdParams.name];
-                }
-
-                if(cmdFunc || objBot.onMsg) {
-                    var ctx = Object.create(objBot.ctx);
-
-                    ctx.from = ctx.cid = msg.chat.id;
-                    ctx.mid = msg.message_id;
-
-                    ctx.update_id = upId;
-                    ctx.message = msg;
-
-                    ctx.data = {};
-
-                    if(cmdFunc) {
-                        cmdFunc(ctx, cmdParams);
-                        return;
-                    }
-
-                    objBot.onMsg(ctx);
-                }
-            }
-        }
-
-        function tmStop() {
-            isStopped = true;
-            clearTimeout(tmPolling);
-        }
+        return createPolling(this, params, callback);
     }
 
     //-------------------------]>
@@ -1436,6 +1301,140 @@ function createServer(botFather, params, callback) {
     }
 }
 
+function createPolling(botFather, params, callback) {
+    if(typeof(params) === "function") {
+        callback = params;
+        params = undefined;
+    }
+
+    if(!params) {
+        params = {};
+    }
+
+    params.interval = (parseInt(params.interval, 10) || 3) * 1000;
+
+    //----------------]>
+
+    var api         = botFather.api,
+
+        objBot      = createSrvBot(botFather, callback),
+
+        isStopped   = false,
+        tmPolling;
+
+    objBot.stop = tmStop;
+
+    //------)>
+
+    if(params.firstLoad)
+        load(); else runTimer();
+
+    //----------------]>
+
+    return objBot;
+
+    //----------------]>
+
+    function runTimer() {
+        if(isStopped)
+            return;
+
+        tmPolling = setTimeout(load, params.interval);
+    }
+
+    function load() {
+        api.getUpdates(params, onParseUpdates);
+    }
+
+    function onParseUpdates(error, data) {
+        if(objBot.cbLogger)
+            objBot.cbLogger(error, data);
+
+        if(!error) {
+            try {
+                data = JSON.parse(data);
+            } catch(e) {
+                error = e;
+            }
+        }
+
+        if(error) {
+            runTimer();
+            return;
+        }
+
+        onLoadSuccess(data);
+    }
+
+    function onLoadSuccess(data) {
+        if(!data.ok) {
+            if(data.error_code === 409) {
+                api.setWebhook(function() {
+                    load();
+                });
+            }
+
+            return;
+        }
+
+        if(data.result.length) {
+            data.result.forEach(onMsg);
+            load();
+        } else {
+            runTimer();
+        }
+
+        function onMsg(data) {
+            var cmdParams, cmdFunc;
+
+            var objCmds = objBot.commands;
+
+            var upId    = data.update_id,
+                msg     = data.message;
+
+            //--------]>
+
+            params.offset = upId + 1;
+
+            //--------]>
+
+            if(objBot.anTrack)
+                objBot.anTrack(msg);
+
+            if(objCmds) {
+                cmdParams = parseCmd(msg.text);
+
+                if(cmdParams)
+                    cmdFunc = objCmds[cmdParams.name];
+            }
+
+            if(cmdFunc || objBot.onMsg) {
+                var ctx = Object.create(objBot.ctx);
+
+                ctx.from = ctx.cid = msg.chat.id;
+                ctx.mid = msg.message_id;
+
+                ctx.update_id = upId;
+                ctx.message = msg;
+
+                ctx.data = {};
+
+                if(cmdFunc) {
+                    cmdFunc(ctx, cmdParams);
+                    return;
+                }
+
+                objBot.onMsg(ctx);
+            }
+        }
+    }
+
+    function tmStop() {
+        isStopped = true;
+        clearTimeout(tmPolling);
+    }
+}
+
 //---------)>
 
 function parseCmd(text) {
@@ -1652,7 +1651,7 @@ function compileKeyboard(input) {
 
         name = name[0].toUpperCase() + name.substr(1);
 
-        map["v" + name] = kb.map(x => [x]);
+        map["v" + name] = kb.map(function(x) { return [x]; });
         map["h" + name] = [kb];
     }
 
