@@ -10,21 +10,34 @@ require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send(
 ```
 
 ```js
+require("telegram-bot-api-c")("TOKEN").api.sendMessage({"text": "Hi", "chat_id": 0});
+```
+
+```js
 var rBot    = require("telegram-bot-api-c");
 
 var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
     buttons = rBot.keyboard;
+	
+var data;
 
-var file    = __dirname + "/MiElPotato.jpg",
-    data    = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
+//--------]>
+
+data = [
+    {"text": params},
+    {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
+];
+
+rBot.send("chatId", data);
+
+//--------]>
+	
+data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 
 api.sendMessage(data(), function() {
     api
         .sendMessage(data())
         
-        .then(data)
-        .then(x => api.sendMessage(x))
-
         .then(data)
         .then(x => {
             x.photo = file;
@@ -76,7 +89,7 @@ var objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
 var objOptions  = {
     "limit":    100,
     "timeout":  0,
-    "interval": 3 // <-- Sec.
+    "interval": 1 // <-- Default / Sec.
 };
 
 objSrv = objBot
@@ -143,8 +156,10 @@ objSrv
 function cbOtherBot(bot) {
     // bot.cid = bot.message.chat.id; <-- Default
 
-    bot.api
+    bot
+        .api
         .getMe()
+		
         .then(() => {
             bot.data.chatAction = "typing";
             return bot.send();

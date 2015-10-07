@@ -1311,7 +1311,7 @@ function createPolling(botFather, params, callback) {
         params = {};
     }
 
-    params.interval = (parseInt(params.interval, 10) || 3) * 1000;
+    params.interval = (parseInt(params.interval, 10) || 1) * 1000;
 
     //----------------]>
 
