@@ -26,85 +26,85 @@ objBot.api
     .setWebhook()
     .then(x => {
 
-        objSrv = objBot.polling(objOptions, rspNotFound);
+        objSrv = objBot.polling(objOptions, onNotFound);
 
         //---------]>
 
-        objSrv.on("/start", rspCmdStart);
-        objSrv.on("/", rspCmdNotFound);
+        objSrv.on("/start", onCmdStart);
+        objSrv.on("/", onCmdNotFound);
 
-        objSrv.on(/^id\s+(\d+)/i, rspTextRegExp)
+        objSrv.on(/^id\s+(\d+)/i, onTextRegExp)
 
-        //objSrv.on(["photo", "document"], rspDocument);
+        //objSrv.on(["photo", "document"], onDocument);
 
-        objSrv.on("text", rspText);
-        objSrv.on("photo", rspPhoto);
-        objSrv.on("audio", rspAudio);
-        objSrv.on("document", rspDocument);
-        objSrv.on("sticker", rspSticker);
-        objSrv.on("video", rspVideo);
-        objSrv.on("voice", rspVoice);
-        objSrv.on("contact", rspContact);
-        objSrv.on("location", rspLocation);
+        objSrv.on("text", onText);
+        objSrv.on("photo", onPhoto);
+        objSrv.on("audio", onAudio);
+        objSrv.on("document", onDocument);
+        objSrv.on("sticker", onSticker);
+        objSrv.on("video", onVideo);
+        objSrv.on("voice", onVoice);
+        objSrv.on("contact", onContact);
+        objSrv.on("location", onLocation);
 
-        //objSrv.off(/^hello/i, rspTextRegExp);
+        //objSrv.off(/^hello/i, onTextRegExp);
 
         //---------]>
 
-        function rspNotFound(bot, cmdParams) {
-            response("rspNotFound:", bot, cmdParams);
+        function onNotFound(bot, cmdParams) {
+            response("onNotFound:", bot, cmdParams);
         }
 
 
-        function rspCmdNotFound(bot, cmdParams) {
-            response("rspCmdNotFound:", bot, cmdParams);
+        function onCmdNotFound(bot, cmdParams) {
+            response("onCmdNotFound:", bot, cmdParams);
         }
 
-        function rspCmdStart(bot, cmdParams) {
-            response("rspCmdStart:", bot, cmdParams);
+        function onCmdStart(bot, cmdParams) {
+            response("onCmdStart:", bot, cmdParams);
 
-        }
-
-
-        function rspTextRegExp(bot, reParams) {
-            response("rspTextRegExp:", bot, reParams);
         }
 
 
-        function rspText(bot) {
-            response("rspText:", bot);
+        function onTextRegExp(bot, reParams) {
+            response("onTextRegExp:", bot, reParams);
+        }
+
+
+        function onText(bot) {
+            response("onText:", bot);
 
         }
 
-        function rspPhoto(bot) {
-            response("rspPhoto:", bot)
+        function onPhoto(bot) {
+            response("onPhoto:", bot)
         }
 
-        function rspAudio(bot) {
+        function onAudio(bot) {
             response("audio:", bot);
         }
 
-        function rspDocument(bot) {
+        function onDocument(bot) {
             response("document:", bot);
         }
 
-        function rspSticker(bot) {
+        function onSticker(bot) {
             response("sticker:", bot);
         }
 
-        function rspVideo(bot) {
+        function onVideo(bot) {
             response("video:", bot);
         }
 
-        function rspVoice(bot) {
+        function onVoice(bot) {
             response("voice:", bot);
         }
 
-        function rspContact(bot) {
+        function onContact(bot) {
             response("contact:", bot);
         }
 
-        function rspLocation(bot) {
+        function onLocation(bot) {
             response("location:", bot);
         }
 

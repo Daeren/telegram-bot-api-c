@@ -19,30 +19,30 @@ var objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 //--------]>
 
-var srv = objBot.polling(rspNotFound);
+var srv = objBot.polling(onNotFound);
 
 //----)>
 
 srv
-    .on("/start", rspCmdStart)
-    .on("/", rspCmdNotFound)
+    .on("/start", onCmdStart)
+    .on("/", onCmdNotFound)
 
-    .on("text", rspText)
-    .on(["photo", "document"], rspPhotoOrDoc)
+    .on("text", onText)
+    .on(["photo", "document"], onPhotoOrDoc)
     
-    .on(/^id\s+(\d+)/i, rspTextRegExp)
-    .off(/^id\s+(\d+)/i, rspTextRegExp);
+    .on(/^id\s+(\d+)/i, onTextRegExp)
+    .off(/^id\s+(\d+)/i, onTextRegExp);
 
 //----)>
 
-function rspNotFound(bot, cmdParams) { }
-function rspCmdNotFound(bot, cmdParams) { }
+function onNotFound(bot, cmdParams) { }
+function onCmdNotFound(bot, cmdParams) { }
 
-function rspCmdStart(bot, cmdParams) { }
-function rspTextRegExp(bot, reParams) { }
+function onCmdStart(bot, cmdParams) { }
+function onTextRegExp(bot, reParams) { }
 
-function rspText(bot) { }
-function rspPhotoOrDoc(bot) { }
+function onText(bot) { }
+function onPhotoOrDoc(bot) { }
 
 //--------]>
 
