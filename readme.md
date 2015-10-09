@@ -15,10 +15,13 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"text": "Hi", "chat_id":
 
 ```js
 var rBot    = require("telegram-bot-api-c");
+var objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 //--------]>
 
 var srv = objBot.polling(rspNotFound);
+
+//----)>
 
 srv
     .on("/start", rspCmdStart)
@@ -42,8 +45,8 @@ function rspPhotoOrDoc(bot) { }
 
 //--------]>
 
-var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
-    buttons = rBot.keyboard;
+var api     = objBot.api,
+    buttons = objBot.keyboard;
 
 var data;
 
