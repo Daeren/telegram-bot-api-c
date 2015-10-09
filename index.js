@@ -759,25 +759,29 @@ function main(token) {
         } else {
             req.write(bodyBegin);
 
-            if(typeof(file) === "string")
+            if(typeof(file) === "string") {
                 file = rFs.createReadStream(file);
+
+                file.on("open", function() {
+                    file.pipe(req, gPipeOptions);
+                })
+            }
             else {
                 if(file.closed) {
                     req.end(bodyEnd);
                     return;
                 }
+
+                file.pipe(req, gPipeOptions);
             }
 
             file
                 .on("error", function(error) {
                     req.end(bodyEnd);
                 })
-                //.on("open", function() {})
                 .on("end", function() {
                     req.end(bodyEnd);
                 });
-
-            file.pipe(req, gPipeOptions);
         }
     }
 

@@ -58,7 +58,7 @@ data = [
     {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
 ];
 
-rBot.send("chatId", data);
+objBot.send("chatId", data);
 
 //----)>
 
