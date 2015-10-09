@@ -42,9 +42,9 @@ function onCmdNotFound(bot, params) { }
 function onCmdStart(bot, params) { }
 function onTextRegExp(bot, params) { }
 
-function onEnterChat(bot) { }
-function onText(bot) { }
-function onPhotoOrDoc(bot) { }
+function onEnterChat(bot, data) { }
+function onText(bot, data) { }
+function onPhotoOrDoc(bot, data) { }
 
 //----[API]----}>
 
@@ -409,25 +409,30 @@ function cbMsg(bot) {
 
 #### Events: on
 
-| Name          | Args                                  | Note                                      |
-|---------------|---------------------------------------|-------------------------------------------|
-|               | -                                     |                                           |
-| enterChat     | data                                  |                                           |
-| leftChat      | data                                  |                                           |
-|               | -                                     |                                           |
-| text          | data                                  |                                           |
-| photo         | data                                  |                                           |
-| audio         | data                                  |                                           |
-| document      | data                                  |                                           |
-| sticker       | data                                  |                                           |
-| video         | data                                  |                                           |
-| voice         | data                                  |                                           |
-| contact       | data                                  |                                           |
-| location      | data                                  |                                           |
-|               | -                                     |                                           |
-| /[name]       | data, params                          | CMD                                       |
-|               | -                                     |                                           |
-| [regexp]      | data, params                          |                                           |
+| Name              | Args                                  | Note                                      |
+|-------------------|---------------------------------------|-------------------------------------------|
+|                   | -                                     |                                           |
+| enterChat         | bot, data                             |                                           |
+| leftChat          | bot, data                             |                                           |
+|                   | -                                     |                                           |
+| chatTitle         | bot, data                             |                                           |
+| chatNewPhoto      | bot, data                             |                                           |
+| chatDeletePhoto   | bot, data                             |                                           |
+| chatCreated       | bot, data                             |                                           |
+|                   | -                                     |                                           |
+| text              | bot, data                             |                                           |
+| photo             | bot, data                             |                                           |
+| audio             | bot, data                             |                                           |
+| document          | bot, data                             |                                           |
+| sticker           | bot, data                             |                                           |
+| video             | bot, data                             |                                           |
+| voice             | bot, data                             |                                           |
+| contact           | bot, data                             |                                           |
+| location          | bot, data                             |                                           |
+|                   | -                                     |                                           |
+| /[name]           | data, params                          | CMD                                       |
+|                   | -                                     |                                           |
+| [regexp]          | data, params                          |                                           |
 
 
 ## License

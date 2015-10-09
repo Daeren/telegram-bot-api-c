@@ -40,6 +40,11 @@ objBot.api
         objSrv.on("enterChat", onEnterChat);
         objSrv.on("leftChat", onLeftChat);
 
+        objSrv.on("chatTitle", onChatTitle);
+        objSrv.on("chatNewPhoto", onChatNewPhoto);
+        objSrv.on("chatDeletePhoto", onChatDeletePhoto);
+        objSrv.on("chatCreated", onChatCreated);
+
         objSrv.on("text", onText);
         objSrv.on("photo", onPhoto);
         objSrv.on("audio", onAudio);
@@ -74,17 +79,34 @@ objBot.api
         }
 
 
-        function onEnterChat(bot) {
-            response("onEnterChat:", bot);
+        function onEnterChat(bot, data) {
+            response("onEnterChat:", bot, data);
         }
 
-        function onLeftChat(bot) {
-            response("onLeftChat:", bot);
+        function onLeftChat(bot, data) {
+            response("onLeftChat:", bot, data);
         }
 
 
-        function onText(bot) {
-            response("onText:", bot);
+        function onChatTitle(bot, data) {
+            response("onChatTitle:", bot, data);
+        }
+
+        function onChatNewPhoto(bot, data) {
+            response("onChatNewPhoto:", bot, data);
+        }
+
+        function onChatDeletePhoto(bot, data) {
+            response("onChatDeletePhoto:", bot, data);
+        }
+
+        function onChatCreated(bot, data) {
+            response("onChatCreated:", bot, data);
+        }
+
+
+        function onText(bot, data) {
+            response("onText:", bot, data);
 
             var msgText = bot.message.text;
 
@@ -103,44 +125,44 @@ objBot.api
             bot.send();
         }
 
-        function onPhoto(bot) {
-            response("onPhoto:", bot)
+        function onPhoto(bot, data) {
+            response("onPhoto:", bot, data)
         }
 
-        function onAudio(bot) {
-            response("audio:", bot);
+        function onAudio(bot, data) {
+            response("audio:", bot, data);
         }
 
-        function onDocument(bot) {
-            response("document:", bot);
+        function onDocument(bot, data) {
+            response("document:", bot, data);
         }
 
-        function onSticker(bot) {
-            response("sticker:", bot);
+        function onSticker(bot, data) {
+            response("sticker:", bot, data);
         }
 
-        function onVideo(bot) {
-            response("video:", bot);
+        function onVideo(bot, data) {
+            response("video:", bot, data);
         }
 
-        function onVoice(bot) {
-            response("voice:", bot);
+        function onVoice(bot, data) {
+            response("voice:", bot, data);
         }
 
-        function onContact(bot) {
-            response("contact:", bot);
+        function onContact(bot, data) {
+            response("contact:", bot, data);
         }
 
-        function onLocation(bot) {
-            response("location:", bot);
+        function onLocation(bot, data) {
+            response("location:", bot, data);
         }
 
         //---------]>
 
         function response(who, bot, params) {
             console.log(who);
-            console.log(bot);
-            console.log(params);
+            console.log("bot: ", bot);
+            console.log("params: ", params);
 
             bot.data.text = bot;
             bot.send();

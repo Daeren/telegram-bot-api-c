@@ -1262,6 +1262,11 @@ function createServer(botFather, params, callback) {
                 case "enterChat":
                 case "leftChat":
 
+                case "chatTitle":
+                case "chatNewPhoto":
+                case "chatDeletePhoto":
+                case "chatCreated":
+
                 case "text":
                 case "photo":
                 case "audio":
@@ -1456,8 +1461,6 @@ function createPolling(botFather, params, callback) {
         //------------]>
 
         function onMsg(data) {
-            var cmdParams;
-
             var upId    = data.update_id,
                 msg     = data.message;
 
@@ -1475,22 +1478,25 @@ function createPolling(botFather, params, callback) {
             var botFilters  = objBot.filters,
 
                 ctx         = createCtx(),
-                msgType     = getTypeMsg(msg);
+                ctxParam,
+
+                msgType     = getTypeMsg(msg),
+                evName      = getEventNameByTypeMsg(msgType);
 
             //------------]>
 
-            switch(msgType) {
+            switch(evName) {
                 case "text":
                     var rule;
 
                     //-----[CMD]----}>
 
-                    cmdParams = parseCmd(msg.text);
+                    ctxParam = parseCmd(msg.text);
 
-                    if(cmdParams) {
-                        rule = "/" + cmdParams.name;
+                    if(ctxParam) {
+                        rule = "/" + ctxParam.name;
 
-                        if(callEvent(rule, cmdParams) || callEvent("/", cmdParams))
+                        if(callEvent(rule, ctxParam) || callEvent("/", ctxParam))
                             return;
                     }
 
@@ -1517,9 +1523,14 @@ function createPolling(botFather, params, callback) {
                     break;
             }
 
-            switch(msgType) {
+            switch(evName) {
                 case "enterChat":
                 case "leftChat":
+
+                case "chatTitle":
+                case "chatNewPhoto":
+                case "chatDeletePhoto":
+                case "chatCreated":
 
                 case "user":
                 case "text":
@@ -1531,12 +1542,14 @@ function createPolling(botFather, params, callback) {
                 case "voice":
                 case "contact":
                 case "location":
-                    callEvent(msgType);
+                    ctxParam = msg[msgType];
+                    callEvent(evName, ctxParam);
+
                     break;
 
                 default:
                     if(objBot.onMsg)
-                        objBot.onMsg(ctx, cmdParams);
+                        objBot.onMsg(ctx, ctxParam);
             }
 
             //------------]>
@@ -1621,11 +1634,23 @@ function parseCmd(text) {
     };
 }
 
+function getEventNameByTypeMsg(type) {
+    switch(type) {
+        case "new_chat_participant": return "enterChat";
+        case "left_chat_participant": return "leftChat";
+
+        case "new_chat_title": return "chatTitle";
+        case "new_chat_photo": return "chatNewPhoto";
+        case "delete_chat_photo": return "chatDeletePhoto";
+        case "group_chat_created": return "chatCreated";
+
+        default:
+            return type;
+    }
+}
+
 function getTypeMsg(m) {
     var t;
-
-    if(hasOwnProperty(m, "new_chat_participant")) return "enterChat";
-    if(hasOwnProperty(m, "left_chat_participant")) return "leftChat";
 
     hasOwnProperty(m, t = "text") ||
     hasOwnProperty(m, t = "photo") ||
@@ -1636,6 +1661,14 @@ function getTypeMsg(m) {
     hasOwnProperty(m, t = "voice") ||
     hasOwnProperty(m, t = "contact") ||
     hasOwnProperty(m, t = "location") ||
+
+    hasOwnProperty(m, t = "new_chat_participant") ||
+    hasOwnProperty(m, t = "left_chat_participant") ||
+    hasOwnProperty(m, t = "new_chat_title") ||
+    hasOwnProperty(m, t = "new_chat_photo") ||
+    hasOwnProperty(m, t = "delete_chat_photo") ||
+    hasOwnProperty(m, t = "group_chat_created") ||
+
     (t = undefined);
 
     return t;
