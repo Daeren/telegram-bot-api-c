@@ -89,6 +89,7 @@ var gKeyboard       = compileKeyboard({
 
 //-----------------------------]>
 
+main.keyboard = gKeyboard;
 main.parseCmd = parseCmd;
 
 //-----------------------------------------------------
@@ -111,7 +112,7 @@ function main(token) {
 
     var CMain = function() {
         this.api        = genApi();
-        this.keyboard   = Object.create(gKeyboard);
+        this.keyboard   = gKeyboard;
     };
 
     CMain.prototype = {
@@ -1871,8 +1872,33 @@ function createSrvBot(bot, onMsg) {
 }
 
 function compileKeyboard(input) {
-    var result  = {},
-        map     = {};
+    var result,
+        map = {};
+
+    //----------]>
+
+    result = function(buttons, params) {
+        buttons = {"keyboard": buttons};
+
+        if(!params)
+            return buttons;
+
+        if(!Array.isArray(params))
+            params = params.split(/\s+/);
+
+        if(params.indexOf("resize") !== -1)
+            buttons.resize_keyboard = true;
+
+        if(params.indexOf("once") !== -1)
+            buttons.one_time_keyboard = true;
+
+        if(params.indexOf("selective") !== -1)
+            buttons.selective = true;
+
+        return buttons;
+    };
+
+    //----------]>
 
     for(var name in input.bin) {
         var kb = input.bin[name];
@@ -1901,6 +1927,8 @@ function compileKeyboard(input) {
         var kb = input.ignore[name];
         result[name] = kb;
     }
+
+    //----------]>
 
     return result;
 }

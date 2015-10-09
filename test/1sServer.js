@@ -85,6 +85,22 @@ objBot.api
 
         function onText(bot) {
             response("onText:", bot);
+
+            var msgText = bot.message.text;
+
+            bot.data.text = bot.message;
+            //bot.data.reply_markup = bot.keyboard[msgText];
+            bot.data.reply_markup = bot.keyboard([["1", "2,", "3"]], msgText);
+
+            // "resize once selective"
+
+            // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
+            // numpad, hide
+
+            // vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
+            // numpadOnce
+
+            bot.send();
         }
 
         function onPhoto(bot) {

@@ -70,6 +70,7 @@ api.sendMessage(data(), function() { });
 api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
     x.reply_markup = buttons.hOxOnce;
+    x.reply_markup = buttons([["X"]], "resize once selective");
 
     api.sendPhoto(x);
 });
@@ -305,6 +306,8 @@ function cbMsg(bot) {
     bot.send();
 }
 
+// rBot.keyboard(buttons[, params])
+
 // v - vertically; h - horizontally; Once - one_time_keyboard
 
 // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
@@ -334,6 +337,7 @@ function cbMsg(bot) {
 | Attribute         | Type           | Note                                 |
 |-------------------|----------------|--------------------------------------|
 |                   | -              |                                      |
+| keyboard          | function       |                                      |
 | parseCmd          | text           | object {name, text, cmd}             |
 
 
@@ -343,7 +347,7 @@ function cbMsg(bot) {
 |-------------------|----------------|--------------------------------------|
 |                   | -              |                                      |
 | api               | Object         | See [Telegram Bot API][3]            |
-| keyboard          | Object         |                                      |
+| keyboard          | function       |                                      |
 
 
 | Method            | Arguments                                                             | Return                            |
