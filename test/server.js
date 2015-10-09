@@ -41,8 +41,8 @@ objSrv
     .bot(objMyBot, "/myBot")
     .logger(cbMyBotLogger)
 
-    .command("start", cbCmdStart)
-    .command("stop", cbCmdStop);
+    .on("/start", cbCmdStart)
+    .on("/stop", cbCmdStop);
 
 objSrv
     .bot(objOtherBot, "/myOtherBot", cbMsg)

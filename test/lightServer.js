@@ -42,7 +42,7 @@ objBot.api
         objBot
             .server(objSrvOptions, cbMsg)
             .logger(cbLogger)
-            .command("start", cbCmdStart);
+            .on("/start", cbCmdStart);
     }, console.error);
 
 

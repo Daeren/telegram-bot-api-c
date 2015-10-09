@@ -22,6 +22,111 @@ var objOptions  = {
     "interval": 1
 };
 
+objBot.api
+    .setWebhook()
+    .then(x => {
+
+        objSrv = objBot.polling(objOptions, rspNotFound);
+
+        //---------]>
+
+        objSrv.on("/start", rspCmdStart);
+        objSrv.on("/", rspCmdNotFound);
+
+        objSrv.on(/^id\s+(\d+)/i, rspTextRegExp)
+
+        //objSrv.on(["photo", "document"], rspDocument);
+
+        objSrv.on("text", rspText);
+        objSrv.on("photo", rspPhoto);
+        objSrv.on("audio", rspAudio);
+        objSrv.on("document", rspDocument);
+        objSrv.on("sticker", rspSticker);
+        objSrv.on("video", rspVideo);
+        objSrv.on("voice", rspVoice);
+        objSrv.on("contact", rspContact);
+        objSrv.on("location", rspLocation);
+
+        //objSrv.off(/^hello/i, rspTextRegExp);
+
+        //---------]>
+
+        function rspNotFound(bot, cmdParams) {
+            response("rspNotFound:", bot, cmdParams);
+        }
+
+
+        function rspCmdNotFound(bot, cmdParams) {
+            response("rspCmdNotFound:", bot, cmdParams);
+        }
+
+        function rspCmdStart(bot, cmdParams) {
+            response("rspCmdStart:", bot, cmdParams);
+
+        }
+
+
+        function rspTextRegExp(bot, reParams) {
+            response("rspTextRegExp:", bot, reParams);
+        }
+
+
+        function rspText(bot) {
+            response("rspText:", bot);
+
+        }
+
+        function rspPhoto(bot) {
+            response("rspPhoto:", bot)
+        }
+
+        function rspAudio(bot) {
+            response("audio:", bot);
+        }
+
+        function rspDocument(bot) {
+            response("document:", bot);
+        }
+
+        function rspSticker(bot) {
+            response("sticker:", bot);
+        }
+
+        function rspVideo(bot) {
+            response("video:", bot);
+        }
+
+        function rspVoice(bot) {
+            response("voice:", bot);
+        }
+
+        function rspContact(bot) {
+            response("contact:", bot);
+        }
+
+        function rspLocation(bot) {
+            response("location:", bot);
+        }
+
+        //---------]>
+
+        function response(who, bot, params) {
+            console.log(who);
+            console.log(params);
+
+            bot.data.text = bot;
+            bot.send();
+        }
+    }, console.error);
+
+
+
+
+
+return;
+
+
+
 
 objBot.api
     .setWebhook()
@@ -30,7 +135,7 @@ objBot.api
             .polling(objOptions, cbMsg)
             .logger(cbLogger)
             .analytics("apiKey", "appName")
-            .command("stop", cbCmdStop);
+            .on("/stop", cbCmdStop);
     }, console.error);
 
 

@@ -16,12 +16,38 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"text": "Hi", "chat_id":
 ```js
 var rBot    = require("telegram-bot-api-c");
 
-var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
-    buttons = rBot.keyboard;
-	
-var data;
+//--------]>
+
+var srv = objBot.polling(rspNotFound);
+
+srv
+    .on("/start", rspCmdStart)
+    .on("/", rspCmdNotFound)
+
+    .on("text", rspText)
+    .on(["photo", "document"], rspPhotoOrDoc)
+    
+    .on(/^id\s+(\d+)/i, rspTextRegExp)
+    .off(/^id\s+(\d+)/i, rspTextRegExp);
+
+//----)>
+
+function rspNotFound(bot, cmdParams) { }
+function rspCmdNotFound(bot, cmdParams) { }
+
+function rspTextRegExp(bot, reParams) {}
+
+function rspText(bot) {}
+function rspPhotoOrDoc(bot) { }
 
 //--------]>
+
+var api     = rBot(process.env.TELEGRAM_BOT_TOKEN).api,
+    buttons = rBot.keyboard;
+
+var data;
+
+//----)>
 
 data = [
     {"text": params},
@@ -30,21 +56,16 @@ data = [
 
 rBot.send("chatId", data);
 
-//--------]>
-	
+//----)>
+
 data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 
-api.sendMessage(data(), function() {
-    api
-        .sendMessage(data())
-        
-        .then(data)
-        .then(x => {
-            x.photo = file;
-            x.reply_markup = buttons.hOxOnce;
+api.sendMessage(data(), function() { });
+api.sendMessage(data()).then(data).then(x => {
+    x.photo = file;
+    x.reply_markup = buttons.hOxOnce;
 
-            api.sendPhoto(x);
-        });
+    api.sendPhoto(x);
 });
 ```
 
@@ -89,12 +110,12 @@ var objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
 var objOptions  = {
     "limit":    100,
     "timeout":  0,
-    "interval": 1 // <-- Default / Sec.
+    "interval": 2 // <-- Default / Sec.
 };
 
 objSrv = objBot
     .polling(objOptions, cbMsg)
-    .command("stop", cbCmdStop);
+    .on("/stop", cbCmdStop);
 
 function cbMsg(bot) {
     bot.data.text = "Stop me: /stop";
@@ -145,8 +166,8 @@ var objSrv      = objBotFather.server(objSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
-    .command("start", cbCmdStart)
-    .command("stop", cbCmdStop);
+    .on("/start", cbCmdStart)
+    .on("/stop", cbCmdStop);
 
 objSrv
     .bot(objOtherBot, "/OtherBot", cbOtherBot);
@@ -159,7 +180,7 @@ function cbOtherBot(bot) {
     bot
         .api
         .getMe()
-		
+
         .then(() => {
             bot.data.chatAction = "typing";
             return bot.send();
@@ -211,8 +232,10 @@ function cbCmdStop(bot, params) {
 ```js
 var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-objBot.api
+objBot
+    .api
     .setWebhook({"url": "site.xx/myBot"})
+    
     .then(JSON.parse)
     .then(response => {
         if(!response.ok)
@@ -358,7 +381,8 @@ function cbMsg(bot) {
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
-| command       | cmd, callback(data, params)           |                                           |
+| on            | type, callback(data, params)          |                                           |
+| off           | type, callback                        |                                           |
 
 #### Methods: server
 
@@ -368,7 +392,8 @@ function cbMsg(bot) {
 | bot           | bot, path, callback(json, request)    |                                           |
 | logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
-| command       | cmd, callback(data, params, request)  |                                           |
+| on            | type, callback(data, params)          |                                           |
+| off           | type, callback                        |                                           |
 
 
 ## License
