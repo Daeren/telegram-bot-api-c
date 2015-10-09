@@ -38,9 +38,10 @@ srv
 function rspNotFound(bot, cmdParams) { }
 function rspCmdNotFound(bot, cmdParams) { }
 
-function rspTextRegExp(bot, reParams) {}
+function rspCmdStart(bot, cmdParams) { }
+function rspTextRegExp(bot, reParams) { }
 
-function rspText(bot) {}
+function rspText(bot) { }
 function rspPhotoOrDoc(bot) { }
 
 //--------]>
@@ -92,7 +93,7 @@ objBot.download("file_id", "dir", "name.mp3");
 
 objBot
     .download("file_id")
-    .then(info => {
+    .then(function(info) {
         info.stream.pipe(require("fs").createWriteStream("O:/" + info.name));
     });
 
