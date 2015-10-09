@@ -27,6 +27,7 @@ srv
     .on("/start", onCmdStart)
     .on("/", onCmdNotFound)
 
+    .on("enterChat", onEnterChat)
     .on("text", onText)
     .on(["photo", "document"], onPhotoOrDoc)
     
@@ -41,6 +42,7 @@ function onCmdNotFound(bot, params) { }
 function onCmdStart(bot, params) { }
 function onTextRegExp(bot, params) { }
 
+function onEnterChat(bot) { }
 function onText(bot) { }
 function onPhotoOrDoc(bot) { }
 
@@ -421,7 +423,7 @@ function cbMsg(bot) {
 |               | -                                     |                                           |
 | /[name]       | data, params                          | CMD                                       |
 |               | -                                     |                                           |
-| <regexp>      | data, params                          |                                           |
+| [regexp]      | data, params                          |                                           |
 
 
 ## License
