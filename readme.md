@@ -406,6 +406,9 @@ function cbMsg(bot) {
 | Name          | Args                                  | Note                                      |
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
+| enterChat     | data                                  |                                           |
+| leftChat      | data                                  |                                           |
+|               | -                                     |                                           |
 | text          | data                                  |                                           |
 | photo         | data                                  |                                           |
 | audio         | data                                  |                                           |
@@ -415,7 +418,9 @@ function cbMsg(bot) {
 | voice         | data                                  |                                           |
 | contact       | data                                  |                                           |
 | location      | data                                  |                                           |
+|               | -                                     |                                           |
 | /[name]       | data, params                          | CMD                                       |
+|               | -                                     |                                           |
 | <regexp>      | data, params                          |                                           |
 
 

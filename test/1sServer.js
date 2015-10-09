@@ -33,9 +33,12 @@ objBot.api
         objSrv.on("/start", onCmdStart);
         objSrv.on("/", onCmdNotFound);
 
-        objSrv.on(/^id\s+(\d+)/i, onTextRegExp)
+        objSrv.on(/^id\s+(\d+)/i, onTextRegExp);
 
         //objSrv.on(["photo", "document"], onDocument);
+
+        objSrv.on("enterChat", onEnterChat);
+        objSrv.on("leftChat", onLeftChat);
 
         objSrv.on("text", onText);
         objSrv.on("photo", onPhoto);
@@ -71,9 +74,17 @@ objBot.api
         }
 
 
+        function onEnterChat(bot) {
+            response("onEnterChat:", bot);
+        }
+
+        function onLeftChat(bot) {
+            response("onLeftChat:", bot);
+        }
+
+
         function onText(bot) {
             response("onText:", bot);
-
         }
 
         function onPhoto(bot) {
@@ -112,6 +123,7 @@ objBot.api
 
         function response(who, bot, params) {
             console.log(who);
+            console.log(bot);
             console.log(params);
 
             bot.data.text = bot;

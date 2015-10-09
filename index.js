@@ -1258,6 +1258,9 @@ function createServer(botFather, params, callback) {
             }
 
             switch(msgType) {
+                case "enterChat":
+                case "leftChat":
+
                 case "text":
                 case "photo":
                 case "audio":
@@ -1514,6 +1517,10 @@ function createPolling(botFather, params, callback) {
             }
 
             switch(msgType) {
+                case "enterChat":
+                case "leftChat":
+
+                case "user":
                 case "text":
                 case "photo":
                 case "audio":
@@ -1615,6 +1622,9 @@ function parseCmd(text) {
 
 function getTypeMsg(m) {
     var t;
+
+    if(hasOwnProperty(m, "new_chat_participant")) return "enterChat";
+    if(hasOwnProperty(m, "left_chat_participant")) return "leftChat";
 
     hasOwnProperty(m, t = "text") ||
     hasOwnProperty(m, t = "photo") ||
@@ -1797,9 +1807,13 @@ function createSrvBot(bot, onMsg) {
                         fltRe.m[rule] = true;
                         fltRe.s.push(rule);
                     }
-                }
+                } else
+                    throw new Error("Unknown rule: " + rule);
 
                 break;
+
+            default:
+                throw new Error("Unknown rule: " + rule);
         }
 
         return result;
