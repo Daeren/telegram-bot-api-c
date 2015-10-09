@@ -17,7 +17,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"text": "Hi", "chat_id":
 var rBot    = require("telegram-bot-api-c");
 var objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-//--------]>
+//----[Server]----}>
 
 var srv = objBot.polling(onNotFound);
 
@@ -44,7 +44,7 @@ function onTextRegExp(bot, reParams) { }
 function onText(bot) { }
 function onPhotoOrDoc(bot) { }
 
-//--------]>
+//----[API]----}>
 
 var api     = objBot.api,
     buttons = objBot.keyboard;
