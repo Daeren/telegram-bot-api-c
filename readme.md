@@ -35,11 +35,11 @@ srv
 
 //----)>
 
-function onNotFound(bot, cmdParams) { }
-function onCmdNotFound(bot, cmdParams) { }
+function onNotFound(bot, params) { }
+function onCmdNotFound(bot, params) { }
 
-function onCmdStart(bot, cmdParams) { }
-function onTextRegExp(bot, reParams) { }
+function onCmdStart(bot, params) { }
+function onTextRegExp(bot, params) { }
 
 function onText(bot) { }
 function onPhotoOrDoc(bot) { }
@@ -65,7 +65,7 @@ objBot.send("chatId", data);
 data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 
 api.sendMessage(data(), function() { });
-api.sendMessage(data()).then(data).then(x => {
+api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
     x.reply_markup = buttons.hOxOnce;
 
@@ -376,6 +376,7 @@ function cbMsg(bot) {
 | location      | string, json                          |                                           |
 | chatAction    | string                                |                                           |
 
+
 #### Methods: polling
 
 | Name          | Arguments                             | Note                                      |
@@ -398,6 +399,24 @@ function cbMsg(bot) {
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
 | on            | type, callback(data, params)          |                                           |
 | off           | type, callback                        |                                           |
+
+
+#### Events: on
+
+| Name          | Args                                  | Note                                      |
+|---------------|---------------------------------------|-------------------------------------------|
+|               | -                                     |                                           |
+| text          | data                                  |                                           |
+| photo         | data                                  |                                           |
+| audio         | data                                  |                                           |
+| document      | data                                  |                                           |
+| sticker       | data                                  |                                           |
+| video         | data                                  |                                           |
+| voice         | data                                  |                                           |
+| contact       | data                                  |                                           |
+| location      | data                                  |                                           |
+| /[name]       | data, params                          | CMD                                       |
+| <regexp>      | data, params                          |                                           |
 
 
 ## License
