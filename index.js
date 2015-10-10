@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------
+//-----------------------------------------------------
 //
 // Author: Daeren
 // Site: 666.io
@@ -1549,9 +1549,9 @@ function createPolling(botFather, params, callback) {
                 case "contact":
                 case "location":
                     ctxParam = msg[msgType];
-                    callEvent(evName, ctxParam);
 
-                    break;
+                    if(callEvent(evName, ctxParam))
+                        break;
 
                 default:
                     if(objBot.onMsg)
@@ -1641,10 +1641,6 @@ function parseCmd(text) {
 }
 
 function getEventNameByTypeMsg(type) {
-
-    console.log("-------------");
-    console.log(type);
-
     switch(type) {
         case "new_chat_participant":    return "enterChat";
         case "left_chat_participant":   return "leftChat";
@@ -1832,7 +1828,7 @@ function createSrvBot(bot, onMsg) {
                 evOn(e, func);
             });
 
-            return;
+            return result;
         }
 
         var fltEv   = result.filters.ev,
