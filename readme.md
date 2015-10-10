@@ -36,7 +36,7 @@ srv
 
 //----)>
 
-function onNotFound(bot, params) { }
+function onNotFound(bot, cmd) { }
 function onCmdNotFound(bot, params) { }
 
 function onCmdStart(bot, params) { }
@@ -56,7 +56,7 @@ var data;
 //----)>
 
 data = [
-    {"text": params},
+    {"text": ["H", "i"]},
     {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
 ];
 
