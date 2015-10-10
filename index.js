@@ -49,7 +49,7 @@ var gApiMethods     = [
     "setWebhook"
 ];
 
-var gMethodsMap     = {
+var gApiMethodsMap  = {
     "text":         "sendMessage",
     "photo":        "sendPhoto",
     "audio":        "sendAudio",
@@ -61,7 +61,7 @@ var gMethodsMap     = {
     "chatAction":   "sendChatAction"
 };
 
-var gMMTypesKeys    = Object.keys(gMethodsMap),
+var gMMTypesKeys    = Object.keys(gApiMethodsMap),
     gMMTypesLen     = gMMTypesKeys.length;
 
 var gKeyboard       = compileKeyboard({
@@ -249,6 +249,11 @@ function main(token) {
     //-----------[L1]----------}>
 
     function callAPI(method, data, callback) {
+        if(!token || typeof(token) !== "string")
+            throw new Error("Check the Access Token: " + token);
+
+        //-------------------------]>
+
         var req,
             body, bodyBegin, bodyEnd,
             file, fileName, fileId;
@@ -734,7 +739,7 @@ function main(token) {
                 break;
 
             default:
-                throw new Error("API method not found!")
+                throw new Error("API method not found!");
         }
 
         //-------------------------]>
@@ -748,42 +753,43 @@ function main(token) {
 
         //-------------------------]>
 
-        if(body)
-            body += genBodyField("end"); else bodyEnd += genBodyField("end");
+        req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
 
         //-------------------------]>
 
-        req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
-
         if(body) {
+            body += genBodyField("end");
             req.end(body);
-        } else {
-            req.write(bodyBegin);
 
-            if(typeof(file) === "string") {
-                file = rFs.createReadStream(file);
-
-                file.on("open", function() {
-                    file.pipe(req, gPipeOptions);
-                })
-            }
-            else {
-                if(file.closed) {
-                    req.end(bodyEnd);
-                    return;
-                }
-
-                file.pipe(req, gPipeOptions);
-            }
-
-            file
-                .on("error", function(error) {
-                    req.end(bodyEnd);
-                })
-                .on("end", function() {
-                    req.end(bodyEnd);
-                });
+            return;
         }
+
+        bodyEnd += genBodyField("end");
+
+        req.write(bodyBegin);
+
+        if(typeof(file) === "string") {
+            file = rFs.createReadStream(file);
+
+            file.on("open", function() {
+                file.pipe(req, gPipeOptions);
+            });
+        } else {
+            if(file.closed) {
+                req.end(bodyEnd);
+                return;
+            }
+
+            file.pipe(req, gPipeOptions);
+        }
+
+        file
+            .on("error", function(error) {
+                req.end(bodyEnd);
+            })
+            .on("end", function() {
+                req.end(bodyEnd);
+            });
     }
 
     function callAPIJson(method, data, callback) {
@@ -853,7 +859,7 @@ function main(token) {
                 cmdData = d[cmdName];
                 cmdData = prepareDataForSendApi(id, cmdName, cmdData, d);
 
-                callAPI(gMethodsMap[cmdName], cmdData, cb);
+                callAPI(gApiMethodsMap[cmdName], cmdData, cb);
             }
 
             function getName(d) {
@@ -1635,14 +1641,18 @@ function parseCmd(text) {
 }
 
 function getEventNameByTypeMsg(type) {
-    switch(type) {
-        case "new_chat_participant": return "enterChat";
-        case "left_chat_participant": return "leftChat";
 
-        case "new_chat_title": return "chatTitle";
-        case "new_chat_photo": return "chatNewPhoto";
-        case "delete_chat_photo": return "chatDeletePhoto";
-        case "group_chat_created": return "chatCreated";
+    console.log("-------------");
+    console.log(type);
+
+    switch(type) {
+        case "new_chat_participant":    return "enterChat";
+        case "left_chat_participant":   return "leftChat";
+
+        case "new_chat_title":          return "chatTitle";
+        case "new_chat_photo":          return "chatNewPhoto";
+        case "delete_chat_photo":       return "chatDeletePhoto";
+        case "group_chat_created":      return "chatCreated";
 
         default:
             return type;

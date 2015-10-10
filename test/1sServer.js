@@ -22,10 +22,11 @@ var objOptions  = {
     "interval": 1
 };
 
-objBot.api
+objBot
+    .api
     .setWebhook()
-    .then(x => {
 
+    .then(x => {
         objSrv = objBot.polling(objOptions, onNotFound);
 
         //---------]>
@@ -167,7 +168,8 @@ objBot.api
             bot.data.text = bot;
             bot.send();
         }
-    }, console.error);
+    })
+    .catch(console.error);
 
 
 
