@@ -1149,7 +1149,7 @@ function createServer(botFather, params, callback) {
         srv = rHttps.createServer(options, cbServer);
     }
 
-    srv.listen(params.port, params.host, cbListen);
+    srv.listen(params.port, params.address || params.host, cbListen);
 
     //-----------------]>
 
@@ -1192,8 +1192,7 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var cmdParams,
-                data;
+            var data;
 
             var objBot      = srvBots && srvBots[req.url] || srvBotDefault,
                 cbLogger    = objBot.cbLogger;
@@ -1224,39 +1223,44 @@ function createServer(botFather, params, callback) {
             var botFilters  = objBot.filters,
 
                 ctx         = createCtx(),
-                msgType     = getTypeMsg(msg);
+                cmdParam,
+
+                msgType     = getTypeMsg(msg),
+                evName      = getEventNameByTypeMsg(msgType);
 
             //------------]>
 
-            switch(msgType) {
+            switch(evName) {
                 case "text":
                     var rule;
 
                     //-----[CMD]----}>
 
-                    cmdParams = parseCmd(msg.text);
+                    cmdParam = parseCmd(msg.text);
 
-                    if(cmdParams) {
-                        rule = "/" + cmdParams.name;
+                    if(cmdParam) {
+                        rule = "/" + cmdParam.name;
 
-                        if(callEvent(rule, cmdParams) || callEvent("/", cmdParams))
+                        if(callEvent(rule, cmdParam) || callEvent("/", cmdParam))
                             return;
                     }
 
                     //-----[RE]----}>
 
                     if(botFilters.regexp.s.length) {
+                        var reParams;
+
                         rule = undefined;
 
                         for(var re, i = 0, len = botFilters.regexp.s.length; !rule && i < len; i++) {
                             re = botFilters.regexp.s[i];
 
-                            if(msg.text.match(re))
+                            if(reParams = msg.text.match(re))
                                 rule = re;
                         }
 
                         if(rule) {
-                            botFilters.ev.emit(re, ctx);
+                            botFilters.ev.emit(re, ctx, reParams);
                             return;
                         }
                     }
@@ -1264,7 +1268,7 @@ function createServer(botFather, params, callback) {
                     break;
             }
 
-            switch(msgType) {
+            switch(evName) {
                 case "enterChat":
                 case "leftChat":
 
@@ -1273,6 +1277,7 @@ function createServer(botFather, params, callback) {
                 case "chatDeletePhoto":
                 case "chatCreated":
 
+                case "user":
                 case "text":
                 case "photo":
                 case "audio":
@@ -1282,12 +1287,12 @@ function createServer(botFather, params, callback) {
                 case "voice":
                 case "contact":
                 case "location":
-                    callEvent(msgType);
-                    break;
+                    if(callEvent(evName, msg[msgType]))
+                        break;
 
                 default:
                     if(objBot.onMsg)
-                        objBot.onMsg(ctx, cmdParams);
+                        objBot.onMsg(ctx, cmdParam);
             }
 
             //------------]>
@@ -1484,7 +1489,7 @@ function createPolling(botFather, params, callback) {
             var botFilters  = objBot.filters,
 
                 ctx         = createCtx(),
-                ctxParam,
+                cmdParam,
 
                 msgType     = getTypeMsg(msg),
                 evName      = getEventNameByTypeMsg(msgType);
@@ -1497,12 +1502,12 @@ function createPolling(botFather, params, callback) {
 
                     //-----[CMD]----}>
 
-                    ctxParam = parseCmd(msg.text);
+                    cmdParam = parseCmd(msg.text);
 
-                    if(ctxParam) {
-                        rule = "/" + ctxParam.name;
+                    if(cmdParam) {
+                        rule = "/" + cmdParam.name;
 
-                        if(callEvent(rule, ctxParam) || callEvent("/", ctxParam))
+                        if(callEvent(rule, cmdParam) || callEvent("/", cmdParam))
                             return;
                     }
 
@@ -1548,14 +1553,12 @@ function createPolling(botFather, params, callback) {
                 case "voice":
                 case "contact":
                 case "location":
-                    ctxParam = msg[msgType];
-
-                    if(callEvent(evName, ctxParam))
+                    if(callEvent(evName, msg[msgType]))
                         break;
 
                 default:
                     if(objBot.onMsg)
-                        objBot.onMsg(ctx, ctxParam);
+                        objBot.onMsg(ctx, cmdParam);
             }
 
             //------------]>
