@@ -1876,7 +1876,7 @@ function createSrvBot(bot, onMsg) {
 
             return result;
         }
-        
+
         //------]>
 
         var filters = result.filters;
