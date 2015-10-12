@@ -1149,7 +1149,7 @@ function createServer(botFather, params, callback) {
         srv = rHttps.createServer(options, cbServer);
     }
 
-    srv.listen(params.port, params.address || params.host, cbListen);
+    srv.listen(params.port, params.host, cbListen);
 
     //-----------------]>
 
@@ -1298,17 +1298,17 @@ function createServer(botFather, params, callback) {
             //------------]>
 
             function createCtx() {
-                var ctx = Object.create(objBot.ctx);
+                var result = Object.create(objBot.ctx);
 
-                ctx.from = ctx.cid = msg.chat.id;
-                ctx.mid = msg.message_id;
+                result.from = result.cid = msg.chat.id;
+                result.mid = msg.message_id;
 
-                ctx.update_id = upId;
-                ctx.message = msg;
+                result.update_id = upId;
+                result.message = msg;
 
-                ctx.data = {};
+                result.data = {};
 
-                return ctx;
+                return result;
             }
 
             function callEvent(type, params) {
@@ -1365,9 +1365,11 @@ function createServer(botFather, params, callback) {
         srvBots[path] = bot = createSrvBot(bot, callback);
 
         if(params.host) {
-            var url = params.host + ":" + params.port + path;
+            var url = (params.address || (params.host + ":" + params.port)) + path;
 
-            bot.bot.api
+            bot
+                .bot
+                .api
                 .setWebhook({"url": url, "certificate": params.selfSigned})
 
                 .then(JSON.parse)
@@ -1564,17 +1566,17 @@ function createPolling(botFather, params, callback) {
             //------------]>
 
             function createCtx() {
-                var ctx = Object.create(objBot.ctx);
+                var result = Object.create(objBot.ctx);
 
-                ctx.from = ctx.cid = msg.chat.id;
-                ctx.mid = msg.message_id;
+                result.from = result.cid = msg.chat.id;
+                result.mid = msg.message_id;
 
-                ctx.update_id = upId;
-                ctx.message = msg;
+                result.update_id = upId;
+                result.message = msg;
 
-                ctx.data = {};
+                result.data = {};
 
-                return ctx;
+                return result;
             }
 
             function callEvent(type, params) {
@@ -1775,7 +1777,9 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
 
 function createSrvBot(bot, onMsg) {
     var result,
-        ctx = Object.create(bot);
+
+        ctx = Object.create(bot),
+        ev  = new rEvents();
 
     //--------------]>
 
@@ -1801,10 +1805,8 @@ function createSrvBot(bot, onMsg) {
 
         "ctx":          ctx,
         "filters":      {
-            "ev":           new rEvents(),
-
-            "regexp":       {"m": {}, "s": []},
-            "funcs":        {}
+            "ev":           ev,
+            "regexp":       {"m": {}, "s": []}
         },
 
         "on":           evOn,
@@ -1818,6 +1820,8 @@ function createSrvBot(bot, onMsg) {
         "logger":       srvLogger,
         "analytics":    srvAnalytics
     };
+
+    ev.setMaxListeners(100);
 
     //-----------]>
 
@@ -1833,6 +1837,8 @@ function createSrvBot(bot, onMsg) {
 
             return result;
         }
+
+        //------]>
 
         var fltEv   = result.filters.ev,
             fltRe   = result.filters.regexp;
@@ -1868,11 +1874,42 @@ function createSrvBot(bot, onMsg) {
                 evOff(e, func);
             });
 
-            return;
+            return result;
+        }
+        
+        //------]>
+
+        var filters = result.filters;
+
+        var fltEv   = filters.ev,
+            fltRe   = filters.regexp;
+
+        //------]>
+
+        if(arguments.length && !fltEv.listenerCount(rule))
+            return result;
+
+        //------]>
+
+        if(arguments.length <= 1) {
+            if(arguments.length) {
+                switch(typeof(rule)) {
+                    case "object":
+                        if(rule instanceof RegExp)
+                            removeFltRegExp(rule);
+
+                        break;
+                }
+            } else {
+                filters.regexp = {"m": {}, "s": []};
+            }
+
+            ev.removeAllListeners(rule);
+
+            return result;
         }
 
-        var fltEv   = result.filters.ev,
-            fltRe   = result.filters.regexp;
+        //------]>
 
         switch(typeof(rule)) {
             case "string":
@@ -1883,16 +1920,27 @@ function createSrvBot(bot, onMsg) {
                 if(rule instanceof RegExp) {
                     fltEv.removeListener(rule, func);
 
-                    if(!fltEv.listenerCount(rule)) {
-                        delete fltRe.m[rule];
-                        fltRe.s.splice(fltRe.s.indexOf(rule), 1);
-                    }
+                    if(!fltEv.listenerCount(rule))
+                        removeFltRegExp(rule);
                 }
 
                 break;
         }
 
+        //------]>
+
         return result;
+
+        //------]>
+
+        function removeFltRegExp(id) {
+            delete fltRe.m[id];
+
+            id = fltRe.s.indexOf(id);
+
+            if(id >= 0)
+                fltRe.s.splice(id, 1);
+        }
     }
 
     function srvLogger(callback) {

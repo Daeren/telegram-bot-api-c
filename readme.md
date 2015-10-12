@@ -393,7 +393,7 @@ function cbMsg(bot) {
 | logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
 | on            | type, callback(data, params)          |                                           |
-| off           | type, callback                        |                                           |
+| off           | [type][, callback]                    |                                           |
 
 #### Methods: server
 
@@ -404,7 +404,7 @@ function cbMsg(bot) {
 | logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
 | on            | type, callback(data, params)          |                                           |
-| off           | type, callback                        |                                           |
+| off           | [type][, callback]                    |                                           |
 
 
 #### Events: on
@@ -440,7 +440,7 @@ function cbMsg(bot) {
 MIT
 
 ----------------------------------
-[@ Daeren Torn][1]
+[@ Daeren][1]
 [@ Telegram][2]
 
 
