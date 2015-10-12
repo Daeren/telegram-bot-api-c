@@ -27,6 +27,10 @@ objBot
     .setWebhook()
 
     .then(x => {
+        var reText = /^id\s+(\d+)/i;
+
+        //---------]>
+
         objSrv = objBot.polling(objOptions, onNotFound);
 
         //---------]>
@@ -34,7 +38,10 @@ objBot
         objSrv.on("/start", onCmdStart);
         objSrv.on("/", onCmdNotFound);
 
-        objSrv.on(/^id\s+(\d+)/i, onTextRegExp);
+        objSrv.on(reText, onTextRegExp);
+        //objSrv.off(reText, onTextRegExp);
+        //objSrv.on(/^id\s+(\d+)/i, onTextRegExp);
+        //objSrv.off(/^id\s+(\d+)/i, onTextRegExp);
 
         //objSrv.on(["photo", "document"], onDocument);
 

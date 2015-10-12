@@ -1896,7 +1896,7 @@ function createSrvBot(bot, onMsg) {
                 switch(typeof(rule)) {
                     case "object":
                         if(rule instanceof RegExp)
-                            removeFltRegExp(rule);
+                            removeFltRegExp(getIdFltRegExp(rule));
 
                         break;
                 }
@@ -1918,14 +1918,20 @@ function createSrvBot(bot, onMsg) {
 
             case "object":
                 if(rule instanceof RegExp) {
-                    fltEv.removeListener(rule, func);
+                    var id = getIdFltRegExp(rule);
 
-                    if(!fltEv.listenerCount(rule))
-                        removeFltRegExp(rule);
+                    if(id >= 0) {
+                        fltEv.removeListener(rule, func);
+
+                        if(!fltEv.listenerCount(rule))
+                            removeFltRegExp(id);
+                    }
                 }
 
                 break;
         }
+
+        console.log(fltRe);
 
         //------]>
 
@@ -1933,13 +1939,19 @@ function createSrvBot(bot, onMsg) {
 
         //------]>
 
+        function getIdFltRegExp(id) {
+            return fltRe.s.indexOf(id);
+        }
+
         function removeFltRegExp(id) {
-            delete fltRe.m[id];
-
-            id = fltRe.s.indexOf(id);
-
-            if(id >= 0)
+            if(id >= 0) {
+                delete fltRe.m[fltRe.s[id]];
                 fltRe.s.splice(id, 1);
+
+                return true;
+            }
+
+            return false;
         }
     }
 
