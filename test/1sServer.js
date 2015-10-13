@@ -22,6 +22,8 @@ var objOptions  = {
     "interval": 1
 };
 
+//-----------------------]>
+
 objBot
     .api
     .setWebhook()

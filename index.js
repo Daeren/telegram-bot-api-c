@@ -136,39 +136,28 @@ function main(token) {
 
     //-------------------------]>
 
-    function request(api, callback) {
-        if(!api)
-            throw new Error("`api` was not specified in `request`");
+    function request(method, callback) {
+        if(!method)
+            throw new Error("`method` was not specified in `request`");
 
-        gReqOptions.path = "/bot" + token + "/" + api;
+        gReqOptions.path = "/bot" + token + "/" + method;
 
         //--------------]>
 
-        api = rHttps.request(gReqOptions, cbRequest);
+        var req = rHttps.request(gReqOptions, cbRequest);
 
         if(typeof(callback) === "function") {
-            api.on("error", callback);
+            req.on("error", callback);
         }
 
         //--------------]>
 
-        return api;
+        return req;
 
         //--------------]>
 
         function cbRequest(response) {
-            var error,
-                firstChunk, chunks;
-
-            if(response.statusCode === 403)
-                error = new Error("Check the Access Token: " + token);
-
-            if(typeof(callback) !== "function") {
-                if(error)
-                    throw error;
-
-                return;
-            }
+            var firstChunk, chunks;
 
             //---------]>
 
@@ -182,7 +171,7 @@ function main(token) {
             });
 
             response.on("end", function() {
-                callback(error || null, chunks ? Buffer.concat(chunks) : firstChunk, response);
+                callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
             });
         }
     }
@@ -250,7 +239,7 @@ function main(token) {
 
     function callAPI(method, data, callback) {
         if(!token || typeof(token) !== "string")
-            throw new Error("Check the Access Token: " + token);
+            throw new Error("callAPI | Forbidden. Check the Access Token: " + token + " [" + method + "]");
 
         //-------------------------]>
 
@@ -1371,7 +1360,7 @@ function createServer(botFather, params, callback) {
                         return;
 
                     console.log("Webhook: %s", url);
-                    console.log(data.result);
+                    console.log(data.description || data.result);
                 }, console.error);
         } else {
             console.log("[!] Warning | `address` and `host` not specified, Auto-Webhook not working");
