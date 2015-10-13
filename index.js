@@ -795,6 +795,8 @@ function main(token) {
     function callAPIJson(method, data, callback) {
         return callAPI(method, data, cbCallAPI);
 
+        //-----------]>
+
         function cbCallAPI(error, result, response) {
             if(result) {
                 try {
@@ -993,6 +995,12 @@ function main(token) {
 
         gApiMethods.forEach(add);
 
+        //--------------]>
+
+        return result;
+
+        //--------------]>
+
         function add(method) {
             result[method] = function(data, callback) {
                 var defer;
@@ -1017,8 +1025,6 @@ function main(token) {
                 }
             };
         }
-
-        return result;
     }
 
     function getReadStreamByUrl(url, type, method, data, callback) {
@@ -1082,12 +1088,15 @@ function createServer(botFather, params, callback) {
     }
 
     if(!params) {
-        params = {"http": true};
+        params = {
+            "host": "127.0.0.1",
+            "http": true
+        };
     }
 
     params.port = params.port || 88;
 
-    //----------)>
+    //-----------------]>
 
     var srv,
         srvBots,
@@ -1199,6 +1208,8 @@ function createServer(botFather, params, callback) {
 
             data = chunks ? Buffer.concat(chunks) : firstChunk;
 
+            //--------]>
+
             if(cbLogger)
                 cbLogger(null, data);
 
@@ -1268,31 +1279,9 @@ function createServer(botFather, params, callback) {
                     break;
             }
 
-            switch(evName) {
-                case "enterChat":
-                case "leftChat":
-
-                case "chatTitle":
-                case "chatNewPhoto":
-                case "chatDeletePhoto":
-                case "chatCreated":
-
-                case "user":
-                case "text":
-                case "photo":
-                case "audio":
-                case "document":
-                case "sticker":
-                case "video":
-                case "voice":
-                case "contact":
-                case "location":
-                    if(callEvent(evName, msg[msgType]))
-                        break;
-
-                default:
-                    if(objBot.onMsg)
-                        objBot.onMsg(ctx, cmdParam);
+            if(!evName || !callEvent(evName, msg[msgType])) {
+                if(objBot.onMsg)
+                    objBot.onMsg(ctx, cmdParam);
             }
 
             //------------]>
@@ -1336,6 +1325,8 @@ function createServer(botFather, params, callback) {
         console.log("> Date: %s", getTime());
         console.log("\n-----------------------------------------\n");
 
+        //-------]>
+
         process.on("SIGINT", function() {
             console.log("\n-----------------------------------------\n");
             console.log("> SIGINT");
@@ -1344,6 +1335,8 @@ function createServer(botFather, params, callback) {
 
             process.exit();
         });
+
+        //-------]>
 
         function getTime() {
             return new Date().toISOString().replace(/T/, " ").replace(/\..+/, "");
@@ -1364,7 +1357,7 @@ function createServer(botFather, params, callback) {
 
         srvBots[path] = bot = createSrvBot(bot, callback);
 
-        if(params.host) {
+        if(params.address || params.host) {
             var url = (params.address || (params.host + ":" + params.port)) + path;
 
             bot
@@ -1381,7 +1374,7 @@ function createServer(botFather, params, callback) {
                     console.log(data.result);
                 }, console.error);
         } else {
-            console.log("[!] Warning | `host` not specified, Auto-Webhook not working");
+            console.log("[!] Warning | `address` and `host` not specified, Auto-Webhook not working");
         }
 
         return bot;
@@ -1536,31 +1529,9 @@ function createPolling(botFather, params, callback) {
                     break;
             }
 
-            switch(evName) {
-                case "enterChat":
-                case "leftChat":
-
-                case "chatTitle":
-                case "chatNewPhoto":
-                case "chatDeletePhoto":
-                case "chatCreated":
-
-                case "user":
-                case "text":
-                case "photo":
-                case "audio":
-                case "document":
-                case "sticker":
-                case "video":
-                case "voice":
-                case "contact":
-                case "location":
-                    if(callEvent(evName, msg[msgType]))
-                        break;
-
-                default:
-                    if(objBot.onMsg)
-                        objBot.onMsg(ctx, cmdParam);
+            if(!evName || !callEvent(evName, msg[msgType])) {
+                if(objBot.onMsg)
+                    objBot.onMsg(ctx, cmdParam);
             }
 
             //------------]>
@@ -1931,8 +1902,6 @@ function createSrvBot(bot, onMsg) {
                 break;
         }
 
-        console.log(fltRe);
-
         //------]>
 
         return result;
@@ -2045,13 +2014,17 @@ function forEachAsync(data, iter, cbEnd) {
     var i   = 0,
         len = data.length;
 
+    //---------]>
+
     run();
 
+    //---------]>
+
     function run() {
-        iter(cbIter, data[i], i);
+        iter(cbNext, data[i], i);
     }
 
-    function cbIter(error, result) {
+    function cbNext(error, result) {
         if(error) {
             if(cbEnd) cbEnd(error);
             return;
