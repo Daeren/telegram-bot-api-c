@@ -81,6 +81,7 @@ api.sendMessage(data()).then(data).then(function(x) {
 
 [Telegram Bot API][3]
 
+* CLI: +
 * Stream: +
 * Server: +
 * LongPolling: +
@@ -89,6 +90,17 @@ api.sendMessage(data()).then(data).then(function(x) {
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 
+
+#### CLI
+
+```js
+> node telegram-bot-api-c TOKEN METHOD -bool --name=val
+
+> node telegram-bot-api-c X sendMessage --chat_id=0 --text="Hi" -disable_web_page_preview
+
+> node telegram-bot-api-c X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
+> node telegram-bot-api-c X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
+```
 
 #### Download
 
