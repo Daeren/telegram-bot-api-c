@@ -5,12 +5,13 @@
 
     "homepage": "http://666.io",
     "keywords": [
-        "es6",
         "node",
         "telegram bot",
+        "telegram bot cli",
         "telegram",
         "bot",
         "api",
+        "cli",
         "bottality"
     ],
 
