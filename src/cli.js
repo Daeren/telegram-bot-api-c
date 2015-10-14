@@ -17,17 +17,45 @@ var reToken = /^(\d+:\w+)/;
 
 var token,
     method,
-    params = {};
+    params;
 
 //-----------------]>
 
 process.argv.forEach(parseArgv);
 
+if(!params) {
+    var isEnded = false;
+
+    var bufEnd = new Buffer("\r\n"),
+        chunks = [];
+
+    var onEnd = function() {
+        params = Buffer.concat(chunks);
+        params = JSON.parse(params);
+
+        chunks = [];
+
+        call();
+    };
+
+    //----------]>
+
+    process.stdin.on("data", function(chunk) {
+        if(bufEnd.equals(chunk))
+            onEnd(); else chunks.push(chunk);
+    });
+
+    process.stdin.on("end", onEnd);
+} else
+    call();
+
 //-----------------]>
 
-rBot(token).call(method, params, function(error, result) {
-    process.stdout.write(error || result);
-});
+function call() {
+    rBot(token).call(method, params, function(error, result) {
+        process.stdout.write(error || result);
+    });
+}
 
 //-----------------------------------------------------
 
@@ -48,6 +76,8 @@ function parseArgv(val, index, array) {
             break;
 
         default:
+            params = params || {};
+
             var name = val.match(/^--(\w+)=/);
 
             if(name) {
