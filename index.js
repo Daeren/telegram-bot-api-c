@@ -105,18 +105,10 @@ if(!module.parent) {
 
     process.argv.forEach(parseArgv);
 
-    if(!token)
-        throw new Error("Check the Access Token: " + token + " [" + method + "]");
-
     //-----------------]>
 
     main(token).call(method, params, function(error, result) {
-        if(error) {
-            console.log(error);
-            return;
-        }
-
-        process.stdout.write(result);
+        process.stdout.write(error || result);
     });
 } else
     module.exports = main;
@@ -1388,10 +1380,8 @@ function createServer(botFather, params, callback) {
     function addBot(bot, path, callback) {
         srvBots = srvBots || {};
 
-        //-------------]>
-
         if(hasOwnProperty(srvBots, path))
-            return srvBots[path];
+            throw new Error("Path '" + path + "' has already been used");
 
         //-------------]>
 
@@ -1442,8 +1432,6 @@ function createPolling(botFather, params, callback) {
         isStopped   = false,
         tmPolling;
 
-    objBot.stop = tmStop;
-
     //------)>
 
     if(params.firstLoad)
@@ -1451,7 +1439,14 @@ function createPolling(botFather, params, callback) {
 
     //----------------]>
 
-    return objBot;
+    return (function() {
+        var result = Object.create(objBot);
+
+        result.start = tmStart;
+        result.stop = tmStop;
+
+        return result;
+    })();
 
     //----------------]>
 
@@ -1465,6 +1460,8 @@ function createPolling(botFather, params, callback) {
     function load() {
         api.getUpdates(params, onParseUpdates);
     }
+
+    //-------)>
 
     function onParseUpdates(error, data) {
         if(objBot.cbLogger)
@@ -1489,7 +1486,7 @@ function createPolling(botFather, params, callback) {
     function onLoadSuccess(data) {
         if(!data.ok) {
             if(data.error_code === 409) {
-                api.setWebhook(function() {
+                api.setWebhook(null, function() {
                     load();
                 });
             }
@@ -1613,9 +1610,22 @@ function createPolling(botFather, params, callback) {
         }
     }
 
+    //----------]>
+
+    function tmStart() {
+        if(isStopped) {
+            isStopped = false;
+            runTimer();
+        }
+
+        return objBot;
+    }
+
     function tmStop() {
         isStopped = true;
         clearTimeout(tmPolling);
+
+        return objBot;
     }
 }
 
@@ -2084,8 +2094,6 @@ function parseArgv(val, index, array) {
         method = val;
         return;
     }
-
-    console.log(index + ': ' + val);
 
     if((/^--/).test(val)) {
         var name = val.match(/^--(\w+)=/);

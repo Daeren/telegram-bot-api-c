@@ -400,26 +400,28 @@ function cbMsg(bot) {
 
 #### Methods: polling
 
-| Name          | Arguments                             | Note                                      |
+| Name          | Arguments                             | Return                                    |
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
-| stop          |                                       |                                           |
+| start         |                                       | this                                      |
+| stop          |                                       | this                                      |
 |               | -                                     |                                           |
-| logger        | callback(error, buffer)               |                                           |
-| analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
-| on            | type[, params], callback(data, params)|                                           |
-| off           | [type][, callback]                    |                                           |
+| logger        | callback(error, buffer)               | this                                      |
+| analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
+| on            | type[, params], callback(data, params)| this                                      |
+| off           | [type][, callback]                    | this                                      |
 
 #### Methods: server
 
-| Name          | Arguments                             | Note                                      |
+| Name          | Arguments                             | Return                                    |
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
-| bot           | bot, path, callback(json, request)    |                                           |
-| logger        | callback(error, buffer)               |                                           |
-| analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
-| on            | type[, params], callback(data, params)|                                           |
-| off           | [type][, callback]                    |                                           |
+| bot           | bot, path, callback(json, request)    | a new instance                            |
+|               | -                                     |                                           |
+| logger        | callback(error, buffer)               | this                                      |
+| analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
+| on            | type[, params], callback(data, params)| this                                      |
+| off           | [type][, callback]                    | this                                      |
 
 
 #### Events: on

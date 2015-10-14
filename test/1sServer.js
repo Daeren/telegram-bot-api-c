@@ -26,12 +26,18 @@ var reText = /^id\s+(\d+)/i;
 
 //---------]>
 
-objSrv = objBot.polling(objOptions);
+objBot
+    .api
+    .setWebhook({"url": "site.xx:88/myBot"})
 
-objSrv.on(/^empty/i, onTextRegExp);
-objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
-objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
-objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+    .then(x => {
+        objSrv = objBot.polling(objOptions);
+
+        objSrv.on(/^empty/i, onTextRegExp);
+        objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
+        objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
+        objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+    });
 
 function onTextRegExp(bot, reParams) {
     response("onTextRegExp:", bot, reParams);
