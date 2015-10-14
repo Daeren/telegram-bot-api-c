@@ -32,42 +32,40 @@ rBot(token).call(method, params, function(error, result) {
 //-----------------------------------------------------
 
 function parseArgv(val, index, array) {
-    if(!token && index <= 2) {
-        val = val.match(reToken);
+    switch(index) {
+        case 0:
+        case 1:
+            break;
 
-        if(val)
-            token = val[0];
+        case 2:
+            if(val.match(reToken))
+                token = val;
 
-        return;
-    }
+            break;
 
-    if(!method) {
-        method = val;
-        return;
-    }
+        case 3:
+            method = val;
+            break;
 
-    if((/^--/).test(val)) {
-        var name = val.match(/^--(\w+)=/);
-        name = name && name[1];
+        default:
+            var name = val.match(/^--(\w+)=/);
 
-        if(!name)
-            return;
+            if(name) {
+                name = name && name[1];
 
-        val = val.match(new RegExp("^--" + name + "\\=([\\s\\S]+)"));
-        val = val && val[1];
+                val = val.match(new RegExp("^--" + name + "\\=([\\s\\S]+)"));
+                val = val && val[1];
 
-        params[name] = val;
+                params[name] = val;
 
-        return;
-    }
+                break;
+            }
 
-    if((/^-/).test(val)) {
-        var name = val.match(/^-(\w+)/);
-        name = name && name[1];
+            name = val.match(/^-(\w+)/);
 
-        if(!name)
-            return;
-
-        params[name] = true;
+            if(name) {
+                name = name && name[1];
+                params[name] = true;
+            }
     }
 }
