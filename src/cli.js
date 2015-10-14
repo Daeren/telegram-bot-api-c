@@ -30,6 +30,9 @@ if(!params) {
         chunks = [];
 
     var onEnd = function() {
+        if(!chunks.length)
+            return;
+
         params = Buffer.concat(chunks);
         params = JSON.parse(params);
 
