@@ -1,5 +1,5 @@
 ```
-npm install telegram-bot-api-c
+npm -g install telegram-bot-api-c
 git clone https://github.com/Daeren/telegram-bot-api-c.git
 ```
 
@@ -94,12 +94,15 @@ api.sendMessage(data()).then(data).then(function(x) {
 #### CLI
 
 ```js
-> node telegram-bot-api-c TOKEN METHOD -bool --name=val
+> tg-api TOKEN METHOD -bool --key=val
+> node telegram-bot-api-c TOKEN METHOD -bool --key=val
 
-> node telegram-bot-api-c X sendMessage --chat_id=0 --text="Hi" -disable_web_page_preview
+...
 
-> node telegram-bot-api-c X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
-> node telegram-bot-api-c X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
+> tg-api X sendMessage --chat_id=0 --text="Hi" -disable_web_page_preview
+
+> tg-api X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
+> tg-api X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
 ```
 
 #### Download
