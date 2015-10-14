@@ -1151,14 +1151,14 @@ function createServer(botFather, params, callback) {
 
     //-----------------]>
 
-    srvBotDefault.__proto__ = srv;
+    return (function() {
+        var result = Object.create(srvBotDefault);
 
-    srv = Object.create(srvBotDefault);
-    srv.bot = addBot;
+        result.app = srv;
+        result.bot = addBot;
 
-    //-----------------]>
-
-    return srv;
+        return result;
+    })();
 
     //-----------------]>
 
@@ -1309,23 +1309,37 @@ function createServer(botFather, params, callback) {
         var host = srv.address().address;
         var port = srv.address().port;
 
-        console.log("\n-----------------------------------------\n");
-        console.log("> Server run: [%s://%s:%s]", params.http ? "http" : "https", host, port);
-        console.log("> Date: %s", getTime());
-        console.log("\n-----------------------------------------\n");
+        //-------]>
+
+        onAction(null, "START");
+
+        process.on("SIGINT", onAction);
+        process.on("uncaughtException", onAction);
 
         //-------]>
 
-        process.on("SIGINT", function() {
-            console.log("\n-----------------------------------------\n");
-            console.log("> SIGINT");
-            console.log("> Date: %s", getTime());
-            console.log("\n-----------------------------------------\n");
+        function onAction(error, evName) {
+            evName = evName || "STOP";
 
-            process.exit();
-        });
+            console.log("\n+---[%s]------------------------------------".slice(0, -1 * evName.length), evName);
+            console.log("|");
+            console.log("| Server: [%s]", getAddress());
+            console.log("| Date: %s", getTime());
+            console.log("+-----------------------------------------\n");
 
-        //-------]>
+            if(error) {
+                console.error(error.stack);
+            }
+
+            if(evName === "STOP")
+                process.exit();
+        }
+
+        //---)>
+
+        function getAddress() {
+            return (params.http ? "http" : "https") + "://" + (host || "*") + ":" + port;
+        }
 
         function getTime() {
             return new Date().toISOString().replace(/T/, " ").replace(/\..+/, "");
