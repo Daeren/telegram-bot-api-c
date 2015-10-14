@@ -30,7 +30,10 @@ srv
     .on("enterChat", onEnterChat)
     .on("text", onText)
     .on(["photo", "document"], onPhotoOrDoc)
-    
+
+    .on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp)
+    .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp)
+
     .on(/^id\s+(\d+)/i, onTextRegExp)
     .off(/^id\s+(\d+)/i, onTextRegExp);
 
@@ -392,7 +395,7 @@ function cbMsg(bot) {
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
-| on            | type, callback(data, params)          |                                           |
+| on            | type[, params], callback(data, params)|                                           |
 | off           | [type][, callback]                    |                                           |
 
 #### Methods: server
@@ -403,7 +406,7 @@ function cbMsg(bot) {
 | bot           | bot, path, callback(json, request)    |                                           |
 | logger        | callback(error, buffer)               |                                           |
 | analytics     | apiKey[, appName="Telegram Bot"]      |                                           |
-| on            | type, callback(data, params)          |                                           |
+| on            | type[, params], callback(data, params)|                                           |
 | off           | [type][, callback]                    |                                           |
 
 

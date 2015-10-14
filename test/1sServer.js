@@ -22,6 +22,42 @@ var objOptions  = {
     "interval": 1
 };
 
+var reText = /^id\s+(\d+)/i;
+
+//---------]>
+
+objSrv = objBot.polling(objOptions);
+
+objSrv.on(/^empty/i, onTextRegExp);
+objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
+objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
+objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+
+function onTextRegExp(bot, reParams) {
+    response("onTextRegExp:", bot, reParams);
+}
+
+function response(who, bot, params) {
+    console.log(who);
+    console.log("bot: ", bot);
+    console.log("params: ", params);
+
+    bot.data.text = bot;
+    bot.send();
+}
+
+
+
+
+
+
+return;
+
+
+
+
+
+
 //-----------------------]>
 
 objBot
@@ -35,12 +71,26 @@ objBot
 
         objSrv = objBot.polling(objOptions, onNotFound);
 
+
+        objSrv.on(reText, ["type", "id"], onTextRegExp);
+        objSrv.on(reText, ["type", "id"], onTextRegExp);
+        objSrv.on(reText, ["type", "id"], onTextRegExp);
+
+        objSrv.off(reText, ["type", "id"], onTextRegExp);
+
+        objSrv.on(reText, ["type", "id"], onTextRegExp);
+
+        return;
+
         //---------]>
 
         objSrv.on("/start", onCmdStart);
         objSrv.on("/", onCmdNotFound);
 
-        objSrv.on(reText, onTextRegExp);
+        objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
+        objSrv.on(/^(num)\s+(\d+)/i, ["type", "num"], onTextRegExp);
+
+        //objSrv.on(reText, onTextRegExp);
         //objSrv.off(reText, onTextRegExp);
         //objSrv.on(/^id\s+(\d+)/i, onTextRegExp);
         //objSrv.off(/^id\s+(\d+)/i, onTextRegExp);

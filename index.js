@@ -1232,7 +1232,7 @@ function createServer(botFather, params, callback) {
 
             switch(evName) {
                 case "text":
-                    var rule;
+                    var rule, len;
 
                     //-----[CMD]----}>
 
@@ -1247,20 +1247,32 @@ function createServer(botFather, params, callback) {
 
                     //-----[RE]----}>
 
-                    if(botFilters.regexp.s.length) {
+                    if(len = botFilters.regexp.length) {
                         var reParams;
 
                         rule = undefined;
 
-                        for(var re, i = 0, len = botFilters.regexp.s.length; !rule && i < len; i++) {
-                            re = botFilters.regexp.s[i];
+                        for(var re, i = 0; !rule && i < len; i++) {
+                            re = botFilters.regexp[i];
 
-                            if(reParams = msg.text.match(re))
-                                rule = re;
+                            if(reParams = msg.text.match(re.rule)) {
+                                rule = re.rule;
+
+                                if(rule && re.binds) {
+                                    var result  = {},
+                                        binds   = re.binds;
+
+                                    for(var j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
+                                        result[binds[j]] = reParams[j + 1];
+                                    }
+
+                                    reParams = result;
+                                }
+                            }
                         }
 
                         if(rule) {
-                            botFilters.ev.emit(re, ctx, reParams);
+                            botFilters.ev.emit(rule, ctx, reParams);
                             return;
                         }
                     }
@@ -1496,7 +1508,7 @@ function createPolling(botFather, params, callback) {
 
             switch(evName) {
                 case "text":
-                    var rule;
+                    var rule, len;
 
                     //-----[CMD]----}>
 
@@ -1511,20 +1523,32 @@ function createPolling(botFather, params, callback) {
 
                     //-----[RE]----}>
 
-                    if(botFilters.regexp.s.length) {
+                    if(len = botFilters.regexp.length) {
                         var reParams;
 
                         rule = undefined;
 
-                        for(var re, i = 0, len = botFilters.regexp.s.length; !rule && i < len; i++) {
-                            re = botFilters.regexp.s[i];
+                        for(var re, i = 0; !rule && i < len; i++) {
+                            re = botFilters.regexp[i];
 
-                            if(reParams = msg.text.match(re))
-                                rule = re;
+                            if(reParams = msg.text.match(re.rule)) {
+                                rule = re.rule;
+
+                                if(rule && re.binds) {
+                                    var result  = {},
+                                        binds   = re.binds;
+
+                                    for(var j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
+                                        result[binds[j]] = reParams[j + 1];
+                                    }
+
+                                    reParams = result;
+                                }
+                            }
                         }
 
                         if(rule) {
-                            botFilters.ev.emit(re, ctx, reParams);
+                            botFilters.ev.emit(rule, ctx, reParams);
                             return;
                         }
                     }
@@ -1780,7 +1804,7 @@ function createSrvBot(bot, onMsg) {
         "ctx":          ctx,
         "filters":      {
             "ev":           ev,
-            "regexp":       {"m": {}, "s": []}
+            "regexp":      []
         },
 
         "on":           evOn,
@@ -1803,10 +1827,17 @@ function createSrvBot(bot, onMsg) {
 
     //-----------]>
 
-    function evOn(rule, func) {
+    function evOn(rule, params, func) {
+        if(typeof(params) === "function") {
+            func = params;
+            params = undefined;
+        }
+
+        //------]>
+
         if(Array.isArray(rule)) {
             rule.forEach(function(e) {
-                evOn(e, func);
+                evOn(e, params, func);
             });
 
             return result;
@@ -1824,16 +1855,20 @@ function createSrvBot(bot, onMsg) {
 
             case "object":
                 if(rule instanceof RegExp) {
+                    if(!fltEv.listenerCount(rule)) {
+                        if(params && !Array.isArray(params))
+                            throw new Error("on | RegExp | `params` is not an array");
+
+                        fltRe.push({
+                            "rule":     rule,
+                            "binds":    params
+                        });
+                    }
+
                     fltEv.on(rule, func);
 
-                    if(!fltRe.m[rule]) {
-                        fltRe.m[rule] = true;
-                        fltRe.s.push(rule);
-                    }
-                } else
-                    throw new Error("Unknown rule: " + rule);
-
-                break;
+                    break;
+                }
 
             default:
                 throw new Error("Unknown rule: " + rule);
@@ -1875,7 +1910,7 @@ function createSrvBot(bot, onMsg) {
                         break;
                 }
             } else {
-                filters.regexp = {"m": {}, "s": []};
+                filters.regexp = [];
             }
 
             ev.removeAllListeners(rule);
@@ -1911,15 +1946,16 @@ function createSrvBot(bot, onMsg) {
 
         //------]>
 
-        function getIdFltRegExp(id) {
-            return fltRe.s.indexOf(id);
+        function getIdFltRegExp(obj) {
+            for(var i = 0, len = fltRe.length; i < len; i++)
+                if(fltRe[i].rule === obj) return i;
+
+            return -1;
         }
 
         function removeFltRegExp(id) {
             if(id >= 0) {
-                delete fltRe.m[fltRe.s[id]];
-                fltRe.s.splice(id, 1);
-
+                fltRe.splice(id, 1);
                 return true;
             }
 
