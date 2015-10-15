@@ -1373,24 +1373,26 @@ function createServer(botFather, params, callback) {
 
         srvBots[path] = bot = createSrvBot(bot, callback);
 
-        if(params.address || params.host) {
-            var url = (params.address || (params.host + ":" + params.port)) + path;
+        if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
+            if(params.autoWebhook || params.host) {
+                var url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
+               
+                bot
+                    .bot
+                    .api
+                    .setWebhook({"url": url, "certificate": params.selfSigned})
 
-            bot
-                .bot
-                .api
-                .setWebhook({"url": url, "certificate": params.selfSigned})
+                    .then(JSON.parse)
+                    .then(function(data) {
+                        if(data.ok)
+                            return;
 
-                .then(JSON.parse)
-                .then(function(data) {
-                    if(data.ok)
-                        return;
-
-                    console.log("Webhook: %s", url);
-                    console.log(data.description || data.result);
-                }, console.error);
-        } else {
-            console.log("[!] Warning | `address` and `host` not specified, Auto-Webhook not working");
+                        console.log("Webhook: %s", url);
+                        console.log(data.description || data.result);
+                    }, console.error);
+            } else {
+                console.log("[!] Warning | `autoWebhook` and `host` not specified, autoWebhook not working");
+            }
         }
 
         return bot;

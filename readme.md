@@ -111,7 +111,13 @@ api.sendMessage(data()).then(data).then(function(x) {
 > tg-api X sendMessage
 > {"chat_id": 0, "t
 > ext": "Hi"}
-> <enter>
+> <enter> [\r\n]
+
+(result)
+
+> {"chat_id": 1, "t
+> ext": "Hi 2"}
+> <enter> [\r\n]
 
 (result)
 ```
@@ -189,7 +195,6 @@ var objSrvOptions   = {
         "/COMODORSADomainValidationSecureServerCA.crt"
     ],
 
-    "http":     false, //_ nginx + nodejs = <3
     "host":     "site.xx"
 };
 
@@ -280,6 +285,25 @@ objBot
         objBot.server(objSrvOptions, cbMsg);
     });
 ```
+
+
+
+#### NGINX + Node.js
+
+```js
+var objBot          = rBot();
+var objSrvOptions   = {
+    "http":         true,
+
+    "autoWebhook":  "site.xx:88", // <-- Default: (host + port); `false` - disable
+
+    "host":         "localhost",
+    "port":         1490
+};
+
+objBot.server(objSrvOptions, cbMsg);
+```
+
 
 
 #### Analytics 
