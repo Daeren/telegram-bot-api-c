@@ -30,8 +30,9 @@ var gReqOptions     = {
     "method":       "POST"
 };
 
-var gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
-    gReReplaceCmd   = /^@\S+\s/,
+var gReReplaceName  = /^@\S+\s+/,
+
+    gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
     gReSplitCmd     = /\s+([\s\S]+)?/,
 
     gReIsFilePath   = /[\\\/\.]/,
@@ -1214,7 +1215,9 @@ function createServer(botFather, params, callback) {
             //--------]>
 
             var upId    = data.update_id,
-                msg     = data.message;
+                msg     = data.message,
+
+                msgChat = msg.chat;
 
             //--------]>
 
@@ -1236,6 +1239,15 @@ function createServer(botFather, params, callback) {
             switch(evName) {
                 case "text":
                     var rule, len;
+
+                    //-----[Filter: botName]----}>
+
+                    if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
+                        var msgText = msg.text;
+
+                        if(msgText[0] === "@")
+                            msg.text = msgText.replace(gReReplaceName, "");
+                    }
 
                     //-----[CMD]----}>
 
@@ -1293,7 +1305,7 @@ function createServer(botFather, params, callback) {
             function createCtx() {
                 var result = Object.create(objBot.ctx);
 
-                result.from = result.cid = msg.chat.id;
+                result.from = result.cid = msgChat.id;
                 result.mid = msg.message_id;
 
                 result.update_id = upId;
@@ -1376,7 +1388,7 @@ function createServer(botFather, params, callback) {
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
                 var url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
-               
+
                 bot
                     .bot
                     .api
@@ -1493,7 +1505,9 @@ function createPolling(botFather, params, callback) {
 
         function onMsg(data) {
             var upId    = data.update_id,
-                msg     = data.message;
+                msg     = data.message,
+
+                msgChat = msg.chat;
 
             //--------]>
 
@@ -1519,6 +1533,15 @@ function createPolling(botFather, params, callback) {
             switch(evName) {
                 case "text":
                     var rule, len;
+
+                    //-----[Filter: botName]----}>
+
+                    if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
+                        var msgText = msg.text;
+
+                        if(msgText[0] === "@")
+                            msg.text = msgText.replace(gReReplaceName, "");
+                    }
 
                     //-----[CMD]----}>
 
@@ -1576,7 +1599,7 @@ function createPolling(botFather, params, callback) {
             function createCtx() {
                 var result = Object.create(objBot.ctx);
 
-                result.from = result.cid = msg.chat.id;
+                result.from = result.cid = msgChat.id;
                 result.mid = msg.message_id;
 
                 result.update_id = upId;
@@ -1640,7 +1663,7 @@ function parseCmd(text) {
             break;
 
         case "@":
-            text = text.replace(gReReplaceCmd, "");
+            text = text.replace(gReReplaceName, "");
 
             if(text[0] !== "/")
                 return null;
@@ -2011,6 +2034,9 @@ function compileKeyboard(input) {
     //----------]>
 
     result = function(buttons, params) {
+        if(typeof(buttons) === "string")
+            buttons = buttons.split(/\s+/).map(function(x) { return [x]; });
+
         buttons = {"keyboard": buttons};
 
         if(!params)

@@ -26,18 +26,21 @@ var reText = /^id\s+(\d+)/i;
 
 //---------]>
 
-objBot
-    .api
-    .setWebhook({"url": "site.xx:88/myBot"})
+objSrv = objBot.polling(objOptions, function(bot, cmd) {
+    console.log(bot);
+    console.log(cmd);
 
-    .then(x => {
-        objSrv = objBot.polling(objOptions);
+    bot.data.text = "Not Found";
+    bot.data.reply_markup = bot.keyboard(bot.message.text);
 
-        objSrv.on(/^empty/i, onTextRegExp);
-        objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
-        objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
-        objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
-    });
+    bot.send();
+});
+
+objSrv.on(/^empty/i, onTextRegExp);
+objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
+objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
+objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+
 
 function onTextRegExp(bot, reParams) {
     response("onTextRegExp:", bot, reParams);

@@ -73,11 +73,14 @@ api.sendMessage(data(), function() { });
 api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
     x.reply_markup = buttons.hOxOnce;
+    x.reply_markup = buttons("X Y Z");
     x.reply_markup = buttons([["X"]], "resize once selective");
 
     api.sendPhoto(x);
 });
 ```
+
+
 
 [Telegram Bot API][3]
 
@@ -87,10 +90,26 @@ api.sendMessage(data()).then(data).then(function(x) {
 * LongPolling: +
 * Analytics: +
 * Promise: +
-* BotCommands: /start [text], /start@bot [text], @bot /start [text]
+* BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 
 
+
+#### Index
+
+* [CLI](#refCLI)
+* [Download](#refDownload)
+* [Polling](#refPolling)
+* [Server](#refServer)
+* [MServer](#refMServer)
+* [Nginx+Node.js](#refExampleNginxNodejs)
+* [Analytics](#refAnalytics)
+* [Logger](#refLogger)
+* [Keyboard](#refKeyboard)
+
+
+
+<a name="refCLI"></a>
 #### CLI
 
 ```js
@@ -122,6 +141,9 @@ api.sendMessage(data()).then(data).then(function(x) {
 (result)
 ```
 
+
+
+<a name="refDownload"></a>
 #### Download
 
 ```js
@@ -143,6 +165,8 @@ objBot
 ```
 
 
+
+<a name="refPolling"></a>
 #### Polling
 
 ```js
@@ -173,6 +197,8 @@ function cbCmdStop(bot, params) {
 ```
 
 
+
+<a name="refServer"></a>
 #### Server
 
 ```js
@@ -268,6 +294,8 @@ function cbCmdStop(bot, params) {
 ```
 
 
+
+<a name="refMServer"></a>
 #### mServer
 
 ```js
@@ -288,6 +316,7 @@ objBot
 
 
 
+<a name="refExampleNginxNodejs"></a>
 #### NGINX + Node.js
 
 ```js
@@ -306,6 +335,7 @@ objBot.server(objSrvOptions, cbMsg);
 
 
 
+<a name="refAnalytics"></a>
 #### Analytics 
 
 Used [Botan SDK][4]
@@ -326,6 +356,8 @@ objBot
 ```
 
 
+
+<a name="refLogger"></a>
 #### Logger 
 
 ```js
@@ -345,6 +377,8 @@ objBot
 ```
 
 
+
+<a name="refKeyboard"></a>
 #### Keyboard 
 
 ```js
