@@ -134,8 +134,7 @@ api.sendMessage(data()).then(data).then(function(x) {
 
 (result)
 
-> {"chat_id": 1, "t
-> ext": "Hi 2"}
+> {"chat_id": 1, "text": "Hi 2"}
 > <enter> [\r\n]
 
 (result)
