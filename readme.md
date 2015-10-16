@@ -29,9 +29,9 @@ srv
 
     .on("enterChat", onEnterChat)
     .on("text", onText)
-    .on(["photo", "document"], onPhotoOrDoc)
+    .on("photo document", onPhotoOrDoc)
 
-    .on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp)
+    .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
     .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp)
 
     .on(/^id\s+(\d+)/i, onTextRegExp)

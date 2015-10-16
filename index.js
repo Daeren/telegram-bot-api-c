@@ -1881,6 +1881,11 @@ function createSrvBot(bot, onMsg) {
 
         //------]>
 
+        if(typeof(rule) === "string")
+            rule = rule.split(/\s+/);
+
+        //---)>
+
         if(Array.isArray(rule)) {
             rule.forEach(function(e) {
                 evOn(e, params, func);
@@ -1902,8 +1907,13 @@ function createSrvBot(bot, onMsg) {
             case "object":
                 if(rule instanceof RegExp) {
                     if(!fltEv.listenerCount(rule)) {
-                        if(params && !Array.isArray(params))
-                            throw new Error("on | RegExp | `params` is not an array");
+                        if(params) {
+                            if(typeof(params) === "string")
+                                params = params.split(/\s+/);
+
+                            if(!Array.isArray(params))
+                                throw new Error("on | RegExp | `params` is not an array");
+                        }
 
                         fltRe.push({
                             "rule":     rule,
