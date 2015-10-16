@@ -38,7 +38,7 @@ objSrv = objBot.polling(objOptions, function(bot, cmd) {
 
 objSrv.on(/^empty/i, onTextRegExp);
 objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
-objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
+objSrv.on(/^(id)\s+(\d+)/i, "type id", onTextRegExp);
 objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
 
 

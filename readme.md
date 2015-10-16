@@ -84,11 +84,7 @@ api.sendMessage(data()).then(data).then(function(x) {
 
 [Telegram Bot API][3]
 
-* CLI: +
 * Stream: +
-* Server: +
-* LongPolling: +
-* Analytics: +
 * Promise: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
@@ -393,6 +389,8 @@ function cbMsg(bot) {
 }
 
 // rBot.keyboard(buttons[, params])
+// buttons: string or array
+// params: "resize once selective"
 
 // v - vertically; h - horizontally; Once - one_time_keyboard
 
@@ -423,7 +421,7 @@ function cbMsg(bot) {
 | Attribute         | Type           | Note                                 |
 |-------------------|----------------|--------------------------------------|
 |                   | -              |                                      |
-| keyboard          | function       |                                      |
+| keyboard          | function       | return: object                       |
 | parseCmd          | text           | object {name, text, cmd}             |
 
 
@@ -433,7 +431,7 @@ function cbMsg(bot) {
 |-------------------|----------------|--------------------------------------|
 |                   | -              |                                      |
 | api               | Object         | See [Telegram Bot API][3]            |
-| keyboard          | function       |                                      |
+| keyboard          | function       | return: object                       |
 
 
 | Method            | Arguments                                                             | Return                            |
@@ -447,8 +445,8 @@ function cbMsg(bot) {
 | send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
-| server            | [options][, callback(json, request)]                                  | ~                                 |
-| polling           | [options][, callback(json)]                                           | ~                                 |
+| server            | [options][, callback(bot, cmd)]                                       | ~                                 |
+| polling           | [options][, callback(bot, cmd)]                                       | ~                                 |
 |                   | -                                                                     |                                   |
 | parseCmd          | text                                                                  | object {name, text, cmd}          |
 
