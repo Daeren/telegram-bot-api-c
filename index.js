@@ -1080,12 +1080,10 @@ function createServer(botFather, params, callback) {
         params = undefined;
     }
 
-    if(!params) {
-        params = {
-            "host": "127.0.0.1",
-            "http": true
-        };
-    }
+    params = params || {
+        "host": "127.0.0.1",
+        "http": true
+    };
 
     params.port = params.port || 88;
 
@@ -1181,9 +1179,9 @@ function createServer(botFather, params, callback) {
         //----------]>
 
         function onData(chunk) {
-            if(!firstChunk)
+            if(!firstChunk) {
                 firstChunk = chunk;
-            else {
+            } else {
                 chunks = chunks || [firstChunk];
                 chunks.push(chunk);
             }
@@ -1325,6 +1323,8 @@ function createServer(botFather, params, callback) {
                 return false;
             }
         }
+
+        //-------)>
 
         function response(code) {
             res.writeHead(code || 200);
@@ -1485,11 +1485,8 @@ function createPolling(botFather, params, callback) {
 
     function onLoadSuccess(data) {
         if(!data.ok) {
-            if(data.error_code === 409) {
-                api.setWebhook(null, function() {
-                    load();
-                });
-            }
+            if(data.error_code === 409)
+                api.setWebhook(null, load);
 
             return;
         }
