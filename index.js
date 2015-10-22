@@ -1732,21 +1732,28 @@ function getTypeMsg(m) {
 //---------------------------]>
 
 function createReadStreamByUrl(url, callback) {
-    url = rUrl.parse(url);
+    var urlObj = rUrl.parse(url);
 
-    if(!url.protocol || !(/^http/).test(url.protocol)) {
+    if(!urlObj.protocol || !(/^http/).test(urlObj.protocol)) {
         callback(new Error("Use the links only with HTTP/HTTPS protocol"));
         return;
     }
 
-    var isSSL = url.protocol === "https:";
+    var isHTTPS = urlObj.protocol === "https:";
     var options = {
-        "host": url.hostname,
-        "port": url.port,
-        "path": url.path
+        "host": urlObj.hostname,
+        "port": urlObj.port,
+        "path": urlObj.path,
+
+        "headers": {
+            "User-Agent":   "TgBotApic",
+            "Referer":      url
+        }
     };
 
-    var request = (isSSL ? rHttps : rHttp).get(options);
+    //-----------]>
+
+    var request = (isHTTPS ? rHttps : rHttp).get(options);
 
     request
         .on("error", callback)
