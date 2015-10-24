@@ -1815,14 +1815,18 @@ function createSrvBot(bot, onMsg) {
 
         //------]>
 
-        if(typeof(rule) === "string")
-            rule = rule.split(/\s+/);
+        if(typeof(rule) === "string") {
+            var t = rule.split(/\s+/);
+
+            if(t.length > 1)
+                rule = t;
+        }
 
         //---)>
 
         if(Array.isArray(rule)) {
             rule.forEach(function(e) {
-                evOn(e, params, func);
+                srvEvOn(e, params, func);
             });
 
             return result;
@@ -1870,7 +1874,7 @@ function createSrvBot(bot, onMsg) {
     function srvEvOff(rule, func) {
         if(Array.isArray(rule)) {
             rule.forEach(function(e) {
-                evOff(e, func);
+                srvEvOff(e, func);
             });
 
             return result;
