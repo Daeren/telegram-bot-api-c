@@ -1212,116 +1212,7 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var upId    = data.update_id,
-                msg     = data.message,
-
-                msgChat = msg.chat;
-
-            //--------]>
-
-            if(objBot.anTrack)
-                objBot.anTrack(msg);
-
-            //----)>
-
-            var botFilters  = objBot.filters,
-
-                ctx         = createCtx(),
-                cmdParam,
-
-                msgType     = getTypeMsg(msg),
-                evName      = getEventNameByTypeMsg(msgType);
-
-            //------------]>
-
-            switch(evName) {
-                case "text":
-                    var rule, len;
-
-                    //-----[Filter: botName]----}>
-
-                    if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
-                        var msgText = msg.text;
-
-                        if(msgText[0] === "@")
-                            msg.text = msgText.replace(gReReplaceName, "");
-                    }
-
-                    //-----[CMD]----}>
-
-                    cmdParam = parseCmd(msg.text);
-
-                    if(cmdParam) {
-                        rule = "/" + cmdParam.name;
-
-                        if(callEvent(rule, cmdParam) || callEvent("/", cmdParam))
-                            return;
-                    }
-
-                    //-----[RE]----}>
-
-                    if(len = botFilters.regexp.length) {
-                        var reParams;
-
-                        rule = undefined;
-
-                        for(var re, i = 0; !rule && i < len; i++) {
-                            re = botFilters.regexp[i];
-
-                            if(reParams = msg.text.match(re.rule)) {
-                                rule = re.rule;
-
-                                if(rule && re.binds) {
-                                    var result  = {},
-                                        binds   = re.binds;
-
-                                    for(var j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
-                                        result[binds[j]] = reParams[j + 1];
-                                    }
-
-                                    reParams = result;
-                                }
-                            }
-                        }
-
-                        if(rule) {
-                            botFilters.ev.emit(rule, ctx, reParams);
-                            return;
-                        }
-                    }
-
-                    break;
-            }
-
-            if(!evName || !callEvent(evName, msg[msgType])) {
-                if(objBot.onMsg)
-                    objBot.onMsg(ctx, cmdParam);
-            }
-
-            //------------]>
-
-            function createCtx() {
-                var result = Object.create(objBot.ctx);
-
-                result.from = result.cid = msgChat.id;
-                result.mid = msg.message_id;
-
-                result.update_id = upId;
-                result.message = msg;
-
-                result.data = {};
-
-                return result;
-            }
-
-            function callEvent(type, params) {
-                if(botFilters.ev.listenerCount(type)) {
-                    botFilters.ev.emit(type, ctx, params);
-                    return true;
-                }
-
-                return false;
-            }
+            srvOnMsg(objBot, data)
         }
 
         //-------)>
@@ -1376,6 +1267,10 @@ function createServer(botFather, params, callback) {
     //-----------------]>
 
     function addBot(bot, path, callback) {
+        var srvBot;
+
+        //-------------]>
+
         srvBots = srvBots || {};
 
         if(hasOwnProperty(srvBots, path))
@@ -1383,13 +1278,13 @@ function createServer(botFather, params, callback) {
 
         //-------------]>
 
-        srvBots[path] = bot = createSrvBot(bot, callback);
+        srvBots[path] = srvBot = createSrvBot(bot, callback);
 
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
                 var url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
 
-                bot
+                srvBot
                     .bot
                     .api
                     .setWebhook({"url": url, "certificate": params.selfSigned})
@@ -1407,7 +1302,7 @@ function createServer(botFather, params, callback) {
             }
         }
 
-        return bot;
+        return srvBot;
     }
 }
 
@@ -1450,13 +1345,6 @@ function createPolling(botFather, params, callback) {
 
     //----------------]>
 
-    function runTimer() {
-        if(isStopped)
-            return;
-
-        tmPolling = setTimeout(load, params.interval);
-    }
-
     function load() {
         api.getUpdates(params, onParseUpdates);
     }
@@ -1480,13 +1368,15 @@ function createPolling(botFather, params, callback) {
             return;
         }
 
+        //--------]>
+
         onLoadSuccess(data);
     }
 
     function onLoadSuccess(data) {
         if(!data.ok) {
             if(data.error_code === 409)
-                api.setWebhook(null, load);
+                api.setWebhook(null, load); else runTimer();
 
             return;
         }
@@ -1501,124 +1391,22 @@ function createPolling(botFather, params, callback) {
         //------------]>
 
         function onMsg(data) {
-            var upId    = data.update_id,
-                msg     = data.message,
-
-                msgChat = msg.chat;
+            params.offset = data.update_id + 1;
 
             //--------]>
 
-            params.offset = upId + 1;
-
-            //--------]>
-
-            if(objBot.anTrack)
-                objBot.anTrack(msg);
-
-            //----)>
-
-            var botFilters  = objBot.filters,
-
-                ctx         = createCtx(),
-                cmdParam,
-
-                msgType     = getTypeMsg(msg),
-                evName      = getEventNameByTypeMsg(msgType);
-
-            //------------]>
-
-            switch(evName) {
-                case "text":
-                    var rule, len;
-
-                    //-----[Filter: botName]----}>
-
-                    if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
-                        var msgText = msg.text;
-
-                        if(msgText[0] === "@")
-                            msg.text = msgText.replace(gReReplaceName, "");
-                    }
-
-                    //-----[CMD]----}>
-
-                    cmdParam = parseCmd(msg.text);
-
-                    if(cmdParam) {
-                        rule = "/" + cmdParam.name;
-
-                        if(callEvent(rule, cmdParam) || callEvent("/", cmdParam))
-                            return;
-                    }
-
-                    //-----[RE]----}>
-
-                    if(len = botFilters.regexp.length) {
-                        var reParams;
-
-                        rule = undefined;
-
-                        for(var re, i = 0; !rule && i < len; i++) {
-                            re = botFilters.regexp[i];
-
-                            if(reParams = msg.text.match(re.rule)) {
-                                rule = re.rule;
-
-                                if(rule && re.binds) {
-                                    var result  = {},
-                                        binds   = re.binds;
-
-                                    for(var j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
-                                        result[binds[j]] = reParams[j + 1];
-                                    }
-
-                                    reParams = result;
-                                }
-                            }
-                        }
-
-                        if(rule) {
-                            botFilters.ev.emit(rule, ctx, reParams);
-                            return;
-                        }
-                    }
-
-                    break;
-            }
-
-            if(!evName || !callEvent(evName, msg[msgType])) {
-                if(objBot.onMsg)
-                    objBot.onMsg(ctx, cmdParam);
-            }
-
-            //------------]>
-
-            function createCtx() {
-                var result = Object.create(objBot.ctx);
-
-                result.from = result.cid = msgChat.id;
-                result.mid = msg.message_id;
-
-                result.update_id = upId;
-                result.message = msg;
-
-                result.data = {};
-
-                return result;
-            }
-
-            function callEvent(type, params) {
-                if(botFilters.ev.listenerCount(type)) {
-                    botFilters.ev.emit(type, ctx, params);
-                    return true;
-                }
-
-                return false;
-            }
+            srvOnMsg(objBot, data)
         }
     }
 
     //----------]>
+
+    function runTimer() {
+        if(isStopped)
+            return;
+
+        tmPolling = setTimeout(load, params.interval);
+    }
 
     function tmStart() {
         if(isStopped) {
@@ -1637,7 +1425,131 @@ function createPolling(botFather, params, callback) {
     }
 }
 
-//---------)>
+//----)>
+
+function srvOnMsg(objBot, data) {
+    var msg     = data.message,
+        msgChat = msg.chat;
+
+    //--------]>
+
+    if(objBot.anTrack)
+        objBot.anTrack(msg);
+
+    //----)>
+
+    var botMiddleware   = objBot.middleware,
+        botFilters      = objBot.filters,
+
+        ctxBot          = createCtx(),
+        cmdParam,
+
+        msgType         = getTypeMsg(msg),
+        evName          = getEventNameByTypeMsg(msgType);
+
+    //------------]>
+
+    forEachAsync(botMiddleware, onIterMiddleware, onEndMiddleware);
+
+    //------------]>
+
+    function onIterMiddleware(next, middleware) {
+        middleware(evName, ctxBot, next)
+    }
+
+    function onEndMiddleware() {
+        switch(evName) {
+            case "text":
+                var rule, len;
+
+                //-----[Filter: botName]----}>
+
+                if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
+                    var msgText = msg.text;
+
+                    if(msgText[0] === "@")
+                        msg.text = msgText.replace(gReReplaceName, "");
+                }
+
+                //-----[CMD]----}>
+
+                cmdParam = parseCmd(msg.text);
+
+                if(cmdParam) {
+                    rule = "/" + cmdParam.name;
+
+                    if(callEvent(rule, cmdParam) || callEvent("/", cmdParam))
+                        return;
+                }
+
+                //-----[RE]----}>
+
+                if(len = botFilters.regexp.length) {
+                    var reParams;
+
+                    rule = undefined;
+
+                    for(var re, i = 0; !rule && i < len; i++) {
+                        re = botFilters.regexp[i];
+
+                        if(reParams = msg.text.match(re.rule)) {
+                            rule = re.rule;
+
+                            if(rule && re.binds) {
+                                var result  = {},
+                                    binds   = re.binds;
+
+                                for(var j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
+                                    result[binds[j]] = reParams[j + 1];
+                                }
+
+                                reParams = result;
+                            }
+                        }
+                    }
+
+                    if(rule) {
+                        botFilters.ev.emit(rule, ctxBot, reParams);
+                        return;
+                    }
+                }
+
+                break;
+        }
+
+        if(!evName || !callEvent(evName, msg[msgType])) {
+            if(objBot.onMsg)
+                objBot.onMsg(ctxBot, cmdParam);
+        }
+
+        //-------]>
+
+        function callEvent(type, params) {
+            if(botFilters.ev.listenerCount(type)) {
+                botFilters.ev.emit(type, ctxBot, params);
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    //-------)>
+
+    function createCtx() {
+        var result = Object.create(objBot.ctx);
+
+        result.from = result.cid = msgChat.id;
+        result.mid = msg.message_id;
+
+        result.message = msg;
+        result.data = {};
+
+        return result;
+    }
+}
+
+//---------]>
 
 function parseCmd(text) {
     if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)
@@ -1821,55 +1733,51 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
     return data;
 }
 
-//---------)>
+//---------]>
 
 function createSrvBot(bot, onMsg) {
     var result,
 
         ctx = Object.create(bot),
-        ev  = new rEvents();
+        ev = new rEvents();
 
-    //--------------]>
-
-    ctx.send = function(callback) {
-        var d = this.data;
-        this.data = {};
-
-        return bot.send(this.cid, d, callback);
-    };
-
-    ctx.forward = function(callback) {
-        return bot.api.forwardMessage({
-            "chat_id":      this.to,
-            "from_chat_id": this.from,
-            "message_id":   this.mid
-        }, callback);
-    };
+    ev.setMaxListeners(100);
 
     //--------------]>
 
     result = {
-        "bot":          bot,
+        "bot": bot,
+        "ctx": ctx,
 
-        "ctx":          ctx,
-        "filters":      {
-            "ev":           ev,
-            "regexp":      []
+        "middleware": [],
+
+        "filters": {
+            "ev": ev,
+            "regexp": []
         },
 
-        "on":           evOn,
-        "off":          evOff,
+        "cbLogger": null,
+        "anTrack": null,
 
-        "onMsg":        onMsg,
+        //-----)>
 
-        "cbLogger":     null,
-        "anTrack":      null,
+        "use": srvUse,
 
-        "logger":       srvLogger,
-        "analytics":    srvAnalytics
+        "on": srvEvOn,
+        "off": srvEvOff,
+
+        "logger": srvLogger,
+        "analytics": srvAnalytics,
+
+        //-----)>
+
+        "onMsg": onMsg
     };
 
-    ev.setMaxListeners(100);
+    //-----)>
+
+    ctx.send = ctxSend;
+    ctx.forward = ctxForward;
 
     //-----------]>
 
@@ -1877,7 +1785,29 @@ function createSrvBot(bot, onMsg) {
 
     //-----------]>
 
-    function evOn(rule, params, func) {
+    function ctxSend(callback) {
+        var d = this.data;
+        this.data = {};
+
+        return bot.send(this.cid, d, callback);
+    }
+
+    function ctxForward(callback) {
+        return bot.api.forwardMessage({
+            "chat_id": this.to,
+            "from_chat_id": this.from,
+            "message_id": this.mid
+        }, callback);
+    }
+
+    //-----)>
+
+    function srvUse(f) {
+        result.middleware.push(f);
+        return result;
+    }
+
+    function srvEvOn(rule, params, func) {
         if(typeof(params) === "function") {
             func = params;
             params = undefined;
@@ -1937,7 +1867,7 @@ function createSrvBot(bot, onMsg) {
         return result;
     }
 
-    function evOff(rule, func) {
+    function srvEvOff(rule, func) {
         if(Array.isArray(rule)) {
             rule.forEach(function(e) {
                 evOff(e, func);
@@ -2106,7 +2036,7 @@ function compileKeyboard(input) {
     return result;
 }
 
-//---------------------------]>
+//-------------[HELPERS]--------------}>
 
 function hasOwnProperty(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -2118,7 +2048,8 @@ function forEachAsync(data, iter, cbEnd) {
 
     //---------]>
 
-    run();
+    if(len) run();
+    else if(cbEnd) cbEnd();
 
     //---------]>
 

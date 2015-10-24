@@ -36,6 +36,19 @@ objSrv = objBot.polling(objOptions, function(bot, cmd) {
     bot.send();
 });
 
+
+objSrv
+    .use(function(type, bot, next) {
+        console.log("1 | Type: %s", type);
+
+        //if(bot.message.text === "next")
+            next();
+    })
+    .use(function(type, bot, next) {
+        console.log("2 | Type: %s", type);
+        next();
+    });
+
 objSrv.on(/^empty/i, onTextRegExp);
 objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
 objSrv.on(/^(id)\s+(\d+)/i, "type id", onTextRegExp);

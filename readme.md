@@ -24,6 +24,8 @@ var srv = objBot.polling(onNotFound);
 //----)>
 
 srv
+    .use(function(type, bot, next) { next(); })
+	
     .on("/start", onCmdStart)
     .on("/", onCmdNotFound)
 
@@ -100,6 +102,7 @@ api.sendMessage(data()).then(data).then(function(x) {
 * [MServer](#refMServer)
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Analytics](#refAnalytics)
+* [Middleware](#refMiddleware)
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 
@@ -373,6 +376,27 @@ objBot
 
 
 
+<a name="refMiddleware"></a>
+#### Middleware 
+
+```js
+objSrv
+    .use(function(type, bot, next) {
+        console.log("1 | Type: %s", type);
+
+        if(bot.message.text === "next")
+            next();
+    })
+    .use(function(type, bot, next) {
+        console.log("2 | Type: %s", type);
+        next();
+    })
+    .on("text", function() {
+    });
+```
+
+
+
 <a name="refKeyboard"></a>
 #### Keyboard 
 
@@ -477,6 +501,7 @@ function cbMsg(bot) {
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
+| use           | callback(type, bot, next)             | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
@@ -489,6 +514,7 @@ function cbMsg(bot) {
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
+| use           | callback(type, bot, next)             | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
