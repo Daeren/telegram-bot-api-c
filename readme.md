@@ -19,13 +19,13 @@ var objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 //----[Server]----}>
 
-var srv = objBot.polling(onNotFound);
+var srv = objBot
+    .polling(onNotFound)
+    .use(function(type, bot, next) { next(); });
 
 //----)>
 
 srv
-    .use(function(type, bot, next) { next(); })
-	
     .on("/start", onCmdStart)
     .on("/", onCmdNotFound)
 
@@ -389,9 +389,15 @@ objSrv
     })
     .use(function(type, bot, next) {
         console.log("2 | Type: %s", type);
+
+        bot.user = {};
+
         next();
-    })
-    .on("text", function() {
+    });
+
+objSrv
+    .on("text", function(bot, data) {
+        bot.user.id;
     });
 ```
 
