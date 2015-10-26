@@ -33,10 +33,8 @@ var objSrvOptions   = {
 
 objBot.api
     .setWebhook({"url": "site.xx/myBot"})
-
-    .then(JSON.parse)
-    .then(response => {
-        if(!response.ok)
+    .then(isOk => {
+        if(!isOk)
             throw new Error("Oops...problems with webhook...");
 
         objBot

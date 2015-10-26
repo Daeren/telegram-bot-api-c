@@ -64,8 +64,8 @@ function response(who, bot, params) {
     console.log("bot: ", bot);
     console.log("params: ", params);
 
-    bot.data.text = bot;
-    bot.send();
+    bot.data.text = params.id ? "" : bot;
+    bot.send().then(console.info, console.error);
 }
 
 
@@ -261,15 +261,12 @@ return;
 
 
 
-objBot.api
-    .setWebhook()
-    .then(x => {
-        objSrv = objBot
-            .polling(objOptions, cbMsg)
-            .logger(cbLogger)
-            .analytics("apiKey", "appName")
-            .on("/stop", cbCmdStop);
-    }, console.error);
+
+objSrv = objBot
+    .polling(objOptions, cbMsg)
+    .logger(cbLogger)
+    .analytics("apiKey", "appName")
+    .on("/stop", cbCmdStop);
 
 
 function cbLogger(error, data) {

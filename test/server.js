@@ -105,7 +105,7 @@ function cbCmdStart(bot, params) {
     //----------------]>
 
     bot.data.text = "Hello";
-    bot.send().then(JSON.parse).then(console.log, console.error);
+    bot.send().then(console.log, console.error);
 }
 
 function cbCmdStop(bot, params) {

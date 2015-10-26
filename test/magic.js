@@ -105,8 +105,7 @@ return;
 
 api
     .setWebhook()
-    .then(() => api.getUpdates())
-    .then(JSON.parse)
+    .then(api.getUpdates)
     .then(console.log, console.error);
 
 return;
@@ -138,7 +137,6 @@ var id      = "59725308",
     send    = objBot.send;
 
 api.getMe()
-    .then(JSON.parse)
     .then(data => send(id, [{"chatAction": "upload_photo"}, {"text": data}]))
 
     .then(results => {
@@ -148,7 +146,7 @@ api.getMe()
 
     .then(() => send(id, {"photo": require("fs").createReadStream(file)}))
     .then(() => send(id, {"photo": file}))
-    .then(JSON.parse)
+
     .then(data => send(id, {"photo": data.result.photo[0].file_id, "caption": "Hell World!"}))
 
     .then(function() {

@@ -798,8 +798,10 @@ function main(token) {
                     error = error || e;
                     result = null;
                 }
-            } else
+            } else {
+                error = error || new Error("Empty: `result`");
                 result = null;
+            }
 
             callback(error, result, response);
         }
@@ -809,6 +811,7 @@ function main(token) {
 
     function send(id, data, callback) {
         var defer;
+        var self = this;
 
         if(typeof(callback) !== "undefined")
             cbPromise(); else defer = new Promise(cbPromise);
@@ -854,7 +857,7 @@ function main(token) {
                 cmdData = d[cmdName];
                 cmdData = prepareDataForSendApi(id, cmdName, cmdData, d);
 
-                callAPI(gApiMethodsMap[cmdName], cmdData, cb);
+                self.api[gApiMethodsMap[cmdName]](cmdData, cb);
             }
 
             function getName(d) {
@@ -900,14 +903,18 @@ function main(token) {
             //--------]>
 
             callAPIJson("getFile", {"file_id": fid}, function(error, data) {
-                if(error || !data) {
-                    cbEnd(error || new Error("Problems with 'data'"), data);
+                error = error || genErrorByTgResponse(data);
+
+                //--------]>
+
+                if(error) {
+                    cbEnd(error, data);
                     return;
                 }
 
                 //--------]>
 
-                var dataResult = data.result;
+                var dataResult  = data.result;
 
                 var fileId      = dataResult.file_id,
                     fileSize    = dataResult.file_size,
@@ -996,9 +1003,10 @@ function main(token) {
 
         function add(method) {
             result[method] = function(data, callback) {
-                var defer;
+                var defer,
+                    argsLen = arguments.length;
 
-                if(typeof(callback) !== "undefined")
+                if(argsLen > 1)
                     cbPromise(); else defer = new Promise(cbPromise);
 
                 //-------------------------]>
@@ -1008,13 +1016,24 @@ function main(token) {
                 //-------------------------]>
 
                 function cbPromise(resolve, reject) {
-                    if(!callback)
+                    if(argsLen < 2) {
                         callback = function(error, body) {
                             if(error)
                                 reject(error); else resolve(body);
                         };
+                    }
 
-                    callAPI(method, data, callback);
+                    if(typeof(callback) !== "function")
+                        throw new Error("API [" + method + "]: `callback` not specified");
+
+                    callAPIJson(method, data, function(error, data) {
+                        error = error || genErrorByTgResponse(data);
+
+                        if(!error)
+                            data = data.result;
+
+                        callback(error, data);
+                    });
                 }
             };
         }
@@ -1286,17 +1305,18 @@ function createServer(botFather, params, callback) {
 
                 srvBot
                     .bot
-                    .api
-                    .setWebhook({"url": url, "certificate": params.selfSigned})
+                    .callJson(
+                        "setWebhook", {"url": url, "certificate": params.selfSigned},
+                        function(error, isOk) {
+                            if(isOk)
+                                return;
 
-                    .then(JSON.parse)
-                    .then(function(data) {
-                        if(data.ok)
-                            return;
+                            console.log("[-] Webhook: %s", url);
 
-                        console.log("Webhook: %s", url);
-                        console.log(data.description || data.result);
-                    }, console.error);
+                            if(error)
+                                console.log(error);
+                        }
+                    );
             } else {
                 console.log("[!] Warning | `autoWebhook` and `host` not specified, autoWebhook not working");
             }
@@ -1320,9 +1340,7 @@ function createPolling(botFather, params, callback) {
 
     //----------------]>
 
-    var api         = botFather.api,
-
-        objBot      = createSrvBot(botFather, callback),
+    var objBot      = createSrvBot(botFather, callback),
 
         isStopped   = false,
         tmPolling;
@@ -1346,7 +1364,7 @@ function createPolling(botFather, params, callback) {
     //----------------]>
 
     function load() {
-        api.getUpdates(params, onParseUpdates);
+        botFather.callJson("getUpdates", params, onParseUpdates);
     }
 
     //-------)>
@@ -1354,14 +1372,6 @@ function createPolling(botFather, params, callback) {
     function onParseUpdates(error, data) {
         if(objBot.cbLogger)
             objBot.cbLogger(error, data);
-
-        if(!error) {
-            try {
-                data = JSON.parse(data);
-            } catch(e) {
-                error = e;
-            }
-        }
 
         if(error) {
             runTimer();
@@ -1376,7 +1386,7 @@ function createPolling(botFather, params, callback) {
     function onLoadSuccess(data) {
         if(!data.ok) {
             if(data.error_code === 409)
-                api.setWebhook(null, load); else runTimer();
+                botFather.callJson("setWebhook", null, load); else runTimer();
 
             return;
         }
@@ -1793,11 +1803,13 @@ function createSrvBot(bot, onMsg) {
     }
 
     function ctxForward(callback) {
-        return bot.api.forwardMessage({
-            "chat_id": this.to,
+        var data = {
+            "chat_id":      this.to,
             "from_chat_id": this.from,
-            "message_id": this.mid
-        }, callback);
+            "message_id":   this.mid
+        };
+
+        return arguments.length < 2 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
     }
 
     //-----)>
@@ -2041,6 +2053,17 @@ function compileKeyboard(input) {
 }
 
 //-------------[HELPERS]--------------}>
+
+function genErrorByTgResponse(data) {
+    if(data && !data.ok) {
+        var error = new Error(data.description);
+        error.code = data.error_code;
+
+        return error;
+    }
+}
+
+//----------]>
 
 function hasOwnProperty(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);

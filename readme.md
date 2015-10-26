@@ -13,6 +13,35 @@ require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send(
 require("telegram-bot-api-c")("TOKEN").api.sendMessage({"text": "Hi", "chat_id": 0});
 ```
 
+[Telegram Bot API][3]
+
+* Stream: +
+* Promise: +
+* BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
+* LoadFileByUrl: photo, audio, document, sticker, voice
+
+
+
+#### Index
+
+* [Start](#refStart)
+* [CLI](#refCLI)
+* [Download](#refDownload)
+* [Polling](#refPolling)
+* [Server](#refServer)
+* [MServer](#refMServer)
+* [Nginx+Node.js](#refExampleNginxNodejs)
+* [Analytics](#refAnalytics)
+* [Middleware](#refMiddleware)
+* [Logger](#refLogger)
+* [Keyboard](#refKeyboard)
+* [Errors](#refErrors)
+
+
+
+<a name="refStart"></a>
+#### Start
+
 ```js
 var rBot    = require("telegram-bot-api-c");
 var objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
@@ -81,30 +110,6 @@ api.sendMessage(data()).then(data).then(function(x) {
     api.sendPhoto(x);
 });
 ```
-
-
-
-[Telegram Bot API][3]
-
-* Stream: +
-* Promise: +
-* BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
-* LoadFileByUrl: photo, audio, document, sticker, voice
-
-
-
-#### Index
-
-* [CLI](#refCLI)
-* [Download](#refDownload)
-* [Polling](#refPolling)
-* [Server](#refServer)
-* [MServer](#refMServer)
-* [Nginx+Node.js](#refExampleNginxNodejs)
-* [Analytics](#refAnalytics)
-* [Middleware](#refMiddleware)
-* [Logger](#refLogger)
-* [Keyboard](#refKeyboard)
 
 
 
@@ -302,10 +307,8 @@ var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 objBot
     .api
     .setWebhook({"url": "site.xx/myBot"})
-    
-    .then(JSON.parse)
-    .then(response => {
-        if(!response.ok)
+    .then(isOk => {
+        if(!isOk)
             throw new Error("Oops...problems with webhook...");
 
         objBot.server(objSrvOptions, cbMsg);
@@ -443,6 +446,43 @@ function cbMsg(bot) {
 | numpad            | 0-9                                  |
 |                   | -                                    |
 | hide              |                                      |
+
+
+
+<a name="refErrors"></a>
+#### Errors 
+
+```js
+var rBot    = require("telegram-bot-api-c");
+var gBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
+
+var api     = gBot.api;
+
+//------------]>
+
+api
+    .sendMessage({"chat_id": "0"})
+    .then(console.info, console.error);
+    
+api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || data));
+
+// e    - Error: request/JSON.parse/response.ok
+// data - JSON: data or null
+
+//------------]>
+
+gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
+
+// e    - Error: request
+// data - Buffer
+
+//------------]>
+
+gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
+
+// e    - Error: request/JSON.parse
+// data - JSON: data or null
+```
 
 
 
