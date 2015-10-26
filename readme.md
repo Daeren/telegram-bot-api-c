@@ -470,21 +470,21 @@ api
 api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || data));
 
 // e    - Error: request/JSON.parse/response.ok
-// data - JSON: result or null
+// data - JSON: response.result or null
 
 //------------]>
 
 gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 // e    - Error: request
-// data - Buffer
+// data - Buffer: response
 
 //------------]>
 
 gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 // e    - Error: request/JSON.parse
-// data - JSON: data or null
+// data - JSON: response or null
 ```
 
 

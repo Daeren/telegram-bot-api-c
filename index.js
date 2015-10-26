@@ -1940,6 +1940,8 @@ function createSrvBot(bot, onMsg) {
     }
 }
 
+//-------------[HELPERS]--------------}>
+
 function compileKeyboard(input) {
     var result,
         map = {};
@@ -2005,7 +2007,7 @@ function compileKeyboard(input) {
     return result;
 }
 
-//-------------[HELPERS]--------------}>
+//----------]>
 
 function tgApiRequest(token, method, callback) {
     if(!method)
