@@ -35,13 +35,7 @@ var gReReplaceName  = /^@\S+\s+/,
     gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
     gReSplitCmd     = /\s+([\s\S]+)?/,
 
-    gReIsFilePath   = /[\\\/\.]/,
-
-    gRePhotoExt     = /\.(jp[e]?g|[gt]if|png|bmp)$/i,
-    gReAudioExt     = /\.(mp3)$/i,
-    gReStickerExt   = /\.(jp[e]?g|[gt]if|png|bmp|webp)$/i,
-    gReVideoExt     = /\.(mp4|mp4v|mpg4)$/i,
-    gReVoiceExt     = /\.(ogg)$/i;
+    gReIsFilePath   = /[\\\/\.]/;
 
 var gApiMethods     = [
     "getMe", "forwardMessage",
