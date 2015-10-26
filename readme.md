@@ -470,7 +470,7 @@ api
 api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || data));
 
 // e    - Error: request/JSON.parse/response.ok
-// data - JSON: data or null
+// data - JSON: result or null
 
 //------------]>
 
@@ -515,7 +515,7 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | call              | method, data[, callback(error, buffer, response)]                     |                                   |
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
-| send              | id, data[, callback(error, buffer, response)]                         | promise or undefined              |
+| send              | id, data[, callback(error, json, response)]                         | promise or undefined              |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
 | server            | [options][, callback(bot, cmd)]                                       | ~                                 |
