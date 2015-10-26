@@ -10,7 +10,11 @@ require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send(
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").api.sendMessage({"text": "Hi", "chat_id": 0});
+require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "Hi"});
+```
+
+```js
+> tg-api TOKEN sendMessage --chat_id=0 --text="Hi"
 ```
 
 [Telegram Bot API][3]
@@ -266,7 +270,6 @@ function cbOtherBot(bot) {
             bot.data.text = "Use: /start";
             return bot.send();
         })
-        .then(JSON.parse)
         .then(console.log, console.error);
 }
 
