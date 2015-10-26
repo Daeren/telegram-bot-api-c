@@ -33,7 +33,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Download](#refDownload)
 * [Polling](#refPolling)
 * [Server](#refServer)
-* [MServer](#refMServer)
+* [mServer](#refMServer)
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Analytics](#refAnalytics)
 * [Middleware](#refMiddleware)
@@ -267,7 +267,7 @@ function cbOtherBot(bot) {
             return bot.forward();
         })
         .then(() => {
-            bot.data.text = "Use: /start";
+            bot.data.text = "Forward: ok";
             return bot.send();
         })
         .then(console.log, console.error);
@@ -290,12 +290,6 @@ function cbCmdStart(bot, params) {
 }
 
 function cbCmdStop(bot, params) {
-    bot.data = [
-        {"text": params},
-        {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
-    ];
-
-    bot.send();
 }
 ```
 

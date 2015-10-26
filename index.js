@@ -975,6 +975,7 @@ function main(token) {
                 var fileId      = dataResult.file_id,
                     fileSize    = dataResult.file_size,
                     filePath    = dataResult.file_path,
+
                     fileName    = filePath.split("/").pop();
 
                 var url         = "https://" + gTgHostFile + "/file/bot" + token +"/" + filePath;

@@ -93,16 +93,16 @@ objBot
 
         objSrv = objBot.polling(objOptions, onNotFound);
 
-
-        objSrv.on(reText, ["type", "id"], onTextRegExp);
-        objSrv.on(reText, ["type", "id"], onTextRegExp);
-        objSrv.on(reText, ["type", "id"], onTextRegExp);
-
-        objSrv.off(reText, ["type", "id"], onTextRegExp);
-
-        objSrv.on(reText, ["type", "id"], onTextRegExp);
-
-        return;
+        //
+        //objSrv.on(reText, ["type", "id"], onTextRegExp);
+        //objSrv.on(reText, ["type", "id"], onTextRegExp);
+        //objSrv.on(reText, ["type", "id"], onTextRegExp);
+        //
+        //objSrv.off(reText, onTextRegExp);
+        //
+        //objSrv.on(reText, ["type", "id"], onTextRegExp);
+        //
+        //return;
 
         //---------]>
 
