@@ -515,11 +515,11 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | call              | method, data[, callback(error, buffer, response)]                     |                                   |
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
-| send              | id, data[, callback(error, json, response)]                         | promise or undefined              |
+| send              | id, data[, callback(error, json, response)]                           | promise or undefined              |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
-| server            | [options][, callback(bot, cmd)]                                       | ~                                 |
-| polling           | [options][, callback(bot, cmd)]                                       | ~                                 |
+| server            | [options][, callback(bot, cmd)]                                       | object                            |
+| polling           | [options][, callback(bot, cmd)]                                       | object                            |
 |                   | -                                                                     |                                   |
 | parseCmd          | text                                                                  | object {name, text, cmd}          |
 

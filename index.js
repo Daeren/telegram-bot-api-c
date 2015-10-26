@@ -115,7 +115,7 @@ function main(token) {
     //---------)>
 
     var CMain = function() {
-        this.api        = genApi();
+        this.api        = genApiMethods();
         this.keyboard   = gKeyboard;
     };
 
@@ -125,11 +125,11 @@ function main(token) {
         "call":         callAPI,
         "callJson":     callAPIJson,
 
-        "send":         send,
-        "download":     download,
+        "send":         mthCMainSend,
+        "download":     mthCMainDownload,
 
-        "server":       server,
-        "polling":      polling,
+        "server":       function(params, callback) { return createServer(this, params, callback); },
+        "polling":      function(params, callback) { return createPolling(this, params, callback); },
 
         "parseCmd":     parseCmd
     };
@@ -140,45 +140,56 @@ function main(token) {
 
     //-------------------------]>
 
-    function request(method, callback) {
-        if(!method)
-            throw new Error("`method` was not specified in `request`");
+    function genApiMethods() {
+        var result = {};
 
-        gReqOptions.path = "/bot" + token + "/" + method;
-
-        //--------------]>
-
-        var req = rHttps.request(gReqOptions, cbRequest);
-
-        if(typeof(callback) === "function") {
-            req.on("error", callback);
-        }
+        gApiMethods.forEach(add);
 
         //--------------]>
 
-        return req;
+        return result;
 
         //--------------]>
 
-        function cbRequest(response) {
-            var firstChunk, chunks;
+        function add(method) {
+            result[method] = function(data, callback) {
+                var defer,
+                    argsLen = arguments.length;
 
-            //---------]>
+                if(argsLen > 1)
+                    cbPromise(); else defer = new Promise(cbPromise);
 
-            response.on("data", function(chunk) {
-                if(!firstChunk)
-                    firstChunk = chunk;
-                else {
-                    chunks = chunks || [firstChunk];
-                    chunks.push(chunk);
+                //-------------------------]>
+
+                return defer;
+
+                //-------------------------]>
+
+                function cbPromise(resolve, reject) {
+                    if(argsLen < 2) {
+                        callback = function(error, body) {
+                            if(error)
+                                reject(error); else resolve(body);
+                        };
+                    }
+
+                    if(typeof(callback) !== "function")
+                        throw new Error("API [" + method + "]: `callback` not specified");
+
+                    callAPIJson(method, data, function(error, data) {
+                        error = error || genErrorByTgResponse(data);
+
+                        if(!error)
+                            data = data.result;
+
+                        callback(error, data);
+                    });
                 }
-            });
-
-            response.on("end", function() {
-                callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
-            });
+            };
         }
     }
+
+    //-----------[L0]----------}>
 
     function updateBoundary() {
         gBoundaryUDate  = Date.now();
@@ -200,7 +211,7 @@ function main(token) {
                 break;
 
             case "json":
-                if(value && typeof(value) !== "string")
+                if(typeof(value) !== "string")
                     value = JSON.stringify(value);
 
                 value = "Content-Disposition: form-data; name=\"" + field + "\"\r\nContent-Type: application/json\r\n\r\n" + value;
@@ -237,6 +248,57 @@ function main(token) {
         }
 
         return value ? (gCRLF + gBoundaryDiv + value) : "";
+    }
+
+    function getReadStreamByUrl(url, type, method, data, callback) {
+        if(!(/^https?:\/\//).test(url))
+            return false;
+
+        createReadStreamByUrl(url, function(error, response) {
+            var headers         = response.headers;
+
+            var contentType     = headers["content-type"],
+                contentLength   = headers["content-length"];
+
+            //--------------]>
+
+            if(!error && data.maxSize) {
+                if(!contentLength)
+                    error = new Error("Unknown size");
+                else if(contentLength > data.maxSize)
+                    error = new Error("maxSize");
+            }
+
+            if(error) {
+                if(callback)
+                    callback(error);
+
+                return;
+            }
+
+            //--------------]>
+
+            var r = Object.create(data);
+
+            r[type] = response;
+
+            if(!r.name && contentType && typeof(contentType) === "string") {
+                switch(contentType) {
+                    case "audio/mpeg":
+                    case "audio/MPA":
+                    case "audio/mpa-robust":
+                        r.name = "audio.mp3";
+                        break;
+
+                    default:
+                        r.name = contentType.replace("/", ".");
+                }
+            }
+
+            callAPI(method, r, callback);
+        });
+
+        return true;
     }
 
     //-----------[L1]----------}>
@@ -737,7 +799,7 @@ function main(token) {
 
         //-------------------------]>
 
-        req = request(method, callback);
+        req = tgApiRequest(token, method, callback);
 
         if(!body && !bodyBegin && !bodyEnd) {
             req.end();
@@ -777,7 +839,7 @@ function main(token) {
         }
 
         file
-            .on("error", function(error) {
+            .on("error", function() {
                 req.end(bodyEnd);
             })
             .on("end", function() {
@@ -809,7 +871,7 @@ function main(token) {
 
     //-----------[L2]----------}>
 
-    function send(id, data, callback) {
+    function mthCMainSend(id, data, callback) {
         var defer;
         var self = this;
 
@@ -874,7 +936,7 @@ function main(token) {
         }
     }
 
-    function download(fid, dir, name, callback) {
+    function mthCMainDownload(fid, dir, name, callback) {
         var defer;
 
         if(typeof(dir) === "function") {
@@ -976,118 +1038,6 @@ function main(token) {
                     });
             });
         }
-    }
-
-    //-----------[L3]----------}>
-
-    function server(params, callback) {
-        return createServer(this, params, callback);
-    }
-
-    function polling(params, callback) {
-        return createPolling(this, params, callback);
-    }
-
-    //-------------------------]>
-
-    function genApi() {
-        var result = {};
-
-        gApiMethods.forEach(add);
-
-        //--------------]>
-
-        return result;
-
-        //--------------]>
-
-        function add(method) {
-            result[method] = function(data, callback) {
-                var defer,
-                    argsLen = arguments.length;
-
-                if(argsLen > 1)
-                    cbPromise(); else defer = new Promise(cbPromise);
-
-                //-------------------------]>
-
-                return defer;
-
-                //-------------------------]>
-
-                function cbPromise(resolve, reject) {
-                    if(argsLen < 2) {
-                        callback = function(error, body) {
-                            if(error)
-                                reject(error); else resolve(body);
-                        };
-                    }
-
-                    if(typeof(callback) !== "function")
-                        throw new Error("API [" + method + "]: `callback` not specified");
-
-                    callAPIJson(method, data, function(error, data) {
-                        error = error || genErrorByTgResponse(data);
-
-                        if(!error)
-                            data = data.result;
-
-                        callback(error, data);
-                    });
-                }
-            };
-        }
-    }
-
-    function getReadStreamByUrl(url, type, method, data, callback) {
-        if(!(/^https?:\/\//).test(url))
-            return false;
-
-        createReadStreamByUrl(url, function(error, response) {
-            var headers         = response.headers;
-
-            var contentType     = headers["content-type"],
-                contentLength   = headers["content-length"];
-
-            //--------------]>
-
-            if(!error && data.maxSize) {
-                if(!contentLength)
-                    error = new Error("Unknown size");
-                else if(contentLength > data.maxSize)
-                    error = new Error("maxSize");
-            }
-
-            if(error) {
-                if(callback)
-                    callback(error);
-
-                return;
-            }
-
-            //--------------]>
-
-            var r = Object.create(data);
-
-            r[type] = response;
-
-            if(!r.name && contentType && typeof(contentType) === "string") {
-                switch(contentType) {
-                    case "audio/mpeg":
-                    case "audio/MPA":
-                    case "audio/mpa-robust":
-                        r.name = "audio.mp3";
-                        break;
-
-                    default:
-                        r.name = contentType.replace("/", ".");
-                }
-            }
-
-            callAPI(method, r, callback);
-        });
-
-        return true;
     }
 }
 
@@ -1231,7 +1181,7 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            srvOnMsg(objBot, data)
+            srvOnMsg(objBot, data);
         }
 
         //-------)>
@@ -1405,7 +1355,7 @@ function createPolling(botFather, params, callback) {
 
             //--------]>
 
-            srvOnMsg(objBot, data)
+            srvOnMsg(objBot, data);
         }
     }
 
@@ -1464,7 +1414,7 @@ function srvOnMsg(objBot, data) {
     //------------]>
 
     function onIterMiddleware(next, middleware) {
-        middleware(evName, ctxBot, next)
+        middleware(evName, ctxBot, next);
     }
 
     function onEndMiddleware() {
@@ -1494,15 +1444,18 @@ function srvOnMsg(objBot, data) {
 
                 //-----[RE]----}>
 
-                if(len = botFilters.regexp.length) {
+                len = botFilters.regexp.length;
+
+                if(len) {
                     var reParams;
 
                     rule = undefined;
 
                     for(var re, i = 0; !rule && i < len; i++) {
                         re = botFilters.regexp[i];
+                        reParams = msg.text.match(re.rule);
 
-                        if(reParams = msg.text.match(re.rule)) {
+                        if(reParams) {
                             rule = re.rule;
 
                             if(rule && re.binds) {
@@ -2053,6 +2006,48 @@ function compileKeyboard(input) {
 }
 
 //-------------[HELPERS]--------------}>
+
+function tgApiRequest(token, method, callback) {
+    if(!method)
+        throw new Error("request: `method` was not specified");
+
+    gReqOptions.path = "/bot" + token + "/" + method;
+
+    //--------------]>
+
+    var req = rHttps.request(gReqOptions, cbRequest);
+
+    if(typeof(callback) === "function") {
+        req.on("error", callback);
+    }
+
+    //--------------]>
+
+    return req;
+
+    //--------------]>
+
+    function cbRequest(response) {
+        var firstChunk, chunks;
+
+        //---------]>
+
+        response.on("data", function(chunk) {
+            if(!firstChunk)
+                firstChunk = chunk;
+            else {
+                chunks = chunks || [firstChunk];
+                chunks.push(chunk);
+            }
+        });
+
+        response.on("end", function() {
+            callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
+        });
+    }
+}
+
+//----------]>
 
 function genErrorByTgResponse(data) {
     if(data && !data.ok) {
