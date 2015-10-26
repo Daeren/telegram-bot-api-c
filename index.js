@@ -245,54 +245,89 @@ function main(token) {
     }
 
     function getReadStreamByUrl(url, type, method, data, callback) {
+        var redirectCount = 3;
+
         if(!(/^https?:\/\//).test(url))
             return false;
 
-        createReadStreamByUrl(url, function(error, response) {
-            var headers         = response.headers;
+        create();
 
-            var contentType     = headers["content-type"],
-                contentLength   = headers["content-length"];
-
-            //--------------]>
-
-            if(!error && data.maxSize) {
-                if(!contentLength)
-                    error = new Error("Unknown size");
-                else if(contentLength > data.maxSize)
-                    error = new Error("maxSize");
-            }
-
-            if(error) {
-                if(callback)
-                    callback(error);
-
-                return;
-            }
-
-            //--------------]>
-
-            var r = Object.create(data);
-
-            r[type] = response;
-
-            if(!r.name && contentType && typeof(contentType) === "string") {
-                switch(contentType) {
-                    case "audio/mpeg":
-                    case "audio/MPA":
-                    case "audio/mpa-robust":
-                        r.name = "audio.mp3";
-                        break;
-
-                    default:
-                        r.name = contentType.replace("/", ".");
-                }
-            }
-
-            callAPI(method, r, callback);
-        });
+        //--------------]>
 
         return true;
+
+        //--------------]>
+
+        function create() {
+            createReadStreamByUrl(url, function(error, response) {
+                if(error) {
+                    if(callback)
+                        callback(error);
+
+                    return;
+                }
+
+                //--------------]>
+
+                var headers         = response.headers;
+
+                var location        = headers["location"],
+
+                    contentType     = headers["content-type"],
+                    contentLength   = headers["content-length"];
+
+                //-----[Redirect]-----}>
+
+                if(location && redirectCount) {
+                    redirectCount--;
+                    url = location;
+
+                    create();
+
+                    return;
+                }
+
+                //-----[Filters]-----}>
+
+                if(!error && data.maxSize) {
+                    if(!contentLength)
+                        error = new Error("Unknown size");
+                    else if(contentLength > data.maxSize)
+                        error = new Error("maxSize");
+                }
+
+                if(error) {
+                    if(callback)
+                        callback(error);
+
+                    return;
+                }
+
+                //--------------]>
+
+                var result = Object.create(data);
+                result[type] = response;
+
+                //-----[MIME]-----}>
+
+                if(!result.name && contentType && typeof(contentType) === "string") {
+                    switch(contentType) {
+                        case "audio/mpeg":
+                        case "audio/MPA":
+                        case "audio/mpa-robust":
+                            result.name = "audio.mp3";
+                            break;
+
+                        default:
+                            result.name = contentType.replace("/", ".");
+                    }
+                }
+
+                //-----[API]-----}>
+
+                callAPI(method, result, callback);
+            });
+        }
     }
 
     //-----------[L1]----------}>

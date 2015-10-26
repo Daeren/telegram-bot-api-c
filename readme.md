@@ -22,7 +22,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * Stream: +
 * Promise: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
-* LoadFileByUrl: photo, audio, document, sticker, voice
+* LoadFileByUrl (with a redirect): photo, audio, document, sticker, voice
 
 
 
