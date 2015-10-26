@@ -1444,7 +1444,7 @@ function srvOnMsg(objBot, data) {
     //------------]>
 
     function onIterMiddleware(next, middleware) {
-        middleware(evName, ctxBot, next);
+        middleware(evName, ctxBot, function() { next(); });
     }
 
     function onEndMiddleware() {
