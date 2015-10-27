@@ -56,8 +56,12 @@ if(!params) {
 
 function call() {
     rBot(token).call(method, params, function(error, result) {
-        if(error)
-            result = error.toString();
+        if(error) {
+            error = error.toString();
+            process.stderr.write(error);
+
+            return;
+        }
 
         process.stdout.write(result);
     });
