@@ -1433,7 +1433,7 @@ function srvOnMsg(objBot, data) {
                 break;
         }
 
-        if(!evName || !callEvent(evName, msg[msgType]) || !callEvent("*", msg[msgType])) {
+        if(!evName || !callEvent(evName, msg[msgType]) && !callEvent("*", msg[msgType])) {
             if(objBot.onMsg)
                 objBot.onMsg(ctxBot, cmdParam);
         }

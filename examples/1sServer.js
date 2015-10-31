@@ -122,7 +122,7 @@ function onNotFound(bot, cmd) {
 
     //----------]>
 
-    response("onNotFound", bot, cmdParams);
+    response("onNotFound", bot, cmd);
 }
 
 function cbCmdStop(bot, cmdParams) {
@@ -147,7 +147,7 @@ function response(who, bot, params) {
     console.log("|params: ", params);
     console.log("+-----------------------|");
 
-    bot.data.text = params.id ? "" : bot;
+    bot.data.text = params && params.id ? "" : bot;
     bot.data.reply_markup = bot.keyboard(bot.message.text);
 
     bot.send().then(console.info, console.error);
