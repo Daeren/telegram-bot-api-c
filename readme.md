@@ -136,7 +136,7 @@ cd <module>
 npm test
 ```
 
-[![npm test][image-test]]
+![npm test][image-test]
 
 
 
