@@ -127,13 +127,13 @@ api.sendMessage(data()).then(data).then(function(x) {
 npm -g install mocha
 npm install chai
 
-cd <module>/test
-
 set TELEGRAM_BOT_TOKEN=X
 set TELEGRAM_CHAT_ID=X
 set TELEGRAM_MSG_ID=X
 
-mocha api --reporter spec
+cd <module>
+
+npm test
 ```
 
 

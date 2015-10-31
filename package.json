@@ -26,6 +26,9 @@
 		"tg-api": "./bin/index.js"
 	},
     "main": "./index",
+	"scripts": {
+		"test": "mocha --reporter spec"
+	},
 	
     "repository": {
         "type": "git",
