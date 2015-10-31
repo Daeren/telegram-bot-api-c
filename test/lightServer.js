@@ -9,13 +9,18 @@
 
 //-----------------------------------------------------
 
-var rBot = require("./../index");
+const rChai     = require("chai");
+
+const assert    = rChai.assert,
+      expect    = rChai.expect;
+
+const rBot      = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot          = rBot(process.env.TELEGRAM_BOT_TOKEN);
-var objSrvOptions   = {
-    "certDir":  "/www/site",
+const objBot            = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const objSrvOptions     = {
+    "certDir":   "/www/site",
 
     "key":       "/3_site.xx.key",
     "cert":      "/2_site.xx.crt",
@@ -25,41 +30,69 @@ var objSrvOptions   = {
         "/COMODORSADomainValidationSecureServerCA.crt"
     ],
 
-    "http":     false, //_ nginx + nodejs = <3
     "host":     "site.xx"
 };
 
 //------------------]>
 
-objBot.api
-    .setWebhook({"url": "site.xx/myBot"})
+objBot
+    .api
+    .setWebhook({"url": "site.xx/botX"})
+
     .then(isOk => {
+        expect(isOk).to.be.a("boolean");
+
         if(!isOk)
             throw new Error("Oops...problems with webhook...");
 
         objBot
             .server(objSrvOptions, cbMsg)
             .logger(cbLogger)
+
             .on("/start", cbCmdStart);
-    }, console.error);
+    }, function(error) {
+        expect(error).to.be.an.instanceof(Error);
 
-
+        console.error(error);
+    });
 
 //------------------]>
 
 function cbLogger(error, data) {
-    console.log("LOG: ", error, data && data.toString());
+    if(error)
+        expect(error).to.be.an.instanceof(Error);
+    else {
+        expect(error).to.be.null;
+        expect(data).to.be.a("object");
+
+        expect(data).to.have.property("update_id").that.is.an("number");
+        expect(data).to.have.property("message").that.is.an("object");
+    }
 }
 
-function cbMsg(bot) {
-    var commands = {
+function cbMsg(bot, cmd) {
+    if(cmd) {
+        expect(cmd).to.be.a("object");
+
+        expect(cmd).to.have.property("name");
+        expect(cmd).to.have.property("text");
+        expect(cmd).to.have.property("cmd");
+    }
+
+    //----------]>
+
+    tCheckBaseBotFields(bot);
+
+    //----------]>
+
+    let commands = {
         "help": x => {
             bot.data.text = x;
             bot.send();
         }
     };
 
-    var cmdFunc,
+    let cmdFunc,
         cmdParams = bot.parseCmd(bot.message.text);
 
     if(cmdParams)
@@ -72,6 +105,36 @@ function cbMsg(bot) {
 }
 
 function cbCmdStart(bot, params) {
-    bot.data.text = params;
+    tCheckBaseBotFields(bot);
+
+    //----------]>
+
+    bot.data.text = "CMD: /start";
     bot.send();
+}
+
+//-------------]>
+
+function tCheckBaseBotFields(bot) {
+    expect(bot).to.be.a("object");
+    expect(bot).to.have.property("message").that.is.an("object");
+
+    //----------]>
+
+    const msg = bot.message;
+
+    expect(msg).to.have.property("message_id");
+    expect(msg).to.have.property("from").that.is.an("object");
+    expect(msg).to.have.property("chat").that.is.an("object");
+    expect(msg).to.have.property("date");
+
+    expect(bot).to.have.property("cid").that.equal(msg.chat.id);
+    expect(bot).to.have.property("mid").that.equal(msg.message_id);
+    expect(bot).to.have.property("from").that.equal(msg.chat.id);
+
+    //----------]>
+
+    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("send").that.is.an("function");
+    expect(bot).to.have.property("forward").that.is.an("function");
 }

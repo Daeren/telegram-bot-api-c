@@ -9,286 +9,172 @@
 
 //-----------------------------------------------------
 
-var rBot = require("./../index");
+const rChai     = require("chai");
+
+const assert    = rChai.assert,
+      expect    = rChai.expect;
+
+const rBot      = require("./../index");
 
 //-----------------------------------------------------
 
-var objSrv;
-
-var objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
-var objOptions  = {
+const objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const objOptions  = {
     "limit":    100,
     "timeout":  0,
     "interval": 1
 };
 
-var reText = /^id\s+(\d+)/i;
+let objSrv;
 
 //---------]>
 
-objSrv = objBot.polling(objOptions, function(bot, cmd) {
-    console.log(bot);
-    console.log(cmd);
+objSrv = objBot
+    .polling(objOptions, onNotFound)
+    .logger(function cbLogger(error, data) {
+        if(error)
+            expect(error).to.be.an.instanceof(Error);
+        else {
+            expect(error).to.be.null;
+            expect(data).to.be.a("object");
 
-    bot.data.text = "Not Found";
-    bot.data.reply_markup = bot.keyboard(bot.message.text);
+            expect(data).to.have.property("ok");
+            expect(data).to.have.property("result");
+        }
+    });
 
-    bot.send();
-});
+//-----[TEST]-----}>
 
+expect(objSrv).to.be.a("object");
+expect(objSrv).to.have.property("start").that.is.an("function");
+expect(objSrv).to.have.property("stop").that.is.an("function");
+
+//-----[PLUGIN]-----}>
 
 objSrv
     .use(function(type, bot, next) {
+        expect(type).to.be.a("string");
+        expect(bot).to.be.a("object");
+        expect(next).to.be.a("function");
+
+        //----------]>
+
+        tCheckBaseBotFields(bot);
+
+        //----------]>
+
         console.log("1 | Type: %s", type);
 
         //if(bot.message.text === "next")
-            next();
+        next();
     })
     .use(function(type, bot, next) {
+        expect(type).to.be.a("string");
+        expect(bot).to.be.a("object");
+        expect(next).to.be.a("function");
+
+        //----------]>
+
+        tCheckBaseBotFields(bot);
+
+        //----------]>
+
         console.log("2 | Type: %s", type);
         next();
     });
 
-objSrv.on(/^empty/i, onTextRegExp);
-objSrv.on(/^hello/i, ["type", "id"], onTextRegExp);
-objSrv.on(/^(id)\s+(\d+)/i, "type id", onTextRegExp);
-objSrv.on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+//-----[EVENTS]-----}>
 
+[
+    "/start", "/",
+    "enterChat", "leftChat",
+
+    "chatTitle", "chatNewPhoto", "chatDeletePhoto", "chatCreated",
+
+    "text", "photo", "audio", "document", "sticker", "video", "voice", "contact", "location",
+
+    /^empty/i
+]
+    .forEach(function(type) {
+        objSrv.on(type, function(bot, cmdParams) {
+            response(type, bot, cmdParams);
+        });
+    });
+
+objSrv.on("/stop", cbCmdStop);
+
+objSrv
+    .on(/^hello/i, ["type", "id"], onTextRegExp)
+    .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
+    .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+
+
+//------]>
+
+function onNotFound(bot, cmd) {
+    if(cmd) {
+        expect(cmd).to.be.a("object");
+
+        expect(cmd).to.have.property("name");
+        expect(cmd).to.have.property("text");
+        expect(cmd).to.have.property("cmd");
+    }
+
+    //----------]>
+
+    response("onNotFound", bot, cmdParams);
+}
+
+function cbCmdStop(bot, cmdParams) {
+    response("cbCmdStop", bot, cmdParams);
+
+    objSrv.stop();
+}
 
 function onTextRegExp(bot, reParams) {
     response("onTextRegExp:", bot, reParams);
 }
 
+//---)>
+
 function response(who, bot, params) {
-    console.log(who);
-    console.log("bot: ", bot);
-    console.log("params: ", params);
+    tCheckBaseBotFields(bot);
+
+    //----------]>
+
+    console.log("[!]", who, " => ");
+    console.log("|bot: ", bot);
+    console.log("|params: ", params);
+    console.log("+-----------------------|");
 
     bot.data.text = params.id ? "" : bot;
+    bot.data.reply_markup = bot.keyboard(bot.message.text);
+
     bot.send().then(console.info, console.error);
 }
 
+//-------------]>
 
+function tCheckBaseBotFields(bot) {
+    expect(bot).to.be.a("object");
+    expect(bot).to.have.property("message").that.is.an("object");
 
+    //----------]>
 
+    const msg = bot.message;
 
+    expect(msg).to.have.property("message_id");
+    expect(msg).to.have.property("from").that.is.an("object");
+    expect(msg).to.have.property("chat").that.is.an("object");
+    expect(msg).to.have.property("date");
 
-return;
+    expect(bot).to.have.property("cid").that.equal(msg.chat.id);
+    expect(bot).to.have.property("mid").that.equal(msg.message_id);
+    expect(bot).to.have.property("from").that.equal(msg.chat.id);
 
+    //----------]>
 
-
-
-
-
-//-----------------------]>
-
-objBot
-    .api
-    .setWebhook()
-
-    .then(x => {
-        var reText = /^id\s+(\d+)/i;
-
-        //---------]>
-
-        objSrv = objBot.polling(objOptions, onNotFound);
-
-        //
-        //objSrv.on(reText, ["type", "id"], onTextRegExp);
-        //objSrv.on(reText, ["type", "id"], onTextRegExp);
-        //objSrv.on(reText, ["type", "id"], onTextRegExp);
-        //
-        //objSrv.off(reText, onTextRegExp);
-        //
-        //objSrv.on(reText, ["type", "id"], onTextRegExp);
-        //
-        //return;
-
-        //---------]>
-
-        objSrv.on("/start", onCmdStart);
-        objSrv.on("/", onCmdNotFound);
-
-        objSrv.on(/^(id)\s+(\d+)/i, ["type", "id"], onTextRegExp);
-        objSrv.on(/^(num)\s+(\d+)/i, ["type", "num"], onTextRegExp);
-
-        //objSrv.on(reText, onTextRegExp);
-        //objSrv.off(reText, onTextRegExp);
-        //objSrv.on(/^id\s+(\d+)/i, onTextRegExp);
-        //objSrv.off(/^id\s+(\d+)/i, onTextRegExp);
-
-        //objSrv.on(["photo", "document"], onDocument);
-
-        objSrv.on("enterChat", onEnterChat);
-        objSrv.on("leftChat", onLeftChat);
-
-        objSrv.on("chatTitle", onChatTitle);
-        objSrv.on("chatNewPhoto", onChatNewPhoto);
-        objSrv.on("chatDeletePhoto", onChatDeletePhoto);
-        objSrv.on("chatCreated", onChatCreated);
-
-        objSrv.on("text", onText);
-        objSrv.on("photo", onPhoto);
-        objSrv.on("audio", onAudio);
-        objSrv.on("document", onDocument);
-        objSrv.on("sticker", onSticker);
-        objSrv.on("video", onVideo);
-        objSrv.on("voice", onVoice);
-        objSrv.on("contact", onContact);
-        objSrv.on("location", onLocation);
-
-        //objSrv.off(/^hello/i, onTextRegExp);
-
-        //---------]>
-
-        function onNotFound(bot, cmdParams) {
-            response("onNotFound:", bot, cmdParams);
-        }
-
-
-        function onCmdNotFound(bot, cmdParams) {
-            response("onCmdNotFound:", bot, cmdParams);
-        }
-
-        function onCmdStart(bot, cmdParams) {
-            response("onCmdStart:", bot, cmdParams);
-
-        }
-
-
-        function onTextRegExp(bot, reParams) {
-            response("onTextRegExp:", bot, reParams);
-        }
-
-
-        function onEnterChat(bot, data) {
-            response("onEnterChat:", bot, data);
-        }
-
-        function onLeftChat(bot, data) {
-            response("onLeftChat:", bot, data);
-        }
-
-
-        function onChatTitle(bot, data) {
-            response("onChatTitle:", bot, data);
-        }
-
-        function onChatNewPhoto(bot, data) {
-            response("onChatNewPhoto:", bot, data);
-        }
-
-        function onChatDeletePhoto(bot, data) {
-            response("onChatDeletePhoto:", bot, data);
-        }
-
-        function onChatCreated(bot, data) {
-            response("onChatCreated:", bot, data);
-        }
-
-
-        function onText(bot, data) {
-            response("onText:", bot, data);
-
-            var msgText = bot.message.text;
-
-            bot.data.text = bot.message;
-            //bot.data.reply_markup = bot.keyboard[msgText];
-            bot.data.reply_markup = bot.keyboard([["1", "2,", "3"]], msgText);
-
-            // "resize once selective"
-
-            // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
-            // numpad, hide
-
-            // vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
-            // numpadOnce
-
-            bot.send();
-        }
-
-        function onPhoto(bot, data) {
-            response("onPhoto:", bot, data)
-        }
-
-        function onAudio(bot, data) {
-            response("audio:", bot, data);
-        }
-
-        function onDocument(bot, data) {
-            response("document:", bot, data);
-        }
-
-        function onSticker(bot, data) {
-            response("sticker:", bot, data);
-        }
-
-        function onVideo(bot, data) {
-            response("video:", bot, data);
-        }
-
-        function onVoice(bot, data) {
-            response("voice:", bot, data);
-        }
-
-        function onContact(bot, data) {
-            response("contact:", bot, data);
-        }
-
-        function onLocation(bot, data) {
-            response("location:", bot, data);
-        }
-
-        //---------]>
-
-        function response(who, bot, params) {
-            console.log(who);
-            console.log("bot: ", bot);
-            console.log("params: ", params);
-
-            bot.data.text = bot;
-            bot.send();
-        }
-    })
-    .catch(console.error);
-
-
-
-
-
-return;
-
-
-
-
-
-objSrv = objBot
-    .polling(objOptions, cbMsg)
-    .logger(cbLogger)
-    .analytics("apiKey", "appName")
-    .on("/stop", cbCmdStop);
-
-
-function cbLogger(error, data) {
-    console.log(error, data && data.toString());
-}
-
-function cbMsg(bot) {
-    bot.data.text = bot.message;
-    bot.data.reply_markup = bot.keyboard[bot.message.text];
-
-    // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
-    // numpad, hide
-
-    // vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
-    // numpadOnce
-
-    bot.send();
-}
-
-function cbCmdStop(bot, params) {
-    bot.data.text = "cbCmdStop";
-    bot.send();
-
-    objSrv.stop();
+    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("send").that.is.an("function");
+    expect(bot).to.have.property("forward").that.is.an("function");
 }

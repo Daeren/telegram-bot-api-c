@@ -36,7 +36,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [mServer](#refMServer)
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Analytics](#refAnalytics)
-* [Middleware](#refMiddleware)
+* [Plugin](#refPlugin)
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Errors](#refErrors)
@@ -86,8 +86,8 @@ function onPhotoOrDoc(bot, data) { }
 
 //----[API]----}>
 
-var api     = objBot.api,
-    buttons = objBot.keyboard;
+var api      = objBot.api,
+    keyboard = objBot.keyboard;
 
 var data;
 
@@ -107,9 +107,9 @@ data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 api.sendMessage(data(), function() { });
 api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
-    x.reply_markup = buttons.hOxOnce;
-    x.reply_markup = buttons("X Y Z");
-    x.reply_markup = buttons([["X"]], "resize once selective");
+    x.reply_markup = keyboard.hOxOnce;
+    x.reply_markup = keyboard("X Y Z");
+    x.reply_markup = keyboard([["X"]], "resize once selective");
 
     api.sendPhoto(x);
 });
@@ -376,8 +376,8 @@ objBot
 
 
 
-<a name="refMiddleware"></a>
-#### Middleware 
+<a name="refPlugin"></a>
+#### Plugin 
 
 ```js
 objSrv

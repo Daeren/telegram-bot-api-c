@@ -9,42 +9,43 @@
 
 //-----------------------------------------------------
 
-var rHttp           = require("http"),
-    rHttps          = require("https"),
-    rUrl            = require("url"),
-    rEvents         = require("events"),
-    rFs             = require("fs"),
-    rStream         = require("stream");
+const rHttp         = require("http"),
+      rHttps        = require("https"),
+      rUrl          = require("url"),
+      rEvents       = require("events"),
+      rFs           = require("fs"),
+      rStream       = require("stream"),
+      rPath         = require("path");
 
 //-----------------------------------------------------
 
-var gTgHostApi      = "api.telegram.org",
-    gTgHostFile     = "api.telegram.org",
-    gTgHostWebhook  = "api.telegram.org";
+const gTgHostApi      = "api.telegram.org",
+      gTgHostFile     = "api.telegram.org",
+      gTgHostWebhook  = "api.telegram.org";
 
-var gCRLF           = "\r\n";
+const gCRLF           = "\r\n";
 
-var gPipeOptions    = {"end": false};
-var gReqOptions     = {
+const gPipeOptions    = {"end": false};
+const gReqOptions     = {
     "host":         gTgHostApi,
     "method":       "POST"
 };
 
-var gReReplaceName  = /^@\S+\s+/,
+const gReReplaceName  = /^@\S+\s+/,
 
-    gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
-    gReSplitCmd     = /\s+([\s\S]+)?/,
+      gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
+      gReSplitCmd     = /\s+([\s\S]+)?/,
 
-    gReIsFilePath   = /[\\\/\.]/;
+      gReIsFilePath   = /[\\\/\.]/;
 
-var gApiMethods     = [
+const gApiMethods     = [
     "getMe", "forwardMessage",
     "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
     "getUserProfilePhotos", "getUpdates", "getFile",
     "setWebhook"
 ];
 
-var gApiMethodsMap  = {
+const gApiMethodsMap  = {
     "text":         "sendMessage",
     "photo":        "sendPhoto",
     "audio":        "sendAudio",
@@ -56,10 +57,10 @@ var gApiMethodsMap  = {
     "chatAction":   "sendChatAction"
 };
 
-var gMMTypesKeys    = Object.keys(gApiMethodsMap),
-    gMMTypesLen     = gMMTypesKeys.length;
+const gMMTypesKeys    = Object.keys(gApiMethodsMap),
+      gMMTypesLen     = gMMTypesKeys.length;
 
-var gKeyboard       = compileKeyboard({
+const gKeyboard       = compileKeyboard({
         "bin": {
             "ox": ["\u2B55\uFE0F", "\u274C"],
             "pn": ["\u2795", "\u2796"],
@@ -97,7 +98,7 @@ if(!module.parent)
 //-----------------------------------------------------
 
 function main(token) {
-    var gBoundaryKey, gBoundaryDiv, gBoundaryEnd,
+    let gBoundaryKey, gBoundaryDiv, gBoundaryEnd,
 
         gBoundaryUDate,
         gBoundaryUIntr  = 1000 * 60 * 5;
@@ -108,7 +109,7 @@ function main(token) {
 
     //---------)>
 
-    var CMain = function() {
+    const CMain = function() {
         this.api        = genApiMethods();
         this.keyboard   = gKeyboard;
     };
@@ -135,7 +136,7 @@ function main(token) {
     //-------------------------]>
 
     function genApiMethods() {
-        var result = {};
+        let result = {};
 
         gApiMethods.forEach(add);
 
@@ -147,10 +148,17 @@ function main(token) {
 
         function add(method) {
             result[method] = function(data, callback) {
-                var defer,
-                    argsLen = arguments.length;
+                const argsLen = arguments.length;
 
-                if(argsLen > 1)
+                let defer;
+
+                //---------]>
+
+                if(argsLen === 1 && typeof(data) === "function") {
+                    callback = data;
+                }
+
+                if(typeof(callback) === "function")
                     cbPromise(); else defer = new Promise(cbPromise);
 
                 //-------------------------]>
@@ -160,7 +168,7 @@ function main(token) {
                 //-------------------------]>
 
                 function cbPromise(resolve, reject) {
-                    if(argsLen < 2) {
+                    if(typeof(callback) !== "function") {
                         callback = function(error, body) {
                             if(error)
                                 reject(error); else resolve(body);
@@ -171,7 +179,7 @@ function main(token) {
                         throw new Error("API [" + method + "]: `callback` not specified");
 
                     callAPIJson(method, data, function(error, data) {
-                        error = error || genErrorByTgResponse(data);
+                        error = error || genErrorByTgResponse(data) || null;
 
                         if(!error)
                             data = data.result;
@@ -245,7 +253,7 @@ function main(token) {
     }
 
     function getReadStreamByUrl(url, type, method, data, callback) {
-        var redirectCount = 3;
+        let redirectCount = 3;
 
         if(!(/^https?:\/\//).test(url))
             return false;
@@ -269,12 +277,10 @@ function main(token) {
 
                 //--------------]>
 
-                var headers         = response.headers;
+                const headers         = response.headers;
 
-                var location        = headers["location"],
-
-                    contentType     = headers["content-type"],
-                    contentLength   = headers["content-length"];
+                const location        = headers["location"],
+                      contentLength   = headers["content-length"];
 
                 //-----[Redirect]-----}>
 
@@ -305,23 +311,8 @@ function main(token) {
 
                 //--------------]>
 
-                var result = Object.create(data);
+                let result = Object.create(data);
                 result[type] = response;
-
-                //-----[MIME]-----}>
-
-                if(!result.name && contentType && typeof(contentType) === "string") {
-                    switch(contentType) {
-                        case "audio/mpeg":
-                        case "audio/MPA":
-                        case "audio/mpa-robust":
-                            result.name = "audio.mp3";
-                            break;
-
-                        default:
-                            result.name = contentType.replace("/", ".");
-                    }
-                }
 
                 //-----[API]-----}>
 
@@ -338,7 +329,9 @@ function main(token) {
 
         //-------------------------]>
 
-        var req,
+        let t, result;
+
+        let req,
             body, bodyBegin, bodyEnd,
             file, fileName, fileId;
 
@@ -363,8 +356,6 @@ function main(token) {
                 break;
 
             case "sendMessage":
-                var t;
-
                 body = genBodyField("text", "chat_id", data.chat_id);
 
                 if((t = data.text) && typeof(t) !== "undefined") {
@@ -389,26 +380,8 @@ function main(token) {
                 break;
 
             case "sendPhoto":
-                var t, result;
-
-                file = data.photo;
-
-                if(!file) {
-                    callback(new Error("Required: photo"));
+                if(fileProcessing("photo"))
                     return;
-                }
-
-                if(typeof(file) === "string") {
-                    if(getReadStreamByUrl(file, "photo", method, data, callback))
-                        return;
-
-                    fileName = data.name || file;
-
-                    if(!gReIsFilePath.test(fileName))
-                        fileId = fileName;
-                } else {
-                    fileName = data.name || file.path || "file";
-                }
 
                 //-------------------]>
 
@@ -433,32 +406,13 @@ function main(token) {
                     result += genBodyField("photo", fileName);
 
                     bodyBegin = result;
-                    bodyEnd = "";
                 }
 
                 break;
 
             case "sendAudio":
-                var t, result;
-
-                file = data.audio;
-
-                if(!file) {
-                    callback(new Error("Required: audio"));
+                if(fileProcessing("audio"))
                     return;
-                }
-
-                if(typeof(file) === "string") {
-                    if(getReadStreamByUrl(file, "audio", method, data, callback))
-                        return;
-
-                    fileName = data.name || file;
-
-                    if(!gReIsFilePath.test(fileName))
-                        fileId = fileName;
-                } else {
-                    fileName = data.name || file.path || "file";
-                }
 
                 //-------------------]>
 
@@ -489,32 +443,13 @@ function main(token) {
                     result += genBodyField("audio", fileName);
 
                     bodyBegin = result;
-                    bodyEnd = "";
                 }
 
                 break;
 
             case "sendDocument":
-                var t, result;
-
-                file = data.document;
-
-                if(!file) {
-                    callback(new Error("Required: document"));
+                if(fileProcessing("document"))
                     return;
-                }
-
-                if(typeof(file) === "string") {
-                    if(getReadStreamByUrl(file, "document", method, data, callback))
-                        return;
-
-                    fileName = data.name || file;
-
-                    if(!gReIsFilePath.test(fileName))
-                        fileId = fileName;
-                } else {
-                    fileName = data.name || file.path || "file";
-                }
 
                 //-------------------]>
 
@@ -536,32 +471,13 @@ function main(token) {
                     result += genBodyField("document", fileName);
 
                     bodyBegin = result;
-                    bodyEnd = "";
                 }
 
                 break;
 
             case "sendSticker":
-                var t, result;
-
-                file = data.sticker;
-
-                if(!file) {
-                    callback(new Error("Required: sticker"));
+                if(fileProcessing("sticker"))
                     return;
-                }
-
-                if(typeof(file) === "string") {
-                    if(getReadStreamByUrl(file, "document", method, data, callback))
-                        return;
-
-                    fileName = data.name || file;
-
-                    if(!gReIsFilePath.test(fileName))
-                        fileId = fileName;
-                } else {
-                    fileName = data.name || file.path || "file";
-                }
 
                 //-------------------]>
 
@@ -583,32 +499,13 @@ function main(token) {
                     result += genBodyField("sticker", fileName);
 
                     bodyBegin = result;
-                    bodyEnd = "";
                 }
 
                 break;
 
             case "sendVideo":
-                var t, result;
-
-                file = data.video;
-
-                if(!file) {
-                    callback(new Error("Required: video"));
+                if(fileProcessing("video"))
                     return;
-                }
-
-                if(typeof(file) === "string") {
-                    if(getReadStreamByUrl(file, "video", method, data, callback))
-                        return;
-
-                    fileName = data.name || file;
-
-                    if(!gReIsFilePath.test(fileName))
-                        fileId = fileName;
-                } else {
-                    fileName = data.name || file.path || "file";
-                }
 
                 //-------------------]>
 
@@ -636,32 +533,13 @@ function main(token) {
                     result += genBodyField("video", fileName);
 
                     bodyBegin = result;
-                    bodyEnd = "";
                 }
 
                 break;
 
             case "sendVoice":
-                var t, result;
-
-                file = data.voice;
-
-                if(!file) {
-                    callback(new Error("Required: voice"));
+                if(fileProcessing("voice"))
                     return;
-                }
-
-                if(typeof(file) === "string") {
-                    if(getReadStreamByUrl(file, "voice", method, data, callback))
-                        return;
-
-                    fileName = data.name || file;
-
-                    if(!gReIsFilePath.test(fileName))
-                        fileId = fileName;
-                } else {
-                    fileName = data.name || file.path || "file";
-                }
 
                 //-------------------]>
 
@@ -686,14 +564,11 @@ function main(token) {
                     result += genBodyField("voice", fileName);
 
                     bodyBegin = result;
-                    bodyEnd = "";
                 }
 
                 break;
 
             case "sendLocation":
-                var t;
-
                 body = genBodyField("text", "chat_id", data.chat_id);
                 body += genBodyField("text", "latitude", data.latitude);
                 body += genBodyField("text", "longitude", data.longitude);
@@ -713,8 +588,6 @@ function main(token) {
                 break;
 
             case "getUserProfilePhotos":
-                var t;
-
                 body = genBodyField("text", "user_id", data.user_id);
 
                 if(t = data.offset)
@@ -730,7 +603,7 @@ function main(token) {
 
                 //------]>
 
-                var t, result = "";
+                result = "";
 
                 if(t = data.offset)
                     result += genBodyField("text", "offset", t);
@@ -751,8 +624,6 @@ function main(token) {
 
                 //------]>
 
-                var t;
-
                 if(t = data.file_id)
                     body = genBodyField("text", "file_id", t);
 
@@ -763,8 +634,7 @@ function main(token) {
 
                 //------]>
 
-                var t, result,
-                    certLikeStrKey;
+                let certLikeStrKey;
 
                 file = data.certificate;
 
@@ -812,7 +682,6 @@ function main(token) {
 
                 if(file) {
                     bodyBegin = result;
-                    bodyEnd = "";
                 } else {
                     body = result;
                 }
@@ -830,7 +699,7 @@ function main(token) {
 
         req = tgApiRequest(token, method, callback);
 
-        if(!body && !bodyBegin && !bodyEnd) {
+        if(!body && !bodyBegin) {
             req.end();
             return;
         }
@@ -848,9 +717,13 @@ function main(token) {
             return;
         }
 
-        bodyEnd += genBodyField("end");
+        //-------[File: init]-------}>
+
+        bodyEnd = genBodyField("end");
 
         req.write(bodyBegin);
+
+        //-------[File: stream]-------}>
 
         if(typeof(file) === "string") {
             file = rFs.createReadStream(file);
@@ -874,6 +747,42 @@ function main(token) {
             .on("end", function() {
                 req.end(bodyEnd);
             });
+
+        //-------------------------]>
+
+        function fileProcessing(type) {
+            file = data[type];
+
+            //--------]>
+
+            if(!file) {
+                callback(new Error("Required: " + type));
+                return true;
+            }
+
+            if(typeof(file) === "string") {
+                if(getReadStreamByUrl(file, type, method, data, callback))
+                    return true;
+
+                fileName = data.name || file;
+
+                if(!gReIsFilePath.test(fileName))
+                    fileId = fileName;
+            } else if(typeof(file) === "object" && file.headers) {
+                fileName = data.name || getNameByMime(file.headers["content-type"]) || "file";
+            } else {
+                fileName = data.name || file.path || "file";
+            }
+
+            //--------]>
+
+            if(fileName)
+                fileName = rPath.basename(fileName);
+
+            //--------]>
+
+            return false;
+        }
     }
 
     function callAPIJson(method, data, callback) {
@@ -901,8 +810,9 @@ function main(token) {
     //-----------[L2]----------}>
 
     function mthCMainSend(id, data, callback) {
-        var defer;
-        var self = this;
+        const self = this;
+
+        let defer;
 
         if(typeof(callback) !== "undefined")
             cbPromise(); else defer = new Promise(cbPromise);
@@ -914,9 +824,9 @@ function main(token) {
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
-            var cmdName, cmdData;
+            let cmdName, cmdData;
 
-            var cbEnd = callback ? callback : function(error, results) {
+            const cbEnd = callback ? callback : function(error, results) {
                 if(error)
                     reject(error); else resolve(results);
             };
@@ -924,11 +834,11 @@ function main(token) {
             //--------]>
 
             if(Array.isArray(data)) {
-                var results = {};
+                let results = {};
 
                 forEachAsync(data, function(next, d) {
                     call(d, function(error, body) {
-                        var stack = results[cmdName] = results[cmdName] || [];
+                        let stack = results[cmdName] = results[cmdName] || [];
                         stack.push(body);
 
                         next(error, results);
@@ -952,7 +862,7 @@ function main(token) {
             }
 
             function getName(d) {
-                var type,
+                let type,
                     len = gMMTypesLen;
 
                 while(len--) {
@@ -966,7 +876,7 @@ function main(token) {
     }
 
     function mthCMainDownload(fid, dir, name, callback) {
-        var defer;
+        let defer;
 
         if(typeof(dir) === "function") {
             callback = dir;
@@ -986,7 +896,7 @@ function main(token) {
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
-            var cbEnd = callback ? callback : function(error, results) {
+            const cbEnd = callback ? callback : function(error, results) {
                 if(error)
                     reject(error); else resolve(results);
             };
@@ -1005,15 +915,17 @@ function main(token) {
 
                 //--------]>
 
-                var dataResult  = data.result;
+                const dataResult  = data.result;
 
-                var fileId      = dataResult.file_id,
-                    fileSize    = dataResult.file_size,
-                    filePath    = dataResult.file_path,
+                const fileId      = dataResult.file_id,
+                      fileSize    = dataResult.file_size,
+                      filePath    = dataResult.file_path;
 
-                    fileName    = filePath.split("/").pop();
+                const url         = "https://" + gTgHostFile + "/file/bot" + token +"/" + filePath;
 
-                var url         = "https://" + gTgHostFile + "/file/bot" + token +"/" + filePath;
+                let fileName      = filePath.split("/").pop();
+
+                //--------]>
 
                 if(name) {
                     fileName = fileName.match(/\.(.+)$/);
@@ -1043,7 +955,9 @@ function main(token) {
 
                 dir += name + fileName;
 
-                var file = rFs.createWriteStream(dir);
+                //---)>
+
+                const file = rFs.createWriteStream(dir);
 
                 //--------]>
 
@@ -1088,20 +1002,22 @@ function createServer(botFather, params, callback) {
 
     //-----------------]>
 
-    var srv,
-        srvBots,
-        srvBotDefault = createSrvBot(botFather, callback);
+    const isHTTPS       = !params.http;
+    const srvBotDefault = createSrvBot(botFather, callback);
+
+    let srv, srvBots;
 
     //----------)>
 
-    if(params.http) {
-        srv = rHttp.createServer(cbServer);
-    } else {
-        var certDir = params.certDir || "";
+    if(isHTTPS) {
+        const certDir = params.certDir || "";
 
-        var optKey  = rFs.readFileSync(certDir + params.key),
-            optCert = rFs.readFileSync(certDir + params.cert),
-            optCa   = params.ca;
+        const optKey  = rFs.readFileSync(certDir + params.key),
+              optCert = rFs.readFileSync(certDir + params.cert);
+
+        let optCa     = params.ca;
+
+        //------)>
 
         if(optCa) {
             if(Array.isArray(optCa)) {
@@ -1113,7 +1029,9 @@ function createServer(botFather, params, callback) {
             }
         }
 
-        var options = {
+        //------)>
+
+        const options = {
             "key":    optKey,
             "cert":   optCert,
             "ca":     optCa,
@@ -1143,9 +1061,11 @@ function createServer(botFather, params, callback) {
             "rejectUnauthorized":   false
         };
 
-        //------)>
+        //---------]>
 
         srv = rHttps.createServer(options, cbServer);
+    } else {
+        srv = rHttp.createServer(cbServer);
     }
 
     srv.listen(params.port, params.host, cbListen);
@@ -1153,7 +1073,7 @@ function createServer(botFather, params, callback) {
     //-----------------]>
 
     return (function() {
-        var result = Object.create(srvBotDefault);
+        let result = Object.create(srvBotDefault);
 
         result.app = srv;
         result.bot = addBot;
@@ -1167,7 +1087,7 @@ function createServer(botFather, params, callback) {
         if(req.method !== "POST")
             return response();
 
-        var firstChunk, chunks;
+        let firstChunk, chunks;
 
         //----------]>
 
@@ -1191,23 +1111,27 @@ function createServer(botFather, params, callback) {
 
             //--------]>
 
-            var data;
+            const objBot      = srvBots && srvBots[req.url] || srvBotDefault,
+                  cbLogger    = objBot.cbLogger;
 
-            var objBot      = srvBots && srvBots[req.url] || srvBotDefault,
-                cbLogger    = objBot.cbLogger;
-
-            data = chunks ? Buffer.concat(chunks) : firstChunk;
+            let data    = chunks ? Buffer.concat(chunks) : firstChunk,
+                error   = null;
 
             //--------]>
-
-            if(cbLogger)
-                cbLogger(null, data);
 
             try {
                 data = JSON.parse(data);
             } catch(e) {
-                return;
+                error = e;
             }
+
+            //--------]>
+
+            if(cbLogger)
+                cbLogger(error, data);
+
+            if(error)
+                return;
 
             //--------]>
 
@@ -1223,8 +1147,8 @@ function createServer(botFather, params, callback) {
     }
 
     function cbListen() {
-        var host = srv.address().address;
-        var port = srv.address().port;
+        const host = srv.address().address,
+              port = srv.address().port;
 
         //-------]>
 
@@ -1266,7 +1190,7 @@ function createServer(botFather, params, callback) {
     //-----------------]>
 
     function addBot(bot, path, callback) {
-        var srvBot;
+        let srvBot;
 
         //-------------]>
 
@@ -1281,7 +1205,7 @@ function createServer(botFather, params, callback) {
 
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
-                var url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
+                const url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
 
                 srvBot
                     .bot
@@ -1320,9 +1244,9 @@ function createPolling(botFather, params, callback) {
 
     //----------------]>
 
-    var objBot      = createSrvBot(botFather, callback),
+    const objBot = createSrvBot(botFather, callback);
 
-        isStopped   = false,
+    let isStopped = false,
         tmPolling;
 
     //------)>
@@ -1333,7 +1257,7 @@ function createPolling(botFather, params, callback) {
     //----------------]>
 
     return (function() {
-        var result = Object.create(objBot);
+        let result = Object.create(objBot);
 
         result.start = tmStart;
         result.stop = tmStop;
@@ -1344,24 +1268,22 @@ function createPolling(botFather, params, callback) {
     //----------------]>
 
     function load() {
-        botFather.callJson("getUpdates", params, onParseUpdates);
+        botFather.callJson("getUpdates", params, function(error, data) {
+            if(objBot.cbLogger)
+                objBot.cbLogger(error, data);
+
+            if(error) {
+                runTimer();
+                return;
+            }
+
+            //--------]>
+
+            onLoadSuccess(data);
+        });
     }
 
     //-------)>
-
-    function onParseUpdates(error, data) {
-        if(objBot.cbLogger)
-            objBot.cbLogger(error, data);
-
-        if(error) {
-            runTimer();
-            return;
-        }
-
-        //--------]>
-
-        onLoadSuccess(data);
-    }
 
     function onLoadSuccess(data) {
         if(!data.ok) {
@@ -1418,8 +1340,8 @@ function createPolling(botFather, params, callback) {
 //----)>
 
 function srvOnMsg(objBot, data) {
-    var msg     = data.message,
-        msgChat = msg.chat;
+    const msg     = data.message,
+          msgChat = msg.chat;
 
     //--------]>
 
@@ -1428,34 +1350,35 @@ function srvOnMsg(objBot, data) {
 
     //----)>
 
-    var botMiddleware   = objBot.middleware,
-        botFilters      = objBot.filters,
+    const botPlugin       = objBot.plugin,
+          botFilters      = objBot.filters,
 
-        ctxBot          = createCtx(),
-        cmdParam,
+          ctxBot          = createCtx(),
 
-        msgType         = getTypeMsg(msg),
-        evName          = getEventNameByTypeMsg(msgType);
+          msgType         = getTypeMsg(msg),
+          evName          = getEventNameByTypeMsg(msgType);
 
-    //------------]>
-
-    forEachAsync(botMiddleware, onIterMiddleware, onEndMiddleware);
+    let cmdParam;
 
     //------------]>
 
-    function onIterMiddleware(next, middleware) {
-        middleware(evName, ctxBot, function() { next(); });
+    forEachAsync(botPlugin, onIterPlugin, onEndPlugin);
+
+    //------------]>
+
+    function onIterPlugin(next, plugin) {
+        plugin(evName, ctxBot, function() { next(); });
     }
 
-    function onEndMiddleware() {
+    function onEndPlugin() {
         switch(evName) {
             case "text":
-                var rule, len;
+                let rule, len;
 
                 //-----[Filter: botName]----}>
 
                 if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
-                    var msgText = msg.text;
+                    let msgText = msg.text;
 
                     if(msgText[0] === "@")
                         msg.text = msgText.replace(gReReplaceName, "");
@@ -1477,11 +1400,11 @@ function srvOnMsg(objBot, data) {
                 len = botFilters.regexp.length;
 
                 if(len) {
-                    var reParams;
+                    let reParams;
 
                     rule = undefined;
 
-                    for(var re, i = 0; !rule && i < len; i++) {
+                    for(let re, i = 0; !rule && i < len; i++) {
                         re = botFilters.regexp[i];
                         reParams = msg.text.match(re.rule);
 
@@ -1489,10 +1412,10 @@ function srvOnMsg(objBot, data) {
                             rule = re.rule;
 
                             if(rule && re.binds) {
-                                var result  = {},
+                                let result  = {},
                                     binds   = re.binds;
 
-                                for(var j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
+                                for(let j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
                                     result[binds[j]] = reParams[j + 1];
                                 }
 
@@ -1530,7 +1453,7 @@ function srvOnMsg(objBot, data) {
     //-------)>
 
     function createCtx() {
-        var result = Object.create(objBot.ctx);
+        let result = Object.create(objBot.ctx);
 
         result.from = result.cid = msgChat.id;
         result.mid = msg.message_id;
@@ -1550,7 +1473,7 @@ function parseCmd(text) {
 
     //---------]>
 
-    var t,
+    let t,
         name, cmd, cmdText;
 
     switch(text[0]) {
@@ -1567,9 +1490,6 @@ function parseCmd(text) {
         case "@":
             text = text.replace(gReReplaceName, "");
 
-            if(text[0] !== "/")
-                return null;
-
             break;
     }
 
@@ -1578,6 +1498,9 @@ function parseCmd(text) {
 
         cmd = t[0];
         cmdText = t[1];
+
+        if(!cmd || cmd[0] !== "/" || cmd === "/")
+            return null;
     }
 
     name = cmd.substr(1);
@@ -1607,42 +1530,40 @@ function getEventNameByTypeMsg(type) {
 }
 
 function getTypeMsg(m) {
-    var t;
+    let t;
 
-    hasOwnProperty(m, t = "text") ||
-    hasOwnProperty(m, t = "photo") ||
-    hasOwnProperty(m, t = "audio") ||
-    hasOwnProperty(m, t = "document") ||
-    hasOwnProperty(m, t = "sticker") ||
-    hasOwnProperty(m, t = "video") ||
-    hasOwnProperty(m, t = "voice") ||
-    hasOwnProperty(m, t = "contact") ||
-    hasOwnProperty(m, t = "location") ||
+    if(
+        hasOwnProperty(m, t = "text") ||
+        hasOwnProperty(m, t = "photo") ||
+        hasOwnProperty(m, t = "audio") ||
+        hasOwnProperty(m, t = "document") ||
+        hasOwnProperty(m, t = "sticker") ||
+        hasOwnProperty(m, t = "video") ||
+        hasOwnProperty(m, t = "voice") ||
+        hasOwnProperty(m, t = "contact") ||
+        hasOwnProperty(m, t = "location") ||
 
-    hasOwnProperty(m, t = "new_chat_participant") ||
-    hasOwnProperty(m, t = "left_chat_participant") ||
-    hasOwnProperty(m, t = "new_chat_title") ||
-    hasOwnProperty(m, t = "new_chat_photo") ||
-    hasOwnProperty(m, t = "delete_chat_photo") ||
-    hasOwnProperty(m, t = "group_chat_created") ||
-
-    (t = undefined);
-
-    return t;
+        hasOwnProperty(m, t = "new_chat_participant") ||
+        hasOwnProperty(m, t = "left_chat_participant") ||
+        hasOwnProperty(m, t = "new_chat_title") ||
+        hasOwnProperty(m, t = "new_chat_photo") ||
+        hasOwnProperty(m, t = "delete_chat_photo") ||
+        hasOwnProperty(m, t = "group_chat_created")
+    ) return t;
 }
 
 //---------------------------]>
 
 function createReadStreamByUrl(url, callback) {
-    var urlObj = rUrl.parse(url);
+    const urlObj = rUrl.parse(url);
 
     if(!urlObj.protocol || !(/^http/).test(urlObj.protocol)) {
         callback(new Error("Use the links only with HTTP/HTTPS protocol"));
         return;
     }
 
-    var isHTTPS = urlObj.protocol === "https:";
-    var options = {
+    const isHTTPS = urlObj.protocol === "https:";
+    const options = {
         "host": urlObj.hostname,
         "port": urlObj.port,
         "path": urlObj.path,
@@ -1655,7 +1576,7 @@ function createReadStreamByUrl(url, callback) {
 
     //-----------]>
 
-    var request = (isHTTPS ? rHttps : rHttp).get(options);
+    const request = (isHTTPS ? rHttps : rHttp).get(options);
 
     request
         .on("error", callback)
@@ -1729,10 +1650,10 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
 //---------]>
 
 function createSrvBot(bot, onMsg) {
-    var result,
+    let result;
 
-        ctx = Object.create(bot),
-        ev = new rEvents();
+    const ctx   = Object.create(bot),
+          ev    = new rEvents();
 
     ev.setMaxListeners(100);
 
@@ -1742,7 +1663,7 @@ function createSrvBot(bot, onMsg) {
         "bot": bot,
         "ctx": ctx,
 
-        "middleware": [],
+        "plugin": [],
 
         "filters": {
             "ev": ev,
@@ -1779,14 +1700,14 @@ function createSrvBot(bot, onMsg) {
     //-----------]>
 
     function ctxSend(callback) {
-        var d = this.data;
+        let d = this.data;
         this.data = {};
 
         return bot.send(this.cid, d, callback);
     }
 
     function ctxForward(callback) {
-        var data = {
+        let data = {
             "chat_id":      this.to,
             "from_chat_id": this.from,
             "message_id":   this.mid
@@ -1798,8 +1719,8 @@ function createSrvBot(bot, onMsg) {
     //-----)>
 
     function srvUse(f) {
-        result.middleware.push(f);
-        return result;
+        result.plugin.push(f);
+        return this;
     }
 
     function srvEvOn(rule, params, func) {
@@ -1811,7 +1732,7 @@ function createSrvBot(bot, onMsg) {
         //------]>
 
         if(typeof(rule) === "string") {
-            var t = rule.split(/\s+/);
+            let t = rule.split(/\s+/);
 
             if(t.length > 1)
                 rule = t;
@@ -1824,12 +1745,12 @@ function createSrvBot(bot, onMsg) {
                 srvEvOn(e, params, func);
             });
 
-            return result;
+            return this;
         }
 
         //------]>
 
-        var fltEv   = result.filters.ev,
+        let fltEv   = result.filters.ev,
             fltRe   = result.filters.regexp;
 
         switch(typeof(rule)) {
@@ -1863,7 +1784,7 @@ function createSrvBot(bot, onMsg) {
                 throw new Error("Unknown rule: " + rule);
         }
 
-        return result;
+        return this;
     }
 
     function srvEvOff(rule, func) {
@@ -1872,20 +1793,20 @@ function createSrvBot(bot, onMsg) {
                 srvEvOff(e, func);
             });
 
-            return result;
+            return this;
         }
 
         //------]>
 
-        var filters = result.filters;
+        let filters = result.filters;
 
-        var fltEv   = filters.ev,
+        let fltEv   = filters.ev,
             fltRe   = filters.regexp;
 
         //------]>
 
         if(arguments.length && !fltEv.listenerCount(rule))
-            return result;
+            return this;
 
         //------]>
 
@@ -1904,7 +1825,7 @@ function createSrvBot(bot, onMsg) {
 
             ev.removeAllListeners(rule);
 
-            return result;
+            return this;
         }
 
         //------]>
@@ -1916,7 +1837,7 @@ function createSrvBot(bot, onMsg) {
 
             case "object":
                 if(rule instanceof RegExp) {
-                    var id = getIdFltRegExp(rule);
+                    let id = getIdFltRegExp(rule);
 
                     if(id >= 0) {
                         fltEv.removeListener(rule, func);
@@ -1931,12 +1852,12 @@ function createSrvBot(bot, onMsg) {
 
         //------]>
 
-        return result;
+        return this;
 
         //------]>
 
         function getIdFltRegExp(obj) {
-            for(var i = 0, len = fltRe.length; i < len; i++)
+            for(let i = 0, len = fltRe.length; i < len; i++)
                 if(fltRe[i].rule === obj) return i;
 
             return -1;
@@ -1955,25 +1876,25 @@ function createSrvBot(bot, onMsg) {
     function srvLogger(callback) {
         result.cbLogger = callback;
 
-        return result;
+        return this;
     }
 
     function srvAnalytics(apiKey, appName) {
-        var rBotan = require("botanio");
+        let rBotan = require("botanio");
         rBotan = rBotan(apiKey);
 
         result.anTrack = function(data) {
             return rBotan.track(data, appName || "Telegram Bot");
         };
 
-        return result;
+        return this;
     }
 }
 
 //-------------[HELPERS]--------------}>
 
 function compileKeyboard(input) {
-    var result,
+    let result,
         map = {};
 
     //----------]>
@@ -2004,8 +1925,11 @@ function compileKeyboard(input) {
 
     //----------]>
 
-    for(var name in input.bin) {
-        var kb = input.bin[name];
+    for(let name in input.bin) {
+        if(!hasOwnProperty(input.bin, name))
+            continue;
+
+        let kb = input.bin[name];
 
         name = name[0].toUpperCase() + name.substr(1);
 
@@ -2013,22 +1937,31 @@ function compileKeyboard(input) {
         map["h" + name] = [kb];
     }
 
-    for(var name in map) {
-        var kb = map[name];
+    for(let name in map) {
+        if(!hasOwnProperty(map, name))
+            continue;
+
+        let kb = map[name];
 
         result[name] = {"keyboard": kb, "resize_keyboard": true};
         result[name + "Once"] = {"keyboard": kb, "resize_keyboard": true, "one_time_keyboard": true};
     }
 
-    for(var name in input.norm) {
-        var kb = input.norm[name];
+    for(let name in input.norm) {
+        if(!hasOwnProperty(input.norm, name))
+            continue;
+
+        let kb = input.norm[name];
 
         result[name] = {"keyboard": kb};
         result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
     }
 
-    for(var name in input.ignore) {
-        var kb = input.ignore[name];
+    for(let name in input.ignore) {
+        if(!hasOwnProperty(input.ignore, name))
+            continue;
+
+        let kb = input.ignore[name];
         result[name] = kb;
     }
 
@@ -2047,7 +1980,7 @@ function tgApiRequest(token, method, callback) {
 
     //--------------]>
 
-    var req = rHttps.request(gReqOptions, cbRequest);
+    const req = rHttps.request(gReqOptions, cbRequest);
 
     if(typeof(callback) === "function") {
         req.on("error", callback);
@@ -2060,7 +1993,7 @@ function tgApiRequest(token, method, callback) {
     //--------------]>
 
     function cbRequest(response) {
-        var firstChunk, chunks;
+        let firstChunk, chunks;
 
         //---------]>
 
@@ -2079,11 +2012,30 @@ function tgApiRequest(token, method, callback) {
     }
 }
 
+function getNameByMime(contentType) {
+    let result;
+
+    if(contentType && typeof(contentType) === "string") {
+        switch(contentType) {
+            case "audio/mpeg":
+            case "audio/MPA":
+            case "audio/mpa-robust":
+                result = "audio.mp3";
+                break;
+
+            default:
+                result = contentType.replace("/", ".");
+        }
+    }
+
+    return result || "";
+}
+
 //----------]>
 
 function genErrorByTgResponse(data) {
     if(data && !data.ok) {
-        var error = new Error(data.description);
+        let error = new Error(data.description);
         error.code = data.error_code;
 
         return error;
@@ -2097,7 +2049,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 function forEachAsync(data, iter, cbEnd) {
-    var i   = 0,
+    let i   = 0,
         len = data.length;
 
     //---------]>

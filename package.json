@@ -1,6 +1,6 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "4.0.2",
+    "version": "5.0.0",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
     "homepage": "http://666.io",
@@ -34,7 +34,7 @@
 
     "license": "MIT",
     "engines": {
-        "node": ">= 0.10.0"
+        "node": ">= 0.12.0"
     },
 
     "readme": "",

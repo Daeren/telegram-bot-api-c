@@ -9,13 +9,18 @@
 
 //-----------------------------------------------------
 
-var rBot = require("./../index");
+const rChai     = require("chai");
+
+const assert    = rChai.assert,
+      expect    = rChai.expect;
+
+const rBot      = require("./../index");
 
 //-----------------------------------------------------
 
-var objBot          = rBot();
-var objSrvOptions   = {
-    "certDir":  "/www/site",
+const objBot          = rBot();
+const objSrvOptions   = {
+    "certDir":   "/www/site",
 
     "key":       "/3_site.xx.key",
     "cert":      "/2_site.xx.crt",
@@ -25,49 +30,64 @@ var objSrvOptions   = {
         "/COMODORSADomainValidationSecureServerCA.crt"
     ],
 
-    "http":     false, //_ nginx + nodejs = <3
     "host":     "site.xx"
 };
 
 //------------------]>
 
-var objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
-    objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
+const objMyBot      = rBot(process.env.TG_BOT_TOKEN_MY),
+      objOtherBot   = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-var objSrv = objBot.server(objSrvOptions);
+const objSrv = objBot.server(objSrvOptions);
 
+//-----------]>
 
 objSrv
     .bot(objMyBot, "/myBot")
-    .logger(cbMyBotLogger)
+    .logger(cbBotLogger)
 
     .on("/start", cbCmdStart)
     .on("/stop", cbCmdStop);
 
 objSrv
     .bot(objOtherBot, "/myOtherBot", cbMsg)
-    .logger(cbOtherBotLogger)
+    .logger(cbBotLogger)
     .analytics("apiKey", "appNameOtherBot");
 
+//-----------]>
 
+function cbBotLogger(error, data) {
+    if(error)
+        expect(error).to.be.an.instanceof(Error);
+    else {
+        expect(error).to.be.null;
+        expect(data).to.be.a("object");
 
-function cbMyBotLogger(error, data) {
-    console.log("cbMyBotLogger");
+        expect(data).to.have.property("update_id").that.is.an("number");
+        expect(data).to.have.property("message").that.is.an("object");
+    }
 }
 
-function cbOtherBotLogger(error, data) {
-    console.log("cbOtherBotLogger");
-}
+//--------)>
 
-function cbMsg(bot) {
-    console.log("cbMsg");
-    console.log(bot);
+function cbMsg(bot, cmd) {
+    if(cmd) {
+        expect(cmd).to.be.a("object");
 
-    //----------------]>
+        expect(cmd).to.have.property("name");
+        expect(cmd).to.have.property("text");
+        expect(cmd).to.have.property("cmd");
+    }
 
-    var msg         = bot.message;
+    //----------]>
 
-    var msgChat     = msg.chat,
+    tCheckBaseBotFields(bot);
+
+    //----------]>
+
+    let msg         = bot.message;
+
+    let msgChat     = msg.chat,
         msgText     = msg.text;
 
     //----------------]>
@@ -91,28 +111,27 @@ function cbMsg(bot) {
             return bot.forward();
         })
         .then(() => {
-            bot.data.text = ">_>";
+            bot.data.text = "Forward: ok";
             return bot.send();
         })
-        .then(JSON.parse)
         .then(console.log, console.error);
 }
 
-function cbCmdStart(bot, params) {
-    console.log("cbCmdStart");
-    console.log(bot);
+//--------)>
 
-    //----------------]>
+function cbCmdStart(bot, params) {
+    tCheckBaseBotFields(bot);
+
+    //----------]>
 
     bot.data.text = "Hello";
     bot.send().then(console.log, console.error);
 }
 
 function cbCmdStop(bot, params) {
-    console.log("cbCmdStop");
-    console.log(bot);
+    tCheckBaseBotFields(bot);
 
-    //----------------]>
+    //----------]>
 
     bot.data = [
         {"text": params},
@@ -120,4 +139,30 @@ function cbCmdStop(bot, params) {
     ];
 
     bot.send();
+}
+
+//-------------]>
+
+function tCheckBaseBotFields(bot) {
+    expect(bot).to.be.a("object");
+    expect(bot).to.have.property("message").that.is.an("object");
+
+    //----------]>
+
+    const msg = bot.message;
+
+    expect(msg).to.have.property("message_id");
+    expect(msg).to.have.property("from").that.is.an("object");
+    expect(msg).to.have.property("chat").that.is.an("object");
+    expect(msg).to.have.property("date");
+
+    expect(bot).to.have.property("cid").that.equal(msg.chat.id);
+    expect(bot).to.have.property("mid").that.equal(msg.message_id);
+    expect(bot).to.have.property("from").that.equal(msg.chat.id);
+
+    //----------]>
+
+    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("send").that.is.an("function");
+    expect(bot).to.have.property("forward").that.is.an("function");
 }
