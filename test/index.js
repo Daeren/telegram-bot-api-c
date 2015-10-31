@@ -286,7 +286,7 @@ describe("Instance: bot", function() {
         });
 
 
-        it("send(photo) | callback", function(done) {
+        it("send(photo-url-stream) | callback", function(done) {
             const url = "https://www.google.ru/images/logos/ps_logo2.png";
             const request = require("https").get(url);
 
@@ -420,7 +420,9 @@ describe("Instance: bot", function() {
             });
         });
 
-        it("sendPhoto(url) | callback", function(done) {
+        //--)>
+
+        it("sendPhoto(file) | callback", function(done) {
             api.sendPhoto({
                 "chat_id":      chatId,
                 "photo":        __dirname + "/MiElPotato.jpg",
@@ -433,6 +435,22 @@ describe("Instance: bot", function() {
                 done();
             });
         });
+
+        it("sendPhoto(file-stream) | callback", function(done) {
+            api.sendPhoto({
+                "chat_id":      chatId,
+                "photo":        require("fs").createReadStream(__dirname + "/MiElPotato.jpg"),
+                "caption":      "MiElPotato"
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("photo").that.is.an("array");
+
+                done();
+            });
+        });
+
+        //--)>
 
         it("sendAudio(url) | callback", function(done) {
             api.sendAudio({

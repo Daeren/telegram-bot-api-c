@@ -1367,7 +1367,9 @@ function srvOnMsg(objBot, data) {
     //------------]>
 
     function onIterPlugin(next, plugin) {
-        plugin(evName, ctxBot, function() { next(); });
+        plugin(evName, ctxBot, function() {
+            setImmediate(next);
+        });
     }
 
     function onEndPlugin() {
@@ -1435,7 +1437,7 @@ function srvOnMsg(objBot, data) {
 
         if(!evName || !callEvent(evName, msg[msgType]) && !callEvent("*", msg[msgType])) {
             if(objBot.onMsg)
-                objBot.onMsg(ctxBot, cmdParam);
+                setImmediate(objBot.onMsg, ctxBot, cmdParam);
         }
 
         //-------]>
