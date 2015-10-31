@@ -136,6 +136,8 @@ cd <module>
 npm test
 ```
 
+[![npm test][image-test]]
+
 
 
 <a name="refCLI"></a>
@@ -606,7 +608,9 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 |                   | -                                     |                                           |
 | /[name]           | data, params                          | CMD                                       |
 |                   | -                                     |                                           |
-| [regexp]          | data, params                          |                                           |
+| (regexp)          | data, params                          |                                           |
+|                   | -                                     |                                           |
+| *                 | bot, cmd                              |                                           |
 
 
 ## License
@@ -622,3 +626,5 @@ MIT
 [2]: https://telegram.me/io666
 [3]: https://core.telegram.org/bots/api
 [4]: https://github.com/botanio/sdk#js
+
+[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
