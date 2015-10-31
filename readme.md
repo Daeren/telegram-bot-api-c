@@ -17,6 +17,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 > tg-api TOKEN sendMessage --chat_id=0 --text="Hi"
 ```
 
+
 [Telegram Bot API][3]
 
 * Coverage: +
@@ -30,6 +31,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 #### Index
 
 * [Start](#refStart)
+* [Test](#refTest)
 * [CLI](#refCLI)
 * [Download](#refDownload)
 * [Polling](#refPolling)
@@ -114,6 +116,24 @@ api.sendMessage(data()).then(data).then(function(x) {
 
     api.sendPhoto(x);
 });
+```
+
+
+
+<a name="refTest"></a>
+#### Test
+
+```js
+npm -g install mocha
+npm install chai
+
+cd <module>/test
+
+set TELEGRAM_BOT_TOKEN=X
+set TELEGRAM_CHAT_ID=X
+set TELEGRAM_MSG_ID=X
+
+mocha api --reporter spec
 ```
 
 
