@@ -40,7 +40,7 @@ expect(msgId).to.exist;
 describe("Module: bot", function() {
 
     it("Require", function() {
-        expect(rBot).to.be.a("object");
+        expect(rBot).to.be.a("function");
     });
 
     describe("Method", function() {
@@ -269,9 +269,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    expect(error).to.be.an.instanceof(Error);
-                    expect(error).to.be.null;
-
+                    checkPromiseError(error);
                     done();
                 });
         });
@@ -282,10 +280,7 @@ describe("Instance: bot", function() {
             let data = {"text": "Hi"};
 
             objBot.send(chatId, data, function(error, data) {
-                checkBaseFields(error, data);
-
-                expect(data).to.have.property("text").that.is.an("string");
-
+                checkSendMessage(error, data);
                 done();
             });
         });
@@ -333,9 +328,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    expect(error).to.be.an.instanceof(Error);
-                    expect(error).to.be.null;
-
+                    checkPromiseError(error);
                     done();
                 });
         });
@@ -408,10 +401,7 @@ describe("Instance: bot", function() {
                 "text":         "*bold Just* _italic markdown_ [XIII](db.gg)",
                 "parse_mode":   "markdown"
             }, function(error, data) {
-                checkBaseFields(error, data);
-
-                expect(data).to.have.property("text").that.is.an("string");
-
+                checkSendMessage(error, data);
                 done();
             });
         });
@@ -572,9 +562,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    expect(error).to.be.an.instanceof(Error);
-                    expect(error).to.be.null;
-
+                    checkPromiseError(error);
                     done();
                 });
         });
@@ -621,9 +609,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    expect(error).to.be.an.instanceof(Error);
-                    expect(error).to.be.null;
-
+                    checkPromiseError(error);
                     done();
                 });
         });
@@ -633,6 +619,21 @@ describe("Instance: bot", function() {
 });
 
 //----------------------------------]>
+
+function checkSendMessage(error, data) {
+    checkBaseFields(error, data);
+
+    expect(data).to.have.property("text").that.is.an("string");
+}
+
+//-----------]>
+
+function checkPromiseError(error) {
+    expect(error).to.be.an.instanceof(Error);
+    expect(error).to.be.null;
+}
+
+//-----------]>
 
 function checkBaseFields(error, data) {
     expect(error).to.be.null;

@@ -1700,7 +1700,7 @@ function createSrvBot(bot, onMsg) {
     //-----------]>
 
     function ctxSend(callback) {
-        let d = this.data;
+        const d = this.data;
         this.data = {};
 
         return bot.send(this.cid, d, callback);

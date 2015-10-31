@@ -19,6 +19,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* Coverage: +
 * Stream: +
 * Promise: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
@@ -47,18 +48,18 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 #### Start
 
 ```js
-var rBot    = require("telegram-bot-api-c");
-var objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const rBot    = require("telegram-bot-api-c");
+const objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 //----[Server]----}>
 
-var srv = objBot
-    .polling(onNotFound)
-    .use(function(type, bot, next) { next(); });
+let srv = objBot.polling();
 
 //----)>
 
 srv
+    .on("*", onNotFound)
+    
     .on("/start", onCmdStart)
     .on("/", onCmdNotFound)
 
@@ -86,10 +87,10 @@ function onPhotoOrDoc(bot, data) { }
 
 //----[API]----}>
 
-var api      = objBot.api,
-    keyboard = objBot.keyboard;
+const api      = objBot.api,
+      keyboard = objBot.keyboard;
 
-var data;
+let data;
 
 //----)>
 
@@ -177,16 +178,14 @@ objBot
 #### Polling
 
 ```js
-var objSrv;
-
-var objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
-var objOptions  = {
+const objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const objOptions  = {
     "limit":    100,
     "timeout":  0,
     "interval": 2 // <-- Default / Sec.
 };
 
-objSrv = objBot
+let objSrv = objBot
     .polling(objOptions, cbMsg)
     .on("/stop", cbCmdStop);
 
@@ -209,12 +208,12 @@ function cbCmdStop(bot, params) {
 #### Server
 
 ```js
-var rBot = require("telegram-bot-api-c");
+const rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-var objBotFather    = rBot();
-var objSrvOptions   = {
+const objBotFather    = rBot();
+const objSrvOptions   = {
     // For Self-signed certificate, you need to upload your public key certificate
     // "selfSigned":  "fullPath/stream/string-key",
 
@@ -233,10 +232,10 @@ var objSrvOptions   = {
 
 //------------------]>
 
-var objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
-    objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
+const objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
+      objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-var objSrv      = objBotFather.server(objSrvOptions);
+let objSrv        = objBotFather.server(objSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
@@ -299,7 +298,7 @@ function cbCmdStop(bot, params) {
 #### mServer
 
 ```js
-var objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 objBot
     .api
@@ -318,8 +317,8 @@ objBot
 #### NGINX + Node.js
 
 ```js
-var objBot          = rBot();
-var objSrvOptions   = {
+const objBot          = rBot();
+const objSrvOptions   = {
     "http":         true,
 
     "autoWebhook":  "site.xx:88", // <-- Default: (host + port); `false` - disable
@@ -407,7 +406,7 @@ objSrv
 #### Keyboard 
 
 ```js
-var rBot = require("telegram-bot-api-c");
+const rBot = require("telegram-bot-api-c");
 
 rBot.keyboard.numpadOnce;
 
@@ -450,10 +449,10 @@ function cbMsg(bot) {
 #### Errors 
 
 ```js
-var rBot    = require("telegram-bot-api-c");
-var gBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const rBot    = require("telegram-bot-api-c");
+const gBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-var api     = gBot.api;
+const api     = gBot.api;
 
 //------------]>
 
