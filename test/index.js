@@ -37,8 +37,36 @@ expect(msgId).to.exist;
 
 //----------------------------------]>
 
+describe("Module: bot", function() {
+
+    it("Require", function() {
+        expect(rBot).to.be.a("object");
+    });
+
+    describe("Method", function() {
+
+        it("keyboard", function() {
+            expect(rBot).to.have.property("keyboard").that.is.an("function");
+        });
+
+        it("parseCmd", function() {
+            expect(rBot).to.have.property("parseCmd").that.is.an("function");
+        });
+
+    });
+
+});
+
+//-----------------]>
+
 describe("Instance: bot", function() {
     this.timeout(1000 * 10);
+
+    //-----------------]>
+
+    it("Instance", function() {
+        expect(objBot).to.be.a("object");
+    });
 
     //-----------------]>
 
@@ -84,6 +112,10 @@ describe("Instance: bot", function() {
 
             //-----]>
 
+            expect(keyboard).to.be.a("function");
+
+            //-----]>
+
             buttons = keyboard.hOxOnce;
 
             expect(buttons).to.be.a("object");
@@ -124,6 +156,10 @@ describe("Instance: bot", function() {
 
             //-----]>
 
+            expect(parseCmd).to.be.a("function");
+
+            //-----]>
+
             for(let cmd of normalCmds)
                 it(cmd, function() {
                     let t = parseCmd(cmd);
@@ -161,6 +197,10 @@ describe("Instance: bot", function() {
                 "/", "/ [text]",
                 "@ [text]", "@ / [text]", " / [text]"
             ];
+
+            //-----]>
+
+            expect(parseCmd).to.be.a("function");
 
             //-----]>
 
