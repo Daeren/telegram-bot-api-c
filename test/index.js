@@ -277,14 +277,17 @@ describe("Instance: bot", function() {
         //-----------------]>
 
         it("send(text) | callback", function(done) {
-            let data = {"text": "Hi"};
+            let data        = {"text": "Hi"};
+            let dataClone   = jsonClone(data);
 
-            objBot.send(chatId, data, function(error, data) {
-                checkSendMessage(error, data);
+            objBot.send(chatId, data, function(error, result) {
+                checkSendMessage(error, result);
+
+                expect(data).to.deep.equal(dataClone);
+
                 done();
             });
         });
-
 
         it("send(photo-url-stream) | callback", function(done) {
             const url = "https://www.google.ru/images/logos/ps_logo2.png";
@@ -331,6 +334,19 @@ describe("Instance: bot", function() {
                     checkPromiseError(error);
                     done();
                 });
+        });
+
+        it("sendLocation | callback", function(done) {
+            let data = {"location": "57.0061726 40.9821055"};
+            let dataClone   = jsonClone(data);
+
+            objBot.send(chatId, data, function(error, result) {
+                checkSendLocation(error, result);
+
+                expect(data).to.deep.equal(dataClone);
+
+                done();
+            });
         });
 
         //-----------------]>
@@ -396,12 +412,19 @@ describe("Instance: bot", function() {
     describe("API", function() {
 
         it("sendMessage | callback", function(done) {
-            api.sendMessage({
+            let data = {
                 "chat_id":      chatId,
                 "text":         "*bold Just* _italic markdown_ [XIII](db.gg)",
                 "parse_mode":   "markdown"
-            }, function(error, data) {
-                checkSendMessage(error, data);
+            };
+
+            let dataClone   = jsonClone(data);
+
+            api.sendMessage(data, function(error, result) {
+                checkSendMessage(error, result);
+
+                expect(data).to.deep.equal(dataClone);
+
                 done();
             });
         });
@@ -527,10 +550,7 @@ describe("Instance: bot", function() {
                 "latitude":     "57.0061726",
                 "longitude":    "40.9821055"
             }, function(error, data) {
-                checkBaseFields(error, data);
-
-                expect(data).to.have.property("location").that.is.an("object");
-
+                checkSendLocation(error, data);
                 done();
             });
         });
@@ -640,8 +660,12 @@ describe("Instance: bot", function() {
 
 function checkSendMessage(error, data) {
     checkBaseFields(error, data);
-
     expect(data).to.have.property("text").that.is.an("string");
+}
+
+function checkSendLocation(error, data) {
+    checkBaseFields(error, data);
+    expect(data).to.have.property("location").that.is.an("object");
 }
 
 //-----------]>
@@ -668,4 +692,10 @@ function checkBaseFields(error, data) {
     expect(data).to.have.property("from").that.is.an("object");
     expect(data).to.have.property("chat").that.is.an("object");
     expect(data).to.have.property("date");
+}
+
+//-------[HELPERS]-------}>
+
+function jsonClone(data) {
+    return JSON.parse(JSON.stringify(data));
 }

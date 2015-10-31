@@ -1588,7 +1588,8 @@ function createReadStreamByUrl(url, callback) {
 }
 
 function prepareDataForSendApi(id, cmdName, cmdData, data) {
-    data.chat_id = id;
+    let result = Object.create(data);
+    result.chat_id = id;
 
     switch(typeof(cmdData)) {
         case "string":
@@ -1596,18 +1597,18 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
                 case "location":
                     cmdData = cmdData.split(/\s+/);
 
-                    data.latitude = cmdData[0];
-                    data.longitude = cmdData[1];
+                    result.latitude = cmdData[0];
+                    result.longitude = cmdData[1];
 
                     break;
 
                 case "chatAction":
-                    data.action = cmdData;
+                    result.action = cmdData;
 
                     break;
 
                 default:
-                    data[cmdName] = cmdData;
+                    result[cmdName] = cmdData;
 
                     break;
             }
@@ -1618,11 +1619,11 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
             switch(cmdName) {
                 case "location":
                     if(Array.isArray(cmdData)) {
-                        data.latitude = cmdData[0];
-                        data.longitude = cmdData[1];
+                        result.latitude = cmdData[0];
+                        result.longitude = cmdData[1];
                     } else if(cmdData) {
-                        data.latitude = cmdData.latitude;
-                        data.longitude = cmdData.longitude;
+                        result.latitude = cmdData.latitude;
+                        result.longitude = cmdData.longitude;
                     }
 
                     break;
@@ -1636,7 +1637,7 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
                             case "sticker":
                             case "video":
                             case "voice":
-                                data[cmdName] = cmdData;
+                                result[cmdName] = cmdData;
 
                                 break;
                         }
@@ -1646,7 +1647,7 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
             break;
     }
 
-    return data;
+    return result;
 }
 
 //---------]>
