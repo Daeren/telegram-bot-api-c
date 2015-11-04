@@ -1372,9 +1372,20 @@ function srvOnMsg(objBot, data) {
     //------------]>
 
     function onIterPlugin(next, plugin) {
-        plugin(evName, ctxBot, function() {
+        if(plugin.length < 3) {
+            plugin(evName, ctxBot);
+            onEnd();
+
+            return;
+        }
+
+        plugin(evName, ctxBot, onEnd);
+
+        //---------]>
+
+        function onEnd() {
             setImmediate(next);
-        });
+        }
     }
 
     function onEndPlugin() {

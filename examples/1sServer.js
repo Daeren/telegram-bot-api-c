@@ -54,7 +54,6 @@ expect(objSrv).to.have.property("stop").that.is.an("function");
 objSrv
     .use(function(type, bot, next) {
         expect(type).to.be.a("string");
-        expect(bot).to.be.a("object");
         expect(next).to.be.a("function");
 
         //----------]>
@@ -63,15 +62,13 @@ objSrv
 
         //----------]>
 
-        console.log("1 | Type: %s", type);
+        console.log("Async | Type: %s", type);
 
         //if(bot.message.text === "next")
         next();
     })
-    .use(function(type, bot, next) {
+    .use(function(type, bot) {
         expect(type).to.be.a("string");
-        expect(bot).to.be.a("object");
-        expect(next).to.be.a("function");
 
         //----------]>
 
@@ -79,8 +76,7 @@ objSrv
 
         //----------]>
 
-        console.log("2 | Type: %s", type);
-        next();
+        console.log("Sync | Type: %s", type);
     });
 
 //-----[EVENTS]-----}>
@@ -156,6 +152,7 @@ function response(who, bot, params) {
 //-------------]>
 
 function tCheckBaseBotFields(bot) {
+    expect(bot).to.be.an.instanceof(objSrv.constructor);
     expect(bot).to.be.a("object");
     expect(bot).to.have.property("message").that.is.an("object");
 

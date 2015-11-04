@@ -21,11 +21,11 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 [Telegram Bot API][3]
 
 * Coverage: +
-* Stream: +
 * Promise: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 * Redirect: +
+* Plugin (Async/Sync): +
 
 
 #### Index
@@ -414,17 +414,15 @@ objBot
 ```js
 objSrv
     .use(function(type, bot, next) {
-        console.log("1 | Type: %s", type);
+        console.log("Async | Type: %s", type);
 
         if(bot.message.text === "next")
             next();
     })
-    .use(function(type, bot, next) {
-        console.log("2 | Type: %s", type);
+    .use(function(type, bot) {
+        console.log("Sync | Type: %s", type);
 
         bot.user = {};
-
-        next();
     });
 
 objSrv
@@ -577,7 +575,7 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
-| use           | callback(type, bot, next)             | this                                      |
+| use           | callback(type, bot[, next])           | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
@@ -590,9 +588,26 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
-| use           | callback(type, bot, next)             | this                                      |
+| use           | callback(type, bot[, next])           | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
+
+
+#### Fields: bot (srv.on("*", bot => { })
+
+| Name              | Type       | Note                                     |
+|-------------------|------------|------------------------------------------|
+|                   | -          |                                          |
+| mid               | number     | bot.mid = bot.message.message_id         |
+| cid               | number     | bot.cid = bot.message.chat.id            |
+| from              | number     | bot.from = bot.message.chat.id           |
+| to                | undefined  |                                          |
+|                   | -          |                                          |
+| message           | object     | Incoming message                         |
+| data              | object     |                                          |
+|                   | -          |                                          |
+| send              | function   | Uses: 'cid, data'                        |
+| forward           | function   | Uses: 'mid, from, to'                    |
 
 
 #### Events: on
