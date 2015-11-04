@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * Coverage: +
 * Stream: +
 * Promise: +
-* BotCommands: /start [text], /start@bot [text], @bot /start [text], @bot [text]
+* BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 * Redirect: +
 
@@ -77,6 +77,17 @@ srv
 
 //----)>
 
+/*
+ 'bot' | objBot -> Sugar -> CtxPerRequest
+ 'bot instanceof objBot.constructor' | true
+
+ cmd.type | common or private
+
+ /start [text] -> common
+ /start@bot [text] -> private
+ @bot /start [text] -> private
+*/
+
 function onNotFound(bot, cmd) { }
 function onCmdNotFound(bot, params) { }
 
@@ -96,7 +107,7 @@ let data;
 
 //----)>
 
-data = [
+data = [ // Queue
     {"text": ["H", "i"]},
     {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
 ];
@@ -446,10 +457,10 @@ function cbMsg(bot) {
 // v - vertically; h - horizontally; Once - one_time_keyboard
 
 // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
-// numpad, hide
+// abcd, numpad, hide
 
 // vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
-// numpadOnce
+// abcdOnce, numpadOnce
 ```
 
 | Name              | Note                                 |
@@ -461,6 +472,7 @@ function cbMsg(bot) {
 | _Lr               | Leftwards / Rightwards arrow         |
 | _Gb               | Like / Dislike                       |
 |                   | -                                    |
+| abcd              | ABCD                                 |
 | numpad            | 0-9                                  |
 |                   | -                                    |
 | hide              |                                      |
@@ -506,11 +518,11 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 
 #### Module 
 
-| Attribute         | Type           | Note                                 |
-|-------------------|----------------|--------------------------------------|
-|                   | -              |                                      |
-| keyboard          | function       | return: object                       |
-| parseCmd          | text           | object {name, text, cmd}             |
+| Attribute         | Type           | Note                                                              |
+|-------------------|----------------|-------------------------------------------------------------------|
+|                   | -              |                                                                   |
+| keyboard          | function       | return: object                                                    |
+| parseCmd          | text, strict   | return: {type,name,text,cmd}; strict: maxLen32+alphanum+underscore|
 
 
 #### Instance 
@@ -536,7 +548,7 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | server            | [options][, callback(bot, cmd)]                                       | object                            |
 | polling           | [options][, callback(bot, cmd)]                                       | object                            |
 |                   | -                                                                     |                                   |
-| parseCmd          | text                                                                  | object {name, text, cmd}          |
+| parseCmd          | text, strict                                                          |                                   |
 
 
 #### Methods: send
@@ -627,4 +639,4 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://github.com/botanio/sdk#js
 
-[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
+ddddda[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png

@@ -145,11 +145,95 @@ describe("Instance: bot", function() {
 
         //------)>
 
+        describe("parseCmd | normal-strict", function() {
+            const cmdSelf = "/12345678901234567890123456789012",
+
+                cmdName = "12345678901234567890123456789012",
+                cmdText = "[text]";
+
+            let cmdType = "common";
+            let normalCmds = [
+                "/12345678901234567890123456789012 [text]",
+                "/12345678901234567890123456789012@bot [text]",
+                "@bot /12345678901234567890123456789012 [text]"
+            ];
+
+            //-----]>
+
+            expect(parseCmd).to.be.a("function");
+
+            //-----]>
+
+            for(let cmd of normalCmds) {
+                it(cmd, function(cmd, cmdType) {
+                    let t = parseCmd(cmd, true);
+
+                    expect(t).to.be.a("object");
+
+                    expect(t).to.have.property("type").that.is.equal(cmdType);
+                    expect(t).to.have.property("name").that.is.equal(cmdName);
+                    expect(t).to.have.property("text").that.is.equal(cmdText);
+                    expect(t).to.have.property("cmd").that.is.equal(cmdSelf);
+                }.bind(this, cmd, cmdType));
+
+                cmdType = "private";
+            }
+
+            //--------[@]-------}>
+
+            cmdType = "common";
+            normalCmds = [
+                "/12345678901234567890123456789012 /[text]",
+                "/12345678901234567890123456789012@bot /[text]",
+                "@bot /12345678901234567890123456789012 /[text]"
+            ];
+
+            //-----]>
+
+            for(let cmd of normalCmds) {
+                it(cmd, function(cmd, cmdType) {
+                    let t = parseCmd(cmd, true);
+
+                    expect(t).to.be.a("object");
+
+                    expect(t).to.have.property("type").that.is.equal(cmdType);
+                    expect(t).to.have.property("name").that.is.equal(cmdName);
+                    expect(t).to.have.property("text").that.is.equal("/" + cmdText);
+                    expect(t).to.have.property("cmd").that.is.equal(cmdSelf);
+                }.bind(this, cmd, cmdType));
+
+                cmdType = "private";
+            }
+        });
+
+        describe("parseCmd | fake-strict", function() {
+            const fakeCmds = [
+                "/123456789012345678901234567890123 [text]",
+                "/123456789012345678901234567890123@bot [text]",
+                "@bot /123456789012345678901234567890123 [text]",
+                "/123456789012345678901234567890123 /[text]",
+                "/123456789012345678901234567890123@bot /[text]",
+                "@bot /123456789012345678901234567890123 /[text]"
+            ];
+
+            //-----]>
+
+            expect(parseCmd).to.be.a("function");
+
+            //-----]>
+
+            for(let cmd of fakeCmds)
+                it(cmd, function() {
+                    expect(parseCmd(cmd, true)).to.be.null;
+                });
+        });
+
         describe("parseCmd | normal", function() {
             const cmdSelf = "/start",
                 cmdName = "start",
                 cmdText = "[text]";
 
+            let cmdType = "common";
             let normalCmds = [
                 "/start [text]", "/start@bot [text]", "@bot /start [text]"
             ];
@@ -160,35 +244,51 @@ describe("Instance: bot", function() {
 
             //-----]>
 
-            for(let cmd of normalCmds)
-                it(cmd, function() {
+            for(let cmd of normalCmds) {
+                it(cmd, function(cmd, cmdType) {
                     let t = parseCmd(cmd);
 
                     expect(t).to.be.a("object");
 
+                    expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
                     expect(t).to.have.property("text").that.is.equal(cmdText);
                     expect(t).to.have.property("cmd").that.is.equal(cmdSelf);
-                });
+                }.bind(this, cmd, cmdType));
 
-            //-----------------]>
+                cmdType = "private";
+            }
 
+            //--------[@]-------}>
+
+            cmdType = "common";
             normalCmds = [
                 "/start /[text]", "/start@bot /[text]", "@bot /start /[text]"
             ];
 
             //-----]>
 
-            for(let cmd of normalCmds)
-                it(cmd, function() {
+            for(let cmd of normalCmds) {
+                it(cmd, function(cmd, cmdType) {
                     let t = parseCmd(cmd);
 
                     expect(t).to.be.a("object");
 
+                    if(cmdType == "common") {
+                        console.log("---------------");
+                        console.log(t);
+                        console.log("---------------");
+                    }
+
+                    expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
                     expect(t).to.have.property("text").that.is.equal("/" + cmdText);
                     expect(t).to.have.property("cmd").that.is.equal(cmdSelf);
-                });
+
+                }.bind(this, cmd, cmdType));
+
+                cmdType = "private";
+            }
         });
 
         describe("parseCmd | fake", function() {

@@ -35,6 +35,7 @@ const gReReplaceName  = /^@\S+\s+/,
 
       gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
       gReSplitCmd     = /\s+([\s\S]+)?/,
+      gReValidCmd     = /[\w]+/i,
 
       gReIsFilePath   = /[\\\/\.]/;
 
@@ -70,6 +71,10 @@ const gKeyboard       = compileKeyboard({
         },
 
         "norm": {
+            "abcd": [
+                ["A", "B", "C", "D"]
+            ],
+
             "numpad": [
                 ["7", "8", "9"],
                 ["4", "5", "6"],
@@ -1469,14 +1474,16 @@ function srvOnMsg(objBot, data) {
 
 //---------]>
 
-function parseCmd(text) {
+function parseCmd(text, strict) {
     if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)
         return null;
 
     //---------]>
 
     let t,
-        name, cmd, cmdText;
+
+        type = "common",
+        name, cmdText, cmd;
 
     switch(text[0]) {
         case "/":
@@ -1485,12 +1492,18 @@ function parseCmd(text) {
             if(t) {
                 cmd = t[1];
                 cmdText = t[2];
+
+                if(cmd)
+                    type = "private";
             }
 
             break;
 
         case "@":
             text = text.replace(gReReplaceName, "");
+
+            if(text)
+                type = "private";
 
             break;
     }
@@ -1509,9 +1522,18 @@ function parseCmd(text) {
 
     //---------]>
 
+    if(strict) {
+        if(name.length > 32 || !gReValidCmd.test(name))
+            return null;
+    }
+
+    //---------]>
+
     return {
+        "type": type,
         "name": name,
         "text": cmdText || "",
+
         "cmd":  cmd
     };
 }
@@ -1663,32 +1685,32 @@ function createSrvBot(bot, onMsg) {
     //--------------]>
 
     result = {
-        "bot": bot,
-        "ctx": ctx,
+        "bot":          bot,
+        "ctx":          ctx,
 
-        "plugin": [],
+        "plugin":       [],
 
         "filters": {
-            "ev": ev,
-            "regexp": []
+            "ev":       ev,
+            "regexp":   []
         },
 
-        "cbLogger": null,
-        "anTrack": null,
+        "cbLogger":     null,
+        "anTrack":      null,
 
         //-----)>
 
-        "use": srvUse,
+        "use":          srvUse,
 
-        "on": srvEvOn,
-        "off": srvEvOff,
+        "on":           srvEvOn,
+        "off":          srvEvOff,
 
-        "logger": srvLogger,
-        "analytics": srvAnalytics,
+        "logger":       srvLogger,
+        "analytics":    srvAnalytics,
 
         //-----)>
 
-        "onMsg": onMsg
+        "onMsg":        onMsg
     };
 
     //-----)>
