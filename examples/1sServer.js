@@ -64,8 +64,8 @@ objSrv
 
         console.log("Async | Type: %s", type);
 
-        //if(bot.message.text === "next")
-        next();
+        if(bot.message.text === "room")
+            next("room.menu"); else next();
     })
     .use(function(type, bot) {
         expect(type).to.be.a("string");
@@ -99,6 +99,8 @@ objSrv
 
 objSrv.on("/stop", cbCmdStop);
 
+objSrv.on("text:room.menu", onTextRoom);
+
 objSrv
     .on(/^hello/i, ["type", "id"], onTextRegExp)
     .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
@@ -125,6 +127,10 @@ function cbCmdStop(bot, cmdParams) {
     response("cbCmdStop", bot, cmdParams);
 
     objSrv.stop();
+}
+
+function onTextRoom(bot, params) {
+    response("onTextRoom:", bot, params);
 }
 
 function onTextRegExp(bot, reParams) {

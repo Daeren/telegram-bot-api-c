@@ -72,7 +72,7 @@ const gKeyboard       = compileKeyboard({
 
         "norm": {
             "abcd": [
-                ["A", "B", "C", "D"]
+                ["A", "B"], ["C", "D"]
             ],
 
             "numpad": [
@@ -1383,12 +1383,12 @@ function srvOnMsg(objBot, data) {
 
         //---------]>
 
-        function onEnd() {
-            setImmediate(next);
+        function onEnd(state) {
+            setImmediate(next, state);
         }
     }
 
-    function onEndPlugin() {
+    function onEndPlugin(state) {
         switch(evName) {
             case "text":
                 let rule, len;
@@ -1460,7 +1460,12 @@ function srvOnMsg(objBot, data) {
 
         function callEvent(type, params) {
             if(botFilters.ev.listenerCount(type)) {
+                if(state) {
+                    type += ":" + state;
+                }
+
                 botFilters.ev.emit(type, ctxBot, params);
+
                 return true;
             }
 

@@ -26,6 +26,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * LoadFileByUrl: photo, audio, document, sticker, voice
 * Redirect: +
 * Plugin (Async/Sync): +
+* Goto (Plugin+Event): +
 
 
 #### Index
@@ -40,6 +41,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Analytics](#refAnalytics)
 * [Plugin](#refPlugin)
+* [Goto](#refGoto)
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Errors](#refErrors)
@@ -429,6 +431,32 @@ objSrv
     .on("text", function(bot, data) {
         bot.user.id;
     });
+```
+
+
+
+<a name="refGoto"></a>
+#### Goto 
+
+```js
+objSrv
+    .use(function(type, bot, next) {
+        if(bot.message.text === "room")
+            next("room.menu"); else next();
+    })
+    .use(function(type, bot) {
+        console.log("If not the room");
+    });
+
+objSrv
+    .on("text", function(bot, data) {
+    });
+    
+objSrv
+    .on("text:room.menu", function(bot, data) {
+    });
+    
+// Does not work with: regEx
 ```
 
 
