@@ -639,4 +639,4 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://github.com/botanio/sdk#js
 
-ddddda[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
+[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
