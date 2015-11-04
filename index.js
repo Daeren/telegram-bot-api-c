@@ -1451,7 +1451,7 @@ function srvOnMsg(objBot, data) {
                 break;
         }
 
-        if(!evName || !callEvent(evName, msg[msgType]) && !callEvent("*", msg[msgType])) {
+        if(!evName || !callEvent(evName, msg[msgType]) && !callEvent("*", cmdParam)) {
             if(objBot.onMsg)
                 setImmediate(objBot.onMsg, ctxBot, cmdParam);
         }
