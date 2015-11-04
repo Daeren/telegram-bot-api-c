@@ -274,12 +274,6 @@ describe("Instance: bot", function() {
 
                     expect(t).to.be.a("object");
 
-                    if(cmdType == "common") {
-                        console.log("---------------");
-                        console.log(t);
-                        console.log("---------------");
-                    }
-
                     expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
                     expect(t).to.have.property("text").that.is.equal("/" + cmdText);
