@@ -1457,13 +1457,12 @@ function srvOnMsg(objBot, data) {
         //-------]>
 
         function callEvent(type, params) {
+            if(state) {
+                type += ":" + state;
+            }
+
             if(botFilters.ev.listenerCount(type)) {
-                if(state) {
-                    type += ":" + state;
-                }
-
                 botFilters.ev.emit(type, ctxBot, params);
-
                 return true;
             }
 
