@@ -39,7 +39,9 @@ objSrv = objBot
             expect(data).to.be.a("object");
 
             expect(data).to.have.property("ok");
-            expect(data).to.have.property("result");
+
+            if(data.ok)
+                expect(data).to.have.property("result");
         }
     });
 
@@ -77,6 +79,8 @@ objSrv
         //----------]>
 
         console.log("Sync | Type: %s", type);
+
+        //return "room.menu";
     });
 
 //-----[EVENTS]-----}>

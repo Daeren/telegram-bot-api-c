@@ -1373,9 +1373,7 @@ function srvOnMsg(objBot, data) {
 
     function onIterPlugin(next, plugin) {
         if(plugin.length < 3) {
-            plugin(evName, ctxBot);
-            onEnd();
-
+            onEnd(plugin(evName, ctxBot));
             return;
         }
 

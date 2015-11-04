@@ -446,6 +446,8 @@ objSrv
     })
     .use(function(type, bot) {
         console.log("If not the room");
+        
+        // return "room.menu";
     });
 
 objSrv
