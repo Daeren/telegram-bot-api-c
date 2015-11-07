@@ -1195,10 +1195,6 @@ function createServer(botFather, params, callback) {
     //-----------------]>
 
     function addBot(bot, path, callback) {
-        let srvBot;
-
-        //-------------]>
-
         srvBots = srvBots || {};
 
         if(hasOwnProperty(srvBots, path))
@@ -1206,7 +1202,7 @@ function createServer(botFather, params, callback) {
 
         //-------------]>
 
-        srvBots[path] = srvBot = createSrvBot(bot, callback);
+        const srvBot = srvBots[path] = createSrvBot(bot, callback);
 
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
