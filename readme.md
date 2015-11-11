@@ -122,7 +122,7 @@ data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 api.sendMessage(data(), function() { });
 api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
-    x.reply_markup = keyboard.hOxOnce;
+    x.reply_markup = keyboard.hOx(/*once, selective*/);
     x.reply_markup = keyboard("X Y Z");
     x.reply_markup = keyboard([["X"]], "resize once selective");
 
