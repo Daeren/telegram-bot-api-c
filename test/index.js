@@ -116,11 +116,13 @@ describe("Instance: bot", function() {
 
             //-----]>
 
-            buttons = keyboard.hOxOnce;
+            buttons = keyboard.hOx;
 
-            expect(buttons).to.be.a("object");
+            expect(buttons).to.be.a("function");
 
-            expect(buttons).to.have.property("keyboard").that.is.an("array");
+            expect(buttons()).to.have.property("keyboard").that.is.an("array");
+            expect(buttons(true)).to.have.property("one_time_keyboard").that.is.equal(true);
+            expect(buttons(false, true)).to.have.property("selective").that.is.equal(true);
 
             //-----]>
 
@@ -663,6 +665,21 @@ describe("Instance: bot", function() {
 
         //-----)>
 
+        it("setWebhook | promise", function(done) {
+            api
+                .setWebhook()
+                .then(function(isOk) {
+                    expect(isOk).to.be.a("boolean");
+
+                    done();
+                }, function(error) {
+                    checkPromiseError(error);
+                    done();
+                });
+        });
+
+        //-----)>
+
         it("getUserProfilePhotos | callback", function(done) {
             api.getUserProfilePhotos({
                 "user_id":      chatId
@@ -682,21 +699,6 @@ describe("Instance: bot", function() {
 
                 done();
             });
-        });
-
-        //-----)>
-
-        it("setWebhook | promise", function(done) {
-            api
-                .setWebhook()
-                .then(function(isOk) {
-                    expect(isOk).to.be.a("boolean");
-
-                    done();
-                }, function(error) {
-                    checkPromiseError(error);
-                    done();
-                });
         });
 
         //-----)>

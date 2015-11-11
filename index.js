@@ -81,10 +81,6 @@ const gKeyboard       = compileKeyboard({
                 ["1", "2", "3"],
                 ["0"]
             ]
-        },
-
-        "ignore": {
-            "hide": {"hide_keyboard": true}
         }
     });
 
@@ -1346,11 +1342,6 @@ function srvOnMsg(objBot, data) {
 
     //--------]>
 
-    if(objBot.anTrack)
-        objBot.anTrack(msg);
-
-    //----)>
-
     const botPlugin       = objBot.plugin,
           botFilters      = objBot.filters,
 
@@ -1705,7 +1696,6 @@ function createSrvBot(bot, onMsg) {
         },
 
         "cbLogger":     null,
-        "anTrack":      null,
 
         //-----)>
 
@@ -1715,7 +1705,6 @@ function createSrvBot(bot, onMsg) {
         "off":          srvEvOff,
 
         "logger":       srvLogger,
-        "analytics":    srvAnalytics,
 
         //-----)>
 
@@ -1909,18 +1898,6 @@ function createSrvBot(bot, onMsg) {
 
     function srvLogger(callback) {
         result.cbLogger = callback;
-
-        return this;
-    }
-
-    function srvAnalytics(apiKey, appName) {
-        let rBotan = require("botanio");
-        rBotan = rBotan(apiKey);
-
-        result.anTrack = function(data) {
-            return rBotan.track(data, appName || "Telegram Bot");
-        };
-
         return this;
     }
 }
@@ -1976,9 +1953,7 @@ function compileKeyboard(input) {
             continue;
 
         let kb = map[name];
-
-        result[name] = {"keyboard": kb, "resize_keyboard": true};
-        result[name + "Once"] = {"keyboard": kb, "resize_keyboard": true, "one_time_keyboard": true};
+        result[name] = genFKB("keyboard", kb, true);
     }
 
     for(let name in input.norm) {
@@ -1986,22 +1961,32 @@ function compileKeyboard(input) {
             continue;
 
         let kb = input.norm[name];
-
-        result[name] = {"keyboard": kb};
-        result[name + "Once"] = {"keyboard": kb, "one_time_keyboard": true};
+        result[name] = genFKB("keyboard", kb);
     }
 
-    for(let name in input.ignore) {
-        if(!hasOwnProperty(input.ignore, name))
-            continue;
+    //-----)>
 
-        let kb = input.ignore[name];
-        result[name] = kb;
-    }
+    result.hide = genFKB("hide_keyboard");
 
     //----------]>
 
     return result;
+
+    //----------]>
+
+    function genFKB(type, kb, resize) {
+        return function(once, selective) {
+            const k = {};
+
+            k[type] = kb || true;
+
+            if(resize) k.resize_keyboard = true;
+            if(once) k.one_time_keyboard = true;
+            if(selective) k.selective = true;
+
+            return k;
+        };
+    }
 }
 
 //----------]>

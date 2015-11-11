@@ -21,12 +21,12 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 [Telegram Bot API][3]
 
 * Coverage: +
-* Promise: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 * Redirect: +
 * Plugin (Async/Sync): +
 * Goto (Plugin+Event): +
+* Analytics: [tgb-pl-botanio][4]
 
 
 #### Index
@@ -39,7 +39,6 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Server](#refServer)
 * [mServer](#refMServer)
 * [Nginx+Node.js](#refExampleNginxNodejs)
-* [Analytics](#refAnalytics)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
 * [Logger](#refLogger)
@@ -367,28 +366,6 @@ objBot.server(objSrvOptions, cbMsg);
 
 
 
-<a name="refAnalytics"></a>
-#### Analytics 
-
-Used [Botan SDK][4]
-
-```js
-objBot
-    .polling(objSrvOptions, cbMsg)
-    .analytics("apiKey", "appName");
-    
-objBot
-    .server(objSrvOptions, cbMsg)
-    .analytics("apiKey", "appName");
-
-objBot
-    .server(objOptions)
-    .bot(objMyBot, "/MyBot", cbMyBot)
-    .analytics("apiKey", "appName");
-```
-
-
-
 <a name="refLogger"></a>
 #### Logger 
 
@@ -469,26 +446,30 @@ objSrv
 ```js
 const rBot = require("telegram-bot-api-c");
 
-rBot.keyboard.numpadOnce;
+rBot.keyboard.numpad(true); // <-- Once
+rBot.keyboard.numpad(false, true); // <-- Selective
 
 function cbMsg(bot) {
     bot.data.text = "Hell Word!";
-    bot.data.reply_markup = bot.keyboard.hOx;
+    bot.data.reply_markup = bot.keyboard.hOx();
     
     bot.send();
 }
+
 
 // rBot.keyboard(buttons[, params])
 // buttons: string or array
 // params: "resize once selective"
 
-// v - vertically; h - horizontally; Once - one_time_keyboard
+
+// v - vertically; h - horizontally;
 
 // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
 // abcd, numpad, hide
 
-// vOxOnce, hOxOnce, vPnOnce, hPnOnce, vLrOnce, hLrOnce, vGbOnce, hGbOnce
-// abcdOnce, numpadOnce
+// vOx(once, selective)
+// numpad(once, selective)
+
 ```
 
 | Name              | Note                                 |
@@ -604,7 +585,6 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | stop          |                                       | this                                      |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
-| analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
 | use           | callback(type, bot[, next])           | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
@@ -617,7 +597,6 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | bot           | bot, path, callback(json, request)    | a new instance                            |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
-| analytics     | apiKey[, appName="Telegram Bot"]      | this                                      |
 | use           | callback(type, bot[, next])           | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
@@ -682,6 +661,6 @@ MIT
 [1]: http://666.io
 [2]: https://telegram.me/io666
 [3]: https://core.telegram.org/bots/api
-[4]: https://github.com/botanio/sdk#js
+[4]: https://npmjs.com/package/tgb-pl-botanio
 
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png

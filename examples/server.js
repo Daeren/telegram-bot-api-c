@@ -51,8 +51,7 @@ objSrv
 
 objSrv
     .bot(objOtherBot, "/myOtherBot", cbMsg)
-    .logger(cbBotLogger)
-    .analytics("apiKey", "appNameOtherBot");
+    .logger(cbBotLogger);
 
 //-----------]>
 
