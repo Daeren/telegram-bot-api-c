@@ -315,7 +315,7 @@ function cbCmdStart(bot, params) {
         {
             "photo":        "https://www.google.ru/images/logos/ps_logo2.png",
             "maxSize":      26189, // <-- decimal number of OCTETs
-            "reply_markup": bot.keyboard.hOxOnce
+            "reply_markup": bot.keyboard.hOx()
         }
     ];
 
