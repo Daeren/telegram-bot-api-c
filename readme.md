@@ -510,28 +510,28 @@ api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || dat
 
 //------------]>
 
-gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
-
-// e    - Error: request
-// data - Buffer: response
-
-//------------]>
-
 gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 // e    - Error: request/JSON.parse
 // data - JSON: response or null
+
+//------------]>
+
+gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
+
+// e    - Error: request
+// data - Buffer: response
 ```
 
 
 
 #### Module 
 
-| Attribute         | Type           | Note                                                              |
-|-------------------|----------------|-------------------------------------------------------------------|
-|                   | -              |                                                                   |
-| keyboard          | function       | return: object                                                    |
-| parseCmd          | text, strict   | return: {type,name,text,cmd}; strict: maxLen32+alphanum+underscore|
+| Attribute         | Type           | Note                                                                     |
+|-------------------|----------------|--------------------------------------------------------------------------|
+|                   | -              |                                                                          |
+| keyboard          | function       | return: object                                                           |
+| parseCmd          | text, strict   | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore|
 
 
 #### Instance 
@@ -562,18 +562,18 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 
 #### Methods: send
 
-| Name          | Type                                  | Note                                      |
-|---------------|---------------------------------------|-------------------------------------------|
-|               | -                                     |                                           |
-| text          | string, json                          |                                           |
-| photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp        |
-| audio         | string, stream                        | Ext: mp3                                  |
-| document      | string, stream                        |                                           |
-| sticker       | string, stream                        | Ext: webp, jpg, jpeg, gif, tif, png, bmp  |
-| video         | string, stream                        | Ext: mp4                                  |
-| voice         | string, stream                        | Ext: ogg                                  |
-| location      | string, json                          |                                           |
-| chatAction    | string                                |                                           |
+| Name          | Type                                  | Note                                                          |
+|---------------|---------------------------------------|---------------------------------------------------------------|
+|               | -                                     |                                                               |
+| text          | string, json                          |                                                               |
+| photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp                            |
+| audio         | string, stream                        | Ext: mp3                                                      |
+| document      | string, stream                        |                                                               |
+| sticker       | string, stream                        | Ext: webp, jpg, jpeg, gif, tif, png, bmp                      |
+| video         | string, stream                        | Ext: mp4                                                      |
+| voice         | string, stream                        | Ext: ogg                                                      |
+| location      | string, json                          | Format: "60.0 60.0", [60, 60], {latitude:60, longitude:60}    |
+| chatAction    | string                                |                                                               |
 
 
 #### Methods: polling
@@ -594,7 +594,7 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | Name          | Arguments                             | Return                                    |
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
-| bot           | bot, path, callback(json, request)    | a new instance                            |
+| bot           | bot, path, callback(json, request)    | srv                                       |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | use           | callback(type, bot[, next])           | this                                      |
@@ -615,8 +615,8 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || dat
 | message           | object     | Incoming message                         |
 | data              | object     |                                          |
 |                   | -          |                                          |
-| send              | function   | Uses: 'cid, data'                        |
-| forward           | function   | Uses: 'mid, from, to'                    |
+| send              | function   | Uses: cid, data                          |
+| forward           | function   | Uses: mid, from, to                      |
 
 
 #### Events: on
