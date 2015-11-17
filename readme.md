@@ -20,6 +20,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* Set engine(render)/promise: +
 * Coverage: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
@@ -41,6 +42,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
+* [Render](#refRender)
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Errors](#refErrors)
@@ -366,6 +368,34 @@ objBot.server(objSrvOptions, cbMsg);
 
 
 
+<a name="refRender"></a>
+#### Render 
+
+```js
+objBot
+    .engine(require("ejs"))
+    .promise(require("bluebird"))
+
+    .polling()
+
+    .use(function(type, bot) {
+        //-----[DEFAULT]-----}>
+
+        bot.data = ["H", "i"];
+        bot.render("Array | Text: {0} + {1}").then(console.log);
+
+        bot.data = {"x": "H", "y": "i"};
+        bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
+
+        //-----[EJS]-----}>
+
+        bot.data = {"x": "H", "y": "i"};
+        bot.render("EJS | Text: <%= x %> + <%= y %>");
+    });
+```
+
+
+
 <a name="refLogger"></a>
 #### Logger 
 
@@ -382,7 +412,6 @@ objBot
     .server(objOptions)
     .bot(objMyBot, "/MyBot")
     .logger(cbLogger);
-    
 ```
 
 
@@ -536,7 +565,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 |-------------------|----------------|--------------------------------------------------------------------------|
 |                   | -              |                                                                          |
 | keyboard          | function       | return: object                                                           |
-| parseCmd          | text, strict   | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore|
+| parseCmd          | text[, strict] | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore|
 
 
 #### Instance 
@@ -551,6 +580,8 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 | Method            | Arguments                                                             | Return                            |
 |-------------------|-----------------------------------------------------------------------|-----------------------------------|
 |                   | -                                                                     |                                   |
+| engine            | instance                                                              | this                              |
+| promise           | instance                                                              | this                              |
 | setToken          | token                                                                 | this                              |
 |                   | -                                                                     |                                   |
 | call              | method, data[, callback(error, buffer, response)]                     |                                   |
@@ -562,7 +593,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 | server            | [options][, callback(bot, cmd)]                                       | object                            |
 | polling           | [options][, callback(bot, cmd)]                                       | object                            |
 |                   | -                                                                     |                                   |
-| parseCmd          | text, strict                                                          |                                   |
+| parseCmd          | text[, strict]                                                        |                                   |
 
 
 #### Methods: send

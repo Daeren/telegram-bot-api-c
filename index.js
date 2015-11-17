@@ -110,13 +110,18 @@ function main(token) {
 
     //---------)>
 
-    const CMain = function() {
-        this.api        = genApiMethods();
+    function CMain() {
+        this.api        = genApiMethods(this);
         this.keyboard   = gKeyboard;
-    };
+
+        this.mdPromise  = Promise;
+    }
 
     CMain.prototype = {
         "setToken":     function(t) { token = t; return this; },
+
+        "engine":       function(t) { this.mdEngine = t; return this; },
+        "promise":      function(t) { this.mdPromise = t; return this; },
 
         "call":         callAPI,
         "callJson":     callAPIJson,
@@ -136,7 +141,7 @@ function main(token) {
 
     //-------------------------]>
 
-    function genApiMethods() {
+    function genApiMethods(bot) {
         let result = {};
 
         gApiMethods.forEach(add);
@@ -160,7 +165,7 @@ function main(token) {
                 }
 
                 if(typeof(callback) === "function")
-                    cbPromise(); else defer = new Promise(cbPromise);
+                    cbPromise(); else defer = new bot.mdPromise(cbPromise);
 
                 //-------------------------]>
 
@@ -819,7 +824,7 @@ function main(token) {
         let defer;
 
         if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
+            cbPromise(); else defer = new this.mdPromise(cbPromise);
 
         //-------------------------]>
 
@@ -891,7 +896,7 @@ function main(token) {
         }
 
         if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new Promise(cbPromise);
+            cbPromise(); else defer = new this.mdPromise(cbPromise);
 
         //-------------------------]>
 
@@ -1728,6 +1733,7 @@ function createSrvBot(bot, onMsg) {
 
     //-----)>
 
+    ctx.render = ctxRender;
     ctx.send = ctxSend;
     ctx.forward = ctxForward;
 
@@ -1736,6 +1742,33 @@ function createSrvBot(bot, onMsg) {
     return result;
 
     //-----------]>
+
+    function ctxRender(template, callback) {
+        let d = this.data;
+        this.data = {};
+
+        if(bot.mdEngine)
+            template = bot.mdEngine.render(template, d);
+        else {
+            if(Array.isArray(d)) {
+                d.forEach(function(e, i) {
+                    template = template.replace("{" + i + "}", e);
+                });
+            } else {
+                for(let name in d) {
+                    if(hasOwnProperty(d, name))
+                        template = template.replace("{" + name + "}", d[name]);
+                }
+            }
+        }
+
+        d = {
+            "chat_id":  this.cid,
+            "text":     template
+        };
+
+        return arguments.length < 2 ? bot.api.sendMessage(d) : bot.api.sendMessage(d, callback);
+    }
 
     function ctxSend(callback) {
         const d = this.data;
@@ -1751,7 +1784,7 @@ function createSrvBot(bot, onMsg) {
             "message_id":   this.mid
         };
 
-        return arguments.length < 2 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
+        return arguments.length < 1 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
     }
 
     //-----)>
