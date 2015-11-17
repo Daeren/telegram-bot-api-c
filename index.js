@@ -726,6 +726,11 @@ function main(token) {
 
         //-------[File: stream]-------}>
 
+        if(!file) {
+            req.end(bodyEnd);
+            return;
+        }
+
         if(typeof(file) === "string") {
             file = rFs.createReadStream(file);
 
