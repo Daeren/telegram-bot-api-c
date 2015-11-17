@@ -405,7 +405,7 @@ objSrv
     });
 
 objSrv
-    .use("text", function(bot /*, next*/) {
+    .use("text", function(bot /*, next*/) { // Filter by `type`
         console.log("Sync | Type: %s", type);
 
         bot.user.id = 1;
