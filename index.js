@@ -281,6 +281,15 @@ function main(token) {
                     return;
                 }
 
+                const statusCode = response.statusCode;
+
+                if(statusCode < 200 || statusCode > 399) {
+                    response = undefined;
+                    onEnd();
+
+                    return;
+                }
+
                 //--------------]>
 
                 const headers         = response.headers;
@@ -317,12 +326,18 @@ function main(token) {
 
                 //--------------]>
 
-                let result = Object.create(data);
-                result[type] = response;
+                onEnd();
 
-                //-----[API]-----}>
+                //--------------]>
 
-                callAPI(method, result, callback);
+                function onEnd() {
+                    let result = Object.create(data);
+                    result[type] = response;
+
+                    //-----[API]-----}>
+
+                    callAPI(method, result, callback);
+                }
             });
         }
     }
