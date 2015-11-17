@@ -83,6 +83,45 @@ objSrv
         //return "room.menu";
     });
 
+//-----[Filter by Type]-----}>
+
+objSrv
+    .use("text", function(bot, next) {
+        tCheckBaseBotFields(bot);
+
+        //----------]>
+
+        console.log("F:Async | Type: text");
+
+        next();
+    });
+
+objSrv
+    .use(function(type, bot) {
+        expect(type).to.be.a("string");
+
+        //----------]>
+
+        tCheckBaseBotFields(bot);
+
+        //----------]>
+
+        console.log("Before[use:type] Sync | Type: %s", type);
+    });
+
+objSrv
+    .use("text", function(bot) {
+        console.log("F:Sync | Type: text");
+    })
+
+    .use("photo", function(bot) {
+        tCheckBaseBotFields(bot);
+
+        //----------]>
+
+        console.log("F:Sync | Type: photo");
+    });
+
 //-----[EVENTS]-----}>
 
 [

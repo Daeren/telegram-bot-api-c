@@ -756,10 +756,8 @@ function main(token) {
 
             //--------]>
 
-            if(!file) {
-                callback(new Error("Required: " + type));
-                return true;
-            }
+            if(!file)
+                return false;
 
             if(typeof(file) === "string") {
                 if(getReadStreamByUrl(file, type, method, data, callback))
@@ -1359,12 +1357,24 @@ function srvOnMsg(objBot, data) {
     //------------]>
 
     function onIterPlugin(next, plugin) {
-        if(plugin.length < 3) {
-            onEnd(plugin(evName, ctxBot));
+        const plType        = plugin[0],
+              plCallback    = plugin[1];
+
+        //---------]>
+
+        if(typeof(plType) !== "undefined") {
+            if(evName !== plType)
+                onEnd();
+            else {
+                if(plCallback.length < 2)
+                    onEnd(plCallback(ctxBot)); else plCallback(ctxBot, onEnd);
+            }
+
             return;
         }
 
-        plugin(evName, ctxBot, onEnd);
+        if(plCallback.length < 3)
+            onEnd(plCallback(evName, ctxBot)); else plCallback(evName, ctxBot, onEnd);
 
         //---------]>
 
@@ -1741,8 +1751,14 @@ function createSrvBot(bot, onMsg) {
 
     //-----)>
 
-    function srvUse(f) {
-        result.plugin.push(f);
+    function srvUse(type, callback) {
+        if(typeof(type) === "function") {
+            callback = type;
+            type = undefined;
+        }
+
+        result.plugin.push([type, callback]);
+
         return this;
     }
 

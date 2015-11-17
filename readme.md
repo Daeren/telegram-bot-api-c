@@ -405,6 +405,13 @@ objSrv
     });
 
 objSrv
+    .use("text", function(bot /*, next*/) {
+        console.log("Sync | Type: %s", type);
+
+        bot.user.id = 1;
+    });
+    
+objSrv
     .on("text", function(bot, data) {
         bot.user.id;
     });
@@ -585,7 +592,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 | stop          |                                       | this                                      |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
-| use           | callback(type, bot[, next])           | this                                      |
+| use           | [type], callback(type, bot[, next])   | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
@@ -597,7 +604,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 | bot           | bot, path, callback(json, request)    | srv                                       |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
-| use           | callback(type, bot[, next])           | this                                      |
+| use           | [type], callback(type, bot[, next])   | this                                      |
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
