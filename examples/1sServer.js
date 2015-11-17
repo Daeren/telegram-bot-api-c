@@ -83,7 +83,7 @@ objSrv
         //return "room.menu";
     });
 
-//-----[Filter by Type]-----}>
+//-----[Filter by `type`]-----}>
 
 objSrv
     .use("text", function(bot, next) {
@@ -113,12 +113,7 @@ objSrv
     .use("text", function(bot) {
         console.log("F:Sync | Type: text");
     })
-
     .use("photo", function(bot) {
-        tCheckBaseBotFields(bot);
-
-        //----------]>
-
         console.log("F:Sync | Type: photo");
     });
 

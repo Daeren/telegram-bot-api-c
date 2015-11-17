@@ -402,9 +402,7 @@ objSrv
         console.log("Sync | Type: %s", type);
 
         bot.user = {};
-    });
-
-objSrv
+    })
     .use("text", function(bot /*, next*/) { // Filter by `type`
         console.log("Sync | Type: %s", type);
 
