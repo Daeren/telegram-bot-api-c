@@ -365,6 +365,7 @@ objSrv
             .chatAction("typing") // <-- Element
 
             .text("https://google.com", params) // <-- Element
+            //.parseMode("markdown") <-- params.parse_mode
             .disableWebPagePreview() // <-- Modifier: for last element
             .keyboard("X Y Z") // <-- Modifier: for last element
 
