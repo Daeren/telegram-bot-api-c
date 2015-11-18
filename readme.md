@@ -358,7 +358,7 @@ objSrv
             "parse_mode":   "markdown", // <-- text,
             "caption":      "myCaption" // <-- photo
         };
-
+        
         bot
             .data() // <-- Builder + Queue
 
@@ -383,7 +383,7 @@ objSrv
 
             .then(console.log);  // <-- Return: hashTable | {elemName: [results]}
         
-        //------[ONE ELEMENT]------]>
+        //------[ONE ELEMENT]------}>
         
         const customKb = {
             "keyboard": [["1"], ["2"], ["3"]]
@@ -393,7 +393,7 @@ objSrv
             .data()
             .text("Hi")
             .keyboard(customKb)
-            .send((e, r) => console.log(e || r));  // <-- Return: hashTable | results
+            .send((e, r) => console.log(e || r));  // <-- Return: hashTable | result
     });
 ```
 
