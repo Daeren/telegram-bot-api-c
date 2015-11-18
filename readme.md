@@ -376,6 +376,7 @@ objSrv
             .keyboard("new", "selective") // <-- Uses: bot.mid (selective)
 
             .location("50 50")
+            .latitude(90)
             .keyboard() // <-- Hide
 
             .send() // <-- Uses: bot.cid

@@ -2023,6 +2023,9 @@ gMMTypesKeys
 
 
 [
+    "maxSize",
+    "latitude", "longitude",
+
     "disable_web_page_preview",
     "parse_mode",
     "caption", "duration", "performer", "title",

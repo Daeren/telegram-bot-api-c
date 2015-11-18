@@ -27,8 +27,6 @@ const objOptions  = {
 
 let objSrv;
 
-
-
 //---------]>
 
 objSrv = objBot
