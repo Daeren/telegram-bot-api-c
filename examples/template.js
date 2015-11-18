@@ -107,7 +107,7 @@ function tCheckBaseBotFields(bot) {
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("data").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
 }

@@ -86,10 +86,7 @@ function cbMsg(bot, cmd) {
     //----------]>
 
     let commands = {
-        "help": x => {
-            bot.data.text = x;
-            bot.send();
-        }
+        "help": x => bot.data().text(x).send()
     };
 
     let cmdFunc,
@@ -100,8 +97,7 @@ function cbMsg(bot, cmd) {
 
     //--------------]>
 
-    bot.data.text = "Hell Word!";
-    bot.send();
+    bot.data().text("Hell Word!").send();
 }
 
 function cbCmdStart(bot, params) {
@@ -109,8 +105,7 @@ function cbCmdStart(bot, params) {
 
     //----------]>
 
-    bot.data.text = "CMD: /start";
-    bot.send();
+    bot.data().text("CMD: /start").send();
 }
 
 //-------------]>
@@ -134,7 +129,7 @@ function tCheckBaseBotFields(bot) {
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("data").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
 }

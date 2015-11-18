@@ -27,6 +27,8 @@ const objOptions  = {
 
 let objSrv;
 
+
+
 //---------]>
 
 objSrv = objBot
@@ -55,6 +57,17 @@ expect(objSrv).to.have.property("stop").that.is.an("function");
 
 objSrv
     .use(function(type, bot, next) {
+
+        const customKb = {"keyboard": [["1"], ["2"], ["3"]]};
+
+        bot
+            .data()
+            .text("Hi")
+            .keyboard(customKb)
+            .send((e, r) => console.log(e || r));
+
+        return;
+
         expect(type).to.be.a("string");
         expect(next).to.be.a("function");
 
@@ -187,10 +200,11 @@ function response(who, bot, params) {
     console.log("|params: ", params);
     console.log("+-----------------------|");
 
-    bot.data.text = params && params.id ? "" : bot;
-    bot.data.reply_markup = bot.keyboard(bot.message.text);
-
-    bot.send().then(console.info, console.error);
+    bot
+        .data()
+        .text(params && params.id ? "" : bot)
+        .keyboard(bot.message.text)
+        .send().then(console.info, console.error);
 }
 
 //-------------]>
@@ -215,7 +229,7 @@ function tCheckBaseBotFields(bot) {
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("data").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
 }

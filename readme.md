@@ -6,7 +6,7 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 #### OneShot
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(x => {x.data.text = "Hi"; x.send();});
+require("telegram-bot-api-c")("TOKEN").polling(x => { x.data().text("Hi").send(); });
 ```
 
 ```js
@@ -20,6 +20,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* [Response Builder](#refResponseBuilder): +
 * Set engine(render)/promise: +
 * Coverage: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
@@ -39,6 +40,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Polling](#refPolling)
 * [Server](#refServer)
 * [mServer](#refMServer)
+* [Response Builder](#refResponseBuilder)
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
@@ -226,15 +228,12 @@ let objSrv = objBot
     .on("/stop", cbCmdStop);
 
 function cbMsg(bot) {
-    bot.data.text = "Stop me: /stop";
-    bot.send();
+    bot.data().text("Stop me: /stop").send();
 }
 
 function cbCmdStop(bot, params) {
-    bot.data.text = params;
-    bot.send();
-
-    objSrv.stop();
+    bot.data().text(params).send();
+    bot.stop();
 }
 ```
 
@@ -344,6 +343,55 @@ objBot
             throw new Error("Oops...problems with webhook...");
 
         objBot.server(objSrvOptions, cbMsg);
+    });
+```
+
+
+
+<a name="refResponseBuilder"></a>
+#### Response Builder
+
+```js
+objSrv
+    .use(function(type, bot, next) {
+        const params = {
+            "parse_mode":   "markdown", // <-- text,
+            "caption":      "myCaption" // <-- photo
+        };
+
+        bot
+            .data() // <-- Builder + Queue
+
+            .chatAction("typing") // <-- Element
+
+            .text("https://google.com", params) // <-- Element
+            .disableWebPagePreview() // <-- Modifier: for last element
+            .keyboard("X Y Z") // <-- Modifier: for last element
+
+            .chatAction("upload_photo")
+            .photo("https://www.google.ru/images/logos/ps_logo2.png", params)
+            .caption("#2EASY") // <-- Modifier: for last element
+            .keyboard("old")
+            .keyboard("new", "selective") // <-- Uses: bot.mid (selective)
+
+            .location("50 50")
+            .keyboard() // <-- Hide
+
+            .send() // <-- Uses: bot.cid
+
+            .then(console.log);  // <-- Return: hashTable | {elemName: [results]}
+        
+        //------[ONE ELEMENT]------]>
+        
+        const customKb = {
+            "keyboard": [["1"], ["2"], ["3"]]
+        };
+
+        bot
+            .data()
+            .text("Hi")
+            .keyboard(customKb)
+            .send((e, r) => console.log(e || r));  // <-- Return: hashTable | results
     });
 ```
 
@@ -598,7 +646,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 | parseCmd          | text[, strict]                                                        |                                   |
 
 
-#### Methods: send
+#### Methods: send / Response Builder
 
 | Name          | Type                                  | Note                                                          |
 |---------------|---------------------------------------|---------------------------------------------------------------|

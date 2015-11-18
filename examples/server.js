@@ -94,24 +94,20 @@ function cbMsg(bot, cmd) {
     bot.api
         .getMe()
         .then(() => {
-            bot.data.chatAction = "typing";
-            return bot.send();
+            return bot.data().chatAction("typing").send();
         })
         .then(() => {
-            bot.data.text = "Use: /start";
-            return bot.send();
+            return bot.data().text("Use: /start").send();
         })
         .then(() => {
-            bot.data.photo = "https://www.google.ru/images/logos/ps_logo2.png";
-            return bot.send();
+            return bot.data().photo("https://www.google.ru/images/logos/ps_logo2.png").send();
         })
         .then(() => {
             bot.to = msgText;
             return bot.forward();
         })
         .then(() => {
-            bot.data.text = "Forward: ok";
-            return bot.send();
+            return bot.data().text("Forward: ok").send();
         })
         .then(console.log, console.error);
 }
@@ -123,8 +119,7 @@ function cbCmdStart(bot, params) {
 
     //----------]>
 
-    bot.data.text = "Hello";
-    bot.send().then(console.log, console.error);
+    bot.data().text("Hello").send().then(console.log, console.error);
 }
 
 function cbCmdStop(bot, params) {
@@ -132,12 +127,11 @@ function cbCmdStop(bot, params) {
 
     //----------]>
 
-    bot.data = [
-        {"text": params},
-        {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
-    ];
-
-    bot.send();
+    bot
+        .data()
+        .text(params)
+        .photo(__dirname + "/MiElPotato.jpg").caption("#2EASY")
+        .send();
 }
 
 //-------------]>
@@ -161,7 +155,7 @@ function tCheckBaseBotFields(bot) {
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("object");
+    expect(bot).to.have.property("data").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
 }

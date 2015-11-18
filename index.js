@@ -1501,7 +1501,7 @@ function srvOnMsg(objBot, data) {
         result.mid = msg.message_id;
 
         result.message = msg;
-        result.data = {};
+        result.data = function() { return new CBuilder(result); };
 
         return result;
     }
@@ -1796,7 +1796,7 @@ function createSrvBot(bot, onMsg) {
 
     function ctxSend(callback) {
         const data = this.data;
-        this.data = {};
+        this.data = function() { return new CBuilder(result); };
 
         return bot.send(this.cid, data, callback);
     }
@@ -1979,6 +1979,111 @@ function createSrvBot(bot, onMsg) {
         return this;
     }
 }
+
+//-------------[EX: CBuilder]--------------}>
+
+function CBuilder(bot) {
+    this.bot            = bot;
+    this.stack          = [];
+
+    this.startKbIndex   = 0;
+    this.lastKbIndex    = -1;
+}
+
+gMMTypesKeys
+    .forEach(function(name) {
+        CBuilder.prototype[name] = function(data, params) {
+            let stack   = this.stack,
+                obj     = params ? Object.create(params) : {};
+
+            obj[name] = data;
+
+            if(this.lastKbIndex > -1) {
+                this.startKbIndex = stack.length;
+                this.lastKbIndex = -1;
+            }
+
+            stack.push(obj);
+
+            let result = Object.create(this);
+
+            switch(name) {
+                case "text":
+                    result.disableWebPagePreview = function() { obj.disable_web_page_preview = true; return this; };
+                    break;
+
+                case "photo":
+                    result.caption = function(v) { obj.caption = v; return this; };
+                    break;
+            }
+
+            return result;
+        };
+    });
+
+
+[
+    "disable_web_page_preview",
+    "parse_mode",
+    "caption", "duration", "performer", "title",
+    "reply_to_message_id"
+]
+    .forEach(function(name) {
+        let defValue;
+
+        const funcName = name
+            .split("_")
+            .map(function(e, i) {
+                if(!i && e === "disable")
+                    defValue = true;
+
+                return i ? (e[0].toUpperCase() + e.substr(1)) : e
+            })
+            .join("");
+
+        CBuilder.prototype[funcName] = function(v) {
+            let stack   = this.stack;
+
+            let len     = stack.length,
+                e       = stack[len - 1];
+
+            e[name] = typeof(v) === "undefined" ? defValue : v;
+
+            return this;
+        };
+    });
+
+CBuilder.prototype.keyboard = function(data, params) {
+    let stack   = this.stack,
+        bot     = this.bot;
+
+    let len     = stack.length,
+        e       = stack[len - 1];
+
+    if(typeof(data) === "undefined" || data === null)
+        data = bot.keyboard.hide();
+    else if(typeof(data) !== "object" || Array.isArray(data))
+        data = bot.keyboard(data, params);
+
+    e.reply_markup = data;
+
+    if(data.selective)
+        e.reply_to_message_id = bot.mid;
+    else
+        delete e.reply_to_message_id;
+
+    return this;
+};
+
+
+CBuilder.prototype.send = function(callback) {
+    const stack = this.stack;
+
+    this.bot.data = stack.length > 1 ? stack : stack[0];
+    this.stack = [];
+
+    return this.bot.send(callback);
+};
 
 //-------------[HELPERS]--------------}>
 
