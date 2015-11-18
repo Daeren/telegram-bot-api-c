@@ -389,7 +389,9 @@ objBot
 
         //-----[EJS]-----}>
 
-        bot.data = {"x": "H", "y": "i"};
+        bot.data.input = {"x": "H", "y": "i"};
+        bot.data.reply_markup = bot.keyboard.hGb();
+
         bot.render("EJS | Text: <%= x %> + <%= y %>");
     });
 ```

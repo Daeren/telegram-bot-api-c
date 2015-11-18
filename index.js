@@ -1759,37 +1759,46 @@ function createSrvBot(bot, onMsg) {
     //-----------]>
 
     function ctxRender(template, callback) {
-        let d = this.data;
-        this.data = {};
+        let data = this.data;
+
+        if(hasOwnProperty(data, "input"))
+            data = data.input;
 
         if(bot.mdEngine)
-            template = bot.mdEngine.render(template, d);
+            template = bot.mdEngine.render(template, data);
         else {
-            if(Array.isArray(d)) {
-                d.forEach(function(e, i) {
-                    template = template.replace("{" + i + "}", e);
-                });
-            } else {
-                for(let name in d) {
-                    if(hasOwnProperty(d, name))
-                        template = template.replace("{" + name + "}", d[name]);
-                }
-            }
+            if(Array.isArray(data))
+                data.forEach(defRender);
+            else
+                for(let name in data)
+                    if(hasOwnProperty(data, name)) defRender(data[name], name);
         }
 
-        d = {
-            "chat_id":  this.cid,
-            "text":     template
-        };
+        //------]>
 
-        return arguments.length < 2 ? bot.api.sendMessage(d) : bot.api.sendMessage(d, callback);
+        data = Object.create(this.data);
+
+        data.chat_id = this.cid;
+        data.text = template;
+
+        this.data = {};
+
+        //-------------]>
+
+        return arguments.length < 2 ? bot.api.sendMessage(data) : bot.api.sendMessage(data, callback);
+
+        //-------------]>
+
+        function defRender(e, i) {
+            template = template.replace("{" + i + "}", e);
+        }
     }
 
     function ctxSend(callback) {
-        const d = this.data;
+        const data = this.data;
         this.data = {};
 
-        return bot.send(this.cid, d, callback);
+        return bot.send(this.cid, data, callback);
     }
 
     function ctxForward(callback) {
