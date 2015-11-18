@@ -371,6 +371,7 @@ objSrv
             .keyboard([["X"], ["Y"]]) // <-- Modifier: for last element
 
             .chatAction("upload_photo")
+            
             .photo("https://www.google.ru/images/logos/ps_logo2.png", params)
             .caption("#2EASY") // <-- Modifier: for last element
             .keyboard("old")
@@ -654,18 +655,18 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 #### Methods: send / Response Builder
 
-| Name          | Type                                  | Note                                                          |
-|---------------|---------------------------------------|---------------------------------------------------------------|
-|               | -                                     |                                                               |
-| text          | string, json                          |                                                               |
-| photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp                            |
-| audio         | string, stream                        | Ext: mp3                                                      |
-| document      | string, stream                        |                                                               |
-| sticker       | string, stream                        | Ext: webp, jpg, jpeg, gif, tif, png, bmp                      |
-| video         | string, stream                        | Ext: mp4                                                      |
-| voice         | string, stream                        | Ext: ogg                                                      |
-| location      | string, json                          | Format: "60.0 60.0", [60, 60], {latitude:60, longitude:60}    |
-| chatAction    | string                                |                                                               |
+| Name          | Type                                  | Note                                                              |
+|---------------|---------------------------------------|-------------------------------------------------------------------|
+|               | -                                     |                                                                   |
+| text          | string, json                          |                                                                   |
+| photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp                                |
+| audio         | string, stream                        | Ext: mp3                                                          |
+| document      | string, stream                        |                                                                   |
+| sticker       | string, stream                        | Ext: webp, jpg, jpeg, gif, tif, png, bmp                          |
+| video         | string, stream                        | Ext: mp4                                                          |
+| voice         | string, stream                        | Ext: ogg                                                          |
+| location      | string, json                          | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
+| chatAction    | string                                |                                                                   |
 
 
 #### Methods: polling
