@@ -487,12 +487,12 @@ objSrv
 
         bot.user = {};
 
-    });
+    })
     .use(function(type, bot) {
         console.log("Sync | Type: %s", type);
         
         bot.user.id = 1;
-    })
+    });
     
 objSrv
     .on("text", function(bot, data) {

@@ -1386,6 +1386,8 @@ function srvOnMsg(objBot, data) {
         const plType        = plugin[0],
               plCallback    = plugin[1];
 
+        let isEnd = false;
+
         //---------]>
 
         if(typeof(plType) !== "undefined") {
@@ -1405,6 +1407,11 @@ function srvOnMsg(objBot, data) {
         //---------]>
 
         function onEnd(state) {
+            if(isEnd)
+                throw new Error("Plugin: double call `next`");
+
+            isEnd = true;
+
             setImmediate(next, state);
         }
     }
