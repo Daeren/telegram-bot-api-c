@@ -108,13 +108,14 @@ function onPhotoOrDoc(bot, data) { }
 const api      = objBot.api,
       keyboard = objBot.keyboard;
 
-let data;
+let file, data;
 
 //----)>
 
+file = __dirname + "/MiElPotato.jpg";
 data = [ // Queue
     {"text": ["H", "i"]},
-    {"photo": __dirname + "/MiElPotato.jpg", "caption": "#2EASY"}
+    {"photo": file, "caption": "#2EASY"}
 ];
 
 objBot.send("chatId", data);
@@ -233,7 +234,7 @@ function cbMsg(bot) {
 
 function cbCmdStop(bot, params) {
     bot.data().text(params).send();
-    bot.stop();
+    objSrv.stop();
 }
 ```
 
@@ -367,7 +368,7 @@ objSrv
             .text("https://google.com", params) // <-- Element
             //.parseMode("markdown") <-- params.parse_mode
             .disableWebPagePreview() // <-- Modifier: for last element
-            .keyboard("X Y Z") // <-- Modifier: for last element
+            .keyboard([["X"], ["Y"]]) // <-- Modifier: for last element
 
             .chatAction("upload_photo")
             .photo("https://www.google.ru/images/logos/ps_logo2.png", params)
@@ -386,7 +387,8 @@ objSrv
         //------[ONE ELEMENT]------}>
         
         const customKb = {
-            "keyboard": [["1"], ["2"], ["3"]]
+            "keyboard":         [["1"], ["2"], ["3"]],
+            "resize_keyboard":  true
         };
 
         bot
@@ -479,16 +481,17 @@ objSrv
         if(bot.message.text === "next")
             next();
     })
-    .use(function(type, bot) {
-        console.log("Sync | Type: %s", type);
+    .use("text", function(bot /*, next*/) { // Filter by `type`
+        console.log("F:Sync | Type: text");
 
         bot.user = {};
-    })
-    .use("text", function(bot /*, next*/) { // Filter by `type`
-        console.log("Sync | Type: text");
 
-        bot.user.id = 1;
     });
+    .use(function(type, bot) {
+        console.log("Sync | Type: %s", type);
+        
+        bot.user.id = 1;
+    })
     
 objSrv
     .on("text", function(bot, data) {
@@ -537,6 +540,7 @@ rBot.keyboard.numpad(false, true); // <-- Selective
 
 function cbMsg(bot) {
     bot.data.text = "Hell Word!";
+    bot.data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
     bot.data.reply_markup = bot.keyboard.hOx();
     
     bot.send();
@@ -634,7 +638,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 |                   | -                                                                     |                                   |
 | engine            | instance                                                              | this                              |
 | promise           | instance                                                              | this                              |
-| setToken          | token                                                                 | this                              |
+| token             | token:str                                                             | this                              |
 |                   | -                                                                     |                                   |
 | call              | method, data[, callback(error, buffer, response)]                     |                                   |
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
@@ -695,8 +699,8 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 | Name              | Type       | Note                                     |
 |-------------------|------------|------------------------------------------|
 |                   | -          |                                          |
-| mid               | number     | bot.mid = bot.message.message_id         |
 | cid               | number     | bot.cid = bot.message.chat.id            |
+| mid               | number     | bot.mid = bot.message.message_id         |
 | from              | number     | bot.from = bot.message.chat.id           |
 | to                | undefined  |                                          |
 |                   | -          |                                          |

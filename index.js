@@ -118,6 +118,7 @@ function main(token) {
     }
 
     CMain.prototype = {
+        "token":        function(t) { token = t; return this; },
         "setToken":     function(t) { token = t; return this; },
 
         "engine":       function(t) { this.mdEngine = t; return this; },

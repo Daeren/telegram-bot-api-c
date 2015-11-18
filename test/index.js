@@ -73,7 +73,7 @@ describe("Instance: bot", function() {
     describe("Property", function() {
 
         const botMethods = [
-            "engine", "promise", "setToken",
+            "engine", "promise", "token", "setToken",
             "call", "callJson",
             "send", "download",
             "server", "polling",
