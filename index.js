@@ -1247,6 +1247,8 @@ function createServer(botFather, params, callback) {
             }
         }
 
+        //-------------]>
+
         return srvBot;
     }
 }
@@ -1509,9 +1511,19 @@ function srvOnMsg(objBot, data) {
         result.mid = msg.message_id;
 
         result.message = msg;
-        result.data = function() { return new CBuilder(result); };
+        result.data = createFResponseBuilder();
+
+        result.createFResponseBuilder = createFResponseBuilder;
+
+        //---------------]>
 
         return result;
+
+        //---------------]>
+
+        function createFResponseBuilder() {
+            return function() { return new CResponseBuilder(result, objBot.bot); };
+        }
     }
 }
 
@@ -1804,7 +1816,7 @@ function createSrvBot(bot, onMsg) {
 
     function ctxSend(callback) {
         const data = this.data;
-        this.data = function() { return new CBuilder(result); };
+        this.data = this.createFResponseBuilder();
 
         return bot.send(this.cid, data, callback);
     }
@@ -1988,44 +2000,29 @@ function createSrvBot(bot, onMsg) {
     }
 }
 
-//-------------[EX: CBuilder]--------------}>
+//-------------[EX: CResponseBuilder]--------------}>
 
-function CBuilder(bot) {
-    this.bot            = bot;
+function CResponseBuilder(botReq, botFather) {
+    // botFather.(send) => || srvCtx => [srvBot.(ctx + send)] || => reqCtx.(data cid)
+    // ^-| use
+
+    this.botReq         = botReq;
+    this.botFather      = botFather;
+
     this.stack          = [];
-
-    this.startKbIndex   = 0;
-    this.lastKbIndex    = -1;
 }
 
 gMMTypesKeys
     .forEach(function(name) {
-        CBuilder.prototype[name] = function(data, params) {
-            let stack   = this.stack,
-                obj     = params ? Object.create(params) : {};
+        CResponseBuilder.prototype[name] = function(data, params) {
+            const stack   = this.stack,
+                  obj     = params ? Object.create(params) : {};
 
             obj[name] = data;
 
-            if(this.lastKbIndex > -1) {
-                this.startKbIndex = stack.length;
-                this.lastKbIndex = -1;
-            }
-
             stack.push(obj);
 
-            let result = Object.create(this);
-
-            switch(name) {
-                case "text":
-                    result.disableWebPagePreview = function() { obj.disable_web_page_preview = true; return this; };
-                    break;
-
-                case "photo":
-                    result.caption = function(v) { obj.caption = v; return this; };
-                    break;
-            }
-
-            return result;
+            return this;
         };
     });
 
@@ -2052,7 +2049,7 @@ gMMTypesKeys
             })
             .join("");
 
-        CBuilder.prototype[funcName] = function(v) {
+        CResponseBuilder.prototype[funcName] = function(v) {
             let stack   = this.stack;
 
             let len     = stack.length,
@@ -2064,12 +2061,12 @@ gMMTypesKeys
         };
     });
 
-CBuilder.prototype.keyboard = function(data, params) {
-    let stack   = this.stack,
-        bot     = this.bot;
+CResponseBuilder.prototype.keyboard = function(data, params) {
+    const stack   = this.stack,
+          bot     = this.botReq;
 
-    let len     = stack.length,
-        e       = stack[len - 1];
+    const len     = stack.length,
+          e       = stack[len - 1];
 
     if(typeof(data) === "undefined" || data === null)
         data = bot.keyboard.hide();
@@ -2087,13 +2084,13 @@ CBuilder.prototype.keyboard = function(data, params) {
 };
 
 
-CBuilder.prototype.send = function(callback) {
-    const stack = this.stack;
+CResponseBuilder.prototype.send = function(callback) {
+    const stack     = this.stack,
+          bot       = this.botReq;
 
-    this.bot.data = stack.length > 1 ? stack : stack[0];
     this.stack = [];
 
-    return this.bot.send(callback);
+    return this.botFather.send(bot.cid, stack.length > 1 ? stack : stack[0], callback);
 };
 
 //-------------[HELPERS]--------------}>
