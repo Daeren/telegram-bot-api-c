@@ -60,7 +60,7 @@ describe("Module: bot", function() {
 //-----------------]>
 
 describe("Instance: bot", function() {
-    this.timeout(1000 * 10);
+    this.timeout(1000 * 60);
 
     //-----------------]>
 

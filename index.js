@@ -745,6 +745,15 @@ function main(token) {
 
         req.write(bodyBegin);
 
+        //-------[File: buffer]-------}>
+
+        if(Buffer.isBuffer(file)) {
+            req.write(file);
+            req.end(bodyEnd);
+
+            return;
+        }
+
         //-------[File: stream]-------}>
 
         if(!file) {
@@ -800,15 +809,7 @@ function main(token) {
             else if(typeof(file) === "object" && file.headers) { // <-- LoadByUrl
                 fileName = data.filename || file.req.path || getNameByMime(file.headers["content-type"]);
             }
-            else if(Buffer.isBuffer(file)) {
-                const stream = new rStream.PassThrough();
-
-                stream.end(file);
-
-                file = stream;
-                fileName = data.filename || "file";
-            }
-            else { // <-- LoadByFileStream
+            else { // <-- FileStream / Buffer
                 fileName = data.filename || file.path || "file";
             }
 
