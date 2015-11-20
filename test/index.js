@@ -432,7 +432,7 @@ describe("Instance: bot", function() {
                 });
         });
 
-        it("sendLocation | callback", function(done) {
+        it("send.location | callback", function(done) {
             let data = {"location": "57.0061726 40.9821055"};
             let dataClone   = jsonClone(data);
 
@@ -560,6 +560,22 @@ describe("Instance: bot", function() {
                 "chat_id":      chatId,
                 "photo":        require("fs").createReadStream(__dirname + "/MiElPotato.jpg"),
                 "caption":      "MiElPotato"
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("photo").that.is.an("array");
+
+                done();
+            });
+        });
+
+        it("sendPhoto(file-buffer) | callback", function(done) {
+            api.sendPhoto({
+                "chat_id":      chatId,
+                "photo":        require("fs").readFileSync(__dirname + "/MiElPotato.jpg"),
+                "caption":      "MiElPotato",
+
+                "filename":      "MiElPotato.jpg" // <-- It is important
             }, function(error, data) {
                 checkBaseFields(error, data);
 

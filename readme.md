@@ -20,6 +20,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* [Send file as Buffer](#refSendFileAsBuffer): +
 * [Response Builder](#refResponseBuilder): +
 * Set engine(render)/promise: +
 * Coverage: +
@@ -612,6 +613,40 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 // e    - Error: request
 // data - Buffer: response
+```
+
+
+<a name="refSendFileAsBuffer"></a>
+#### Send file as Buffer 
+
+```js
+
+const imgBuffer = require("fs").readFileSync(__dirname + "/MiElPotato.jpg");
+
+//------------]>
+
+objSrv
+    .use(function(type, bot, next) {
+        bot
+            .data()
+            .photo(imgBuffer)
+            .filename("MiElPotato.jpg") // <-- It is important
+            .send();
+    });
+    
+//------------]>
+
+api.sendPhoto({
+    "chat_id":      0,
+    "photo":        imgBuffer,
+
+    "filename":      "MiElPotato.jpg" // <-- It is important
+});
+
+api.sendDocument({
+    "chat_id":      0,
+    "document":     imgBuffer
+});
 ```
 
 

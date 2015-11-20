@@ -782,27 +782,41 @@ function main(token) {
 
             //--------]>
 
-            if(!file)
+            if(!file) {
                 return false;
+            }
 
             if(typeof(file) === "string") {
-                if(getReadStreamByUrl(file, type, method, data, callback))
+                if(getReadStreamByUrl(file, type, method, data, callback)) { // <-- Delegate task
                     return true;
+                }
 
-                fileName = data.name || file;
+                fileName = data.filename || file;
 
-                if(!gReIsFilePath.test(fileName))
+                if(!gReIsFilePath.test(fileName)) {
                     fileId = fileName;
-            } else if(typeof(file) === "object" && file.headers) {
-                fileName = data.name || getNameByMime(file.headers["content-type"]) || "file";
-            } else {
-                fileName = data.name || file.path || "file";
+                }
+            }
+            else if(typeof(file) === "object" && file.headers) { // <-- LoadByUrl
+                fileName = data.filename || file.req.path || getNameByMime(file.headers["content-type"]);
+            }
+            else if(Buffer.isBuffer(file)) {
+                const stream = new rStream.PassThrough();
+
+                stream.end(file);
+
+                file = stream;
+                fileName = data.filename || "file";
+            }
+            else { // <-- LoadByFileStream
+                fileName = data.filename || file.path || "file";
             }
 
             //--------]>
 
-            if(fileName)
+            if(fileName) {
                 fileName = rPath.basename(fileName);
+            }
 
             //--------]>
 
@@ -1109,8 +1123,9 @@ function createServer(botFather, params, callback) {
     //-----------------]>
 
     function cbServer(req, res) {
-        if(req.method !== "POST")
+        if(req.method !== "POST") {
             return response();
+        }
 
         let firstChunk, chunks;
 
@@ -1217,8 +1232,9 @@ function createServer(botFather, params, callback) {
     function addBot(bot, path, callback) {
         srvBots = srvBots || {};
 
-        if(hasOwnProperty(srvBots, path))
+        if(hasOwnProperty(srvBots, path)) {
             throw new Error("Path '" + path + "' has already been used");
+        }
 
         //-------------]>
 
@@ -1428,8 +1444,9 @@ function srvOnMsg(objBot, data) {
                 if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
                     let msgText = msg.text;
 
-                    if(msgText[0] === "@")
+                    if(msgText[0] === "@") {
                         msg.text = msgText.replace(gReReplaceName, "");
+                    }
                 }
 
                 //-----[CMD]----}>
@@ -1439,8 +1456,9 @@ function srvOnMsg(objBot, data) {
                 if(cmdParam) {
                     rule = "/" + cmdParam.name;
 
-                    if(callEvent(rule, cmdParam) || callEvent("/", cmdParam))
+                    if(callEvent(rule, cmdParam) || callEvent("/", cmdParam)) {
                         return;
+                    }
                 }
 
                 //-----[RE]----}>
@@ -1482,8 +1500,9 @@ function srvOnMsg(objBot, data) {
         }
 
         if(!evName || !callEvent(evName, msg[msgType]) && !callEvent("*", cmdParam)) {
-            if(objBot.onMsg)
+            if(objBot.onMsg) {
                 setImmediate(objBot.onMsg, ctxBot, cmdParam);
+            }
         }
 
         //-------]>
@@ -1530,8 +1549,9 @@ function srvOnMsg(objBot, data) {
 //---------]>
 
 function parseCmd(text, strict) {
-    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1)
+    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1) {
         return null;
+    }
 
     //---------]>
 
@@ -1548,8 +1568,9 @@ function parseCmd(text, strict) {
                 cmd = t[1];
                 cmdText = t[2];
 
-                if(cmd)
+                if(cmd) {
                     type = "private";
+                }
             }
 
             break;
@@ -1557,8 +1578,9 @@ function parseCmd(text, strict) {
         case "@":
             text = text.replace(gReReplaceName, "");
 
-            if(text)
+            if(text) {
                 type = "private";
+            }
 
             break;
     }
@@ -1569,8 +1591,9 @@ function parseCmd(text, strict) {
         cmd = t[0];
         cmdText = t[1];
 
-        if(!cmd || cmd[0] !== "/" || cmd === "/")
+        if(!cmd || cmd[0] !== "/" || cmd === "/") {
             return null;
+        }
     }
 
     name = cmd.substr(1);
@@ -1578,8 +1601,9 @@ function parseCmd(text, strict) {
     //---------]>
 
     if(strict) {
-        if(name.length > 32 || !gReValidCmd.test(name))
+        if(name.length > 32 || !gReValidCmd.test(name)) {
             return null;
+        }
     }
 
     //---------]>
@@ -2028,7 +2052,7 @@ gMMTypesKeys
 
 
 [
-    "maxSize",
+    "maxSize", "filename",
     "latitude", "longitude",
 
     "disable_web_page_preview",
