@@ -9,13 +9,21 @@
 
 //-----------------------------------------------------
 
-const rHttp         = require("http"),
-      rHttps        = require("https"),
-      rUrl          = require("url"),
-      rEvents       = require("events"),
-      rFs           = require("fs"),
-      rStream       = require("stream"),
-      rPath         = require("path");
+const rHttp             = require("http"),
+      rHttps            = require("https"),
+      rUrl              = require("url"),
+      rEvents           = require("events"),
+      rFs               = require("fs"),
+      rStream           = require("stream"),
+      rPath             = require("path");
+
+const rApiMethods       = require("./src/api/methods");
+const rSendApiMethods   = require("./src/send/methods");
+
+const rParseCmd         = require("./src/parseCmd"),
+      rKeyboard         = require("./src/keyboard");
+
+const CResponseBuilder  = require("./src/responseBuilder");
 
 //-----------------------------------------------------
 
@@ -32,62 +40,12 @@ const gReqOptions     = {
 };
 
 const gReReplaceName  = /^@\S+\s+/,
-
-      gReFindCmd      = /(^\/\S*?)@\S+\s*(.*)/,
-      gReSplitCmd     = /\s+([\s\S]+)?/,
-      gReValidCmd     = /[\w]+/i,
-
       gReIsFilePath   = /[\\\/\.]/;
-
-const gApiMethods     = [
-    "getMe", "forwardMessage",
-    "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
-    "getUserProfilePhotos", "getUpdates", "getFile",
-    "setWebhook"
-];
-
-const gApiMethodsMap  = {
-    "text":         "sendMessage",
-    "photo":        "sendPhoto",
-    "audio":        "sendAudio",
-    "document":     "sendDocument",
-    "sticker":      "sendSticker",
-    "video":        "sendVideo",
-    "voice":        "sendVoice",
-    "location":     "sendLocation",
-    "chatAction":   "sendChatAction"
-};
-
-const gMMTypesKeys    = Object.keys(gApiMethodsMap),
-      gMMTypesLen     = gMMTypesKeys.length;
-
-const gKeyboard       = compileKeyboard({
-        "bin": {
-            "ox": ["\u2B55\uFE0F", "\u274C"],
-            "pn": ["\u2795", "\u2796"],
-            "ud": ["\uD83D\uDD3C", "\uD83D\uDD3D"],
-            "lr": ["\u25C0\uFE0F", "\u25B6\uFE0F"],
-            "gb": ["\uD83D\uDC4D\uD83C\uDFFB", "\uD83D\uDC4E\uD83C\uDFFB"]
-        },
-
-        "norm": {
-            "abcd": [
-                ["A", "B"], ["C", "D"]
-            ],
-
-            "numpad": [
-                ["7", "8", "9"],
-                ["4", "5", "6"],
-                ["1", "2", "3"],
-                ["0"]
-            ]
-        }
-    });
 
 //-----------------------------]>
 
-main.keyboard = gKeyboard;
-main.parseCmd = parseCmd;
+main.keyboard = rKeyboard;
+main.parseCmd = rParseCmd;
 
 //-----------------------------------------------------
 
@@ -112,7 +70,7 @@ function main(token) {
 
     function CMain() {
         this.api        = genApiMethods(this);
-        this.keyboard   = gKeyboard;
+        this.keyboard   = rKeyboard;
 
         this.mdPromise  = Promise;
     }
@@ -133,7 +91,7 @@ function main(token) {
         "server":       function(params, callback) { return createServer(this, params, callback); },
         "polling":      function(params, callback) { return createPolling(this, params, callback); },
 
-        "parseCmd":     parseCmd
+        "parseCmd":     rParseCmd
     };
 
     //-------------------------]>
@@ -145,7 +103,7 @@ function main(token) {
     function genApiMethods(bot) {
         let result = {};
 
-        gApiMethods.forEach(add);
+        rApiMethods.forEach(add);
 
         //--------------]>
 
@@ -898,15 +856,15 @@ function main(token) {
                 cmdData = d[cmdName];
                 cmdData = prepareDataForSendApi(id, cmdName, cmdData, d);
 
-                self.api[gApiMethodsMap[cmdName]](cmdData, cb);
+                self.api[rSendApiMethods.map[cmdName]](cmdData, cb);
             }
 
             function getName(d) {
                 let type,
-                    len = gMMTypesLen;
+                    len = rSendApiMethods.length;
 
                 while(len--) {
-                    type = gMMTypesKeys[len];
+                    type = rSendApiMethods.keys[len];
 
                     if(hasOwnProperty(d, type))
                         return type;
@@ -1244,21 +1202,26 @@ function createServer(botFather, params, callback) {
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
                 const url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
+                const data = {"url": url, "certificate": params.selfSigned};
 
                 srvBot
                     .bot
-                    .callJson(
-                        "setWebhook", {"url": url, "certificate": params.selfSigned},
-                        function(error, isOk) {
-                            if(isOk)
-                                return;
-
-                            console.log("[-] Webhook: %s", url);
-
-                            if(error)
-                                console.log(error);
+                    .callJson("setWebhook", data, function(error, isOk) {
+                        if(isOk) {
+                            return;
                         }
-                    );
+
+                        console.log("[-] Webhook: %s", url);
+
+                        if(error) {
+                            if(error.message) {
+                                console.log(error.message);
+                            }
+
+                            console.log(error.stack);
+                        }
+                    }
+                );
             } else {
                 console.log("[!] Warning | `autoWebhook` and `host` not specified, autoWebhook not working");
             }
@@ -1291,8 +1254,11 @@ function createPolling(botFather, params, callback) {
 
     //------)>
 
-    if(params.firstLoad)
-        load(); else runTimer();
+    if(params.firstLoad) {
+        load();
+    } else {
+        runTimer();
+    }
 
     //----------------]>
 
@@ -1309,8 +1275,9 @@ function createPolling(botFather, params, callback) {
 
     function load() {
         botFather.callJson("getUpdates", params, function(error, data) {
-            if(objBot.cbLogger)
+            if(objBot.cbLogger) {
                 objBot.cbLogger(error, data);
+            }
 
             if(error) {
                 runTimer();
@@ -1327,8 +1294,12 @@ function createPolling(botFather, params, callback) {
 
     function onLoadSuccess(data) {
         if(!data.ok) {
-            if(data.error_code === 409)
-                botFather.callJson("setWebhook", null, load); else runTimer();
+            if(data.error_code === 409) {
+                botFather.callJson("setWebhook", null, load);
+            }
+            else {
+                runTimer();
+            }
 
             return;
         }
@@ -1354,8 +1325,9 @@ function createPolling(botFather, params, callback) {
     //----------]>
 
     function runTimer() {
-        if(isStopped)
+        if(isStopped) {
             return;
+        }
 
         tmPolling = setTimeout(load, params.interval);
     }
@@ -1410,24 +1382,33 @@ function srvOnMsg(objBot, data) {
         //---------]>
 
         if(typeof(plType) !== "undefined") {
-            if(evName !== plType)
+            if(evName !== plType) {
                 onEnd();
+            }
             else {
-                if(plCallback.length < 2)
-                    onEnd(plCallback(ctxBot)); else plCallback(ctxBot, onEnd);
+                if(plCallback.length < 2) {
+                    onEnd(plCallback(ctxBot));
+                }
+                else {
+                    plCallback(ctxBot, onEnd);
+                }
             }
 
             return;
         }
 
-        if(plCallback.length < 3)
-            onEnd(plCallback(evName, ctxBot)); else plCallback(evName, ctxBot, onEnd);
+        if(plCallback.length < 3) {
+            onEnd(plCallback(evName, ctxBot));
+        }  else {
+            plCallback(evName, ctxBot, onEnd);
+        }
 
         //---------]>
 
         function onEnd(state) {
-            if(isEnd)
+            if(isEnd) {
                 throw new Error("Plugin: double call `next`");
+            }
 
             isEnd = true;
 
@@ -1452,7 +1433,7 @@ function srvOnMsg(objBot, data) {
 
                 //-----[CMD]----}>
 
-                cmdParam = parseCmd(msg.text);
+                cmdParam = rParseCmd(msg.text);
 
                 if(cmdParam) {
                     rule = "/" + cmdParam.name;
@@ -1549,75 +1530,6 @@ function srvOnMsg(objBot, data) {
 
 //---------]>
 
-function parseCmd(text, strict) {
-    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1) {
-        return null;
-    }
-
-    //---------]>
-
-    let t,
-
-        type = "common",
-        name, cmdText, cmd;
-
-    switch(text[0]) {
-        case "/":
-            t = text.match(gReFindCmd);
-
-            if(t) {
-                cmd = t[1];
-                cmdText = t[2];
-
-                if(cmd) {
-                    type = "private";
-                }
-            }
-
-            break;
-
-        case "@":
-            text = text.replace(gReReplaceName, "");
-
-            if(text) {
-                type = "private";
-            }
-
-            break;
-    }
-
-    if(!t) {
-        t = text.split(gReSplitCmd, 2);
-
-        cmd = t[0];
-        cmdText = t[1];
-
-        if(!cmd || cmd[0] !== "/" || cmd === "/") {
-            return null;
-        }
-    }
-
-    name = cmd.substr(1);
-
-    //---------]>
-
-    if(strict) {
-        if(name.length > 32 || !gReValidCmd.test(name)) {
-            return null;
-        }
-    }
-
-    //---------]>
-
-    return {
-        "type": type,
-        "name": name,
-        "text": cmdText || "",
-
-        "cmd":  cmd
-    };
-}
-
 function getEventNameByTypeMsg(type) {
     switch(type) {
         case "new_chat_participant":    return "enterChat";
@@ -1627,10 +1539,9 @@ function getEventNameByTypeMsg(type) {
         case "new_chat_photo":          return "chatNewPhoto";
         case "delete_chat_photo":       return "chatDeletePhoto";
         case "group_chat_created":      return "chatCreated";
-
-        default:
-            return type;
     }
+
+    return type;
 }
 
 function getTypeMsg(m) {
@@ -1806,17 +1717,24 @@ function createSrvBot(bot, onMsg) {
     function ctxRender(template, callback) {
         let data = this.data;
 
-        if(hasOwnProperty(data, "input"))
+        if(hasOwnProperty(data, "input")) {
             data = data.input;
+        }
 
-        if(bot.mdEngine)
+        if(bot.mdEngine) {
             template = bot.mdEngine.render(template, data);
+        }
         else {
-            if(Array.isArray(data))
+            if(Array.isArray(data)) {
                 data.forEach(defRender);
-            else
-                for(let name in data)
-                    if(hasOwnProperty(data, name)) defRender(data[name], name);
+            }
+            else {
+                for(let name in data) {
+                    if(hasOwnProperty(data, name)) {
+                        defRender(data[name], name);
+                    }
+                }
+            }
         }
 
         //------]>
@@ -1880,8 +1798,9 @@ function createSrvBot(bot, onMsg) {
         if(typeof(rule) === "string") {
             let t = rule.split(/\s+/);
 
-            if(t.length > 1)
+            if(t.length > 1) {
                 rule = t;
+            }
         }
 
         //---)>
@@ -1960,8 +1879,9 @@ function createSrvBot(bot, onMsg) {
             if(arguments.length) {
                 switch(typeof(rule)) {
                     case "object":
-                        if(rule instanceof RegExp)
+                        if(rule instanceof RegExp) {
                             removeFltRegExp(getIdFltRegExp(rule));
+                        }
 
                         break;
                 }
@@ -2003,8 +1923,11 @@ function createSrvBot(bot, onMsg) {
         //------]>
 
         function getIdFltRegExp(obj) {
-            for(let i = 0, len = fltRe.length; i < len; i++)
-                if(fltRe[i].rule === obj) return i;
+            for(let i = 0, len = fltRe.length; i < len; i++) {
+                if(fltRe[i].rule === obj) {
+                    return i;
+                }
+            }
 
             return -1;
         }
@@ -2025,191 +1948,12 @@ function createSrvBot(bot, onMsg) {
     }
 }
 
-//-------------[EX: CResponseBuilder]--------------}>
-
-function CResponseBuilder(botReq, botFather) {
-    // botFather.(send) => || srvCtx => [srvBot.(ctx + send)] || => reqCtx.(data cid)
-    // ^-| use
-
-    this.botReq         = botReq;
-    this.botFather      = botFather;
-
-    this.stack          = [];
-}
-
-gMMTypesKeys
-    .forEach(function(name) {
-        CResponseBuilder.prototype[name] = function(data, params) {
-            const stack   = this.stack,
-                  obj     = params ? Object.create(params) : {};
-
-            obj[name] = data;
-
-            stack.push(obj);
-
-            return this;
-        };
-    });
-
-
-[
-    "maxSize", "filename",
-    "latitude", "longitude",
-
-    "disable_web_page_preview",
-    "parse_mode",
-    "caption", "duration", "performer", "title",
-    "reply_to_message_id"
-]
-    .forEach(function(name) {
-        let defValue;
-
-        const funcName = name
-            .split("_")
-            .map(function(e, i) {
-                if(!i && e === "disable")
-                    defValue = true;
-
-                return i ? (e[0].toUpperCase() + e.substr(1)) : e
-            })
-            .join("");
-
-        CResponseBuilder.prototype[funcName] = function(v) {
-            let stack   = this.stack;
-
-            let len     = stack.length,
-                e       = stack[len - 1];
-
-            e[name] = typeof(v) === "undefined" ? defValue : v;
-
-            return this;
-        };
-    });
-
-CResponseBuilder.prototype.keyboard = function(data, params) {
-    const stack   = this.stack,
-          bot     = this.botReq;
-
-    const len     = stack.length,
-          e       = stack[len - 1];
-
-    if(typeof(data) === "undefined" || data === null)
-        data = bot.keyboard.hide();
-    else if(typeof(data) !== "object" || Array.isArray(data))
-        data = bot.keyboard(data, params);
-
-    e.reply_markup = data;
-
-    if(data.selective)
-        e.reply_to_message_id = bot.mid;
-    else
-        delete e.reply_to_message_id;
-
-    return this;
-};
-
-
-CResponseBuilder.prototype.send = function(callback) {
-    const stack     = this.stack,
-          bot       = this.botReq;
-
-    this.stack = [];
-
-    return this.botFather.send(bot.cid, stack.length > 1 ? stack : stack[0], callback);
-};
-
 //-------------[HELPERS]--------------}>
 
-function compileKeyboard(input) {
-    let result,
-        map = {};
-
-    //----------]>
-
-    result = function(buttons, params) {
-        if(typeof(buttons) === "string")
-            buttons = buttons.split(/\s+/).map(function(x) { return [x]; });
-
-        buttons = {"keyboard": buttons};
-
-        if(!params)
-            return buttons;
-
-        if(!Array.isArray(params))
-            params = params.split(/\s+/);
-
-        if(params.indexOf("resize") !== -1)
-            buttons.resize_keyboard = true;
-
-        if(params.indexOf("once") !== -1)
-            buttons.one_time_keyboard = true;
-
-        if(params.indexOf("selective") !== -1)
-            buttons.selective = true;
-
-        return buttons;
-    };
-
-    //----------]>
-
-    for(let name in input.bin) {
-        if(!hasOwnProperty(input.bin, name))
-            continue;
-
-        let kb = input.bin[name];
-
-        name = name[0].toUpperCase() + name.substr(1);
-
-        map["v" + name] = kb.map(function(x) { return [x]; });
-        map["h" + name] = [kb];
-    }
-
-    for(let name in map) {
-        if(!hasOwnProperty(map, name))
-            continue;
-
-        let kb = map[name];
-        result[name] = genFKB("keyboard", kb, true);
-    }
-
-    for(let name in input.norm) {
-        if(!hasOwnProperty(input.norm, name))
-            continue;
-
-        let kb = input.norm[name];
-        result[name] = genFKB("keyboard", kb);
-    }
-
-    //-----)>
-
-    result.hide = genFKB("hide_keyboard");
-
-    //----------]>
-
-    return result;
-
-    //----------]>
-
-    function genFKB(type, kb, resize) {
-        return function(once, selective) {
-            const k = {};
-
-            k[type] = kb || true;
-
-            if(resize) k.resize_keyboard = true;
-            if(once) k.one_time_keyboard = true;
-            if(selective) k.selective = true;
-
-            return k;
-        };
-    }
-}
-
-//----------]>
-
 function tgApiRequest(token, method, callback) {
-    if(!method)
+    if(!method) {
         throw new Error("request: `method` was not specified");
+    }
 
     gReqOptions.path = "/bot" + token + "/" + method;
 
@@ -2289,8 +2033,14 @@ function forEachAsync(data, iter, cbEnd) {
 
     //---------]>
 
-    if(len) run();
-    else if(cbEnd) cbEnd();
+    if(len) {
+        run();
+    }
+    else {
+        if(cbEnd) {
+            cbEnd();
+        }
+    }
 
     //---------]>
 
@@ -2300,16 +2050,21 @@ function forEachAsync(data, iter, cbEnd) {
 
     function cbNext(error, result) {
         if(error) {
-            if(cbEnd) cbEnd(error);
+            if(cbEnd) {
+                cbEnd(error);
+            }
+
             return;
         }
 
         i++;
 
         if(i >= len) {
-            if(cbEnd)
+            if(cbEnd) {
                 cbEnd(error, result);
-        } else
+            }
+        } else {
             run();
+        }
     }
 }

@@ -172,7 +172,7 @@ npm test
 > tg-api X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
 > tg-api X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
 
-> tg-api X sendMessage < "./test/msg.json"
+> tg-api X sendMessage < "./examples/msg.json"
 
 ...
 
@@ -631,6 +631,7 @@ objSrv
             .data()
             .photo(imgBuffer)
             .filename("MiElPotato.jpg") // <-- It is important
+            .filename("/path/MiElPotato.jpg") // <-- Same as above
             .send();
     });
     
