@@ -16,27 +16,24 @@ const rHttp             = require("http"),
       rStream           = require("stream"),
       rPath             = require("path");
 
-const rApiMethods       = require("./src/api/methods");
+const rApiMethods       = require("./src/api/methods"),
+      rApiRequest       = require("./src/api/request");
+
 const rSendApiMethods   = require("./src/send/methods");
 
 const rParseCmd         = require("./src/parseCmd"),
-      rKeyboard         = require("./src/keyboard");
+      rKeyboard         = require("./src/keyboard"),
 
-const rServer           = require("./src/server");
+      rServer           = require("./src/server");
 
 //-----------------------------------------------------
 
-const gTgHostApi      = "api.telegram.org",
-      gTgHostFile     = "api.telegram.org",
+const gTgHostFile     = "api.telegram.org",
       gTgHostWebhook  = "api.telegram.org";
 
 const gCRLF           = "\r\n";
 
 const gPipeOptions    = {"end": false};
-const gReqOptions     = {
-    "host":         gTgHostApi,
-    "method":       "POST"
-};
 
 const gReIsFilePath   = /[\\\/\.]/;
 
@@ -675,7 +672,7 @@ function main(token) {
 
         //-------------------------]>
 
-        req = tgApiRequest(token, method, callback);
+        req = rApiRequest(token, method, callback);
 
         if(!body && !bodyBegin) {
             req.end();
@@ -1090,47 +1087,6 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
 }
 
 //-------------[HELPERS]--------------}>
-
-function tgApiRequest(token, method, callback) {
-    if(!method) {
-        throw new Error("request: `method` was not specified");
-    }
-
-    gReqOptions.path = "/bot" + token + "/" + method;
-
-    //--------------]>
-
-    const req = rHttps.request(gReqOptions, cbRequest);
-
-    if(typeof(callback) === "function") {
-        req.on("error", callback);
-    }
-
-    //--------------]>
-
-    return req;
-
-    //--------------]>
-
-    function cbRequest(response) {
-        let firstChunk, chunks;
-
-        //---------]>
-
-        response.on("data", function(chunk) {
-            if(!firstChunk)
-                firstChunk = chunk;
-            else {
-                chunks = chunks || [firstChunk];
-                chunks.push(chunk);
-            }
-        });
-
-        response.on("end", function() {
-            callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
-        });
-    }
-}
 
 function getNameByMime(contentType) {
     let result;
