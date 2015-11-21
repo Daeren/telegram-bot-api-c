@@ -10,7 +10,8 @@
 //-----------------------------------------------------
 
 const rHttp         = require("http"),
-      rHttps        = require("https");
+      rHttps        = require("https"),
+      rFs           = require("fs");
 
 const rCreateBot    = require("./createBot"),
       rOnMsg        = require("./onMsg");
