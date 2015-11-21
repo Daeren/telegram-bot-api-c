@@ -38,8 +38,7 @@ const gReqOptions     = {
     "method":       "POST"
 };
 
-const gReReplaceName  = /^@\S+\s+/,
-      gReIsFilePath   = /[\\\/\.]/;
+const gReIsFilePath   = /[\\\/\.]/;
 
 //-----------------------------]>
 

@@ -10,8 +10,11 @@
 //-----------------------------------------------------
 
 const rParseCmd         = require("./../parseCmd");
-
 const CResponseBuilder  = require("./responseBuilder");
+
+//-----------------------------------------------------
+
+const gReReplaceBotName = /^@\S+\s+/;
 
 //-----------------------------------------------------
 
@@ -95,7 +98,7 @@ function main(objBot, data) {
                     let msgText = msg.text;
 
                     if(msgText[0] === "@") {
-                        msg.text = msgText.replace(gReReplaceName, "");
+                        msg.text = msgText.replace(gReReplaceBotName, "");
                     }
                 }
 
