@@ -10,7 +10,8 @@
 //-----------------------------------------------------
 
 const rParseCmd         = require("./../parseCmd"),
-      rMsgType          = require("./../msgType");
+
+      rMsgSanitize      = require("./msgSanitize");
 
 const CResponseBuilder  = require("./responseBuilder");
 
@@ -30,7 +31,7 @@ function main(objBot, data) {
     }
 
     if(!objBot.bot.disabled("url.unsafe")) {
-        data = rMsgType("update", data); // <-- Prototype
+        data = rMsgSanitize("update", data); // <-- Prototype
     }
 
     //--------]>
