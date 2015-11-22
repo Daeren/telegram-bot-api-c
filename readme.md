@@ -20,7 +20,6 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
-* Safety improvement: +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
@@ -44,7 +43,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
 * [Errors](#refErrors)
-* [Unsafe URI](#refUnsafeURI)
+* [Unsafe URL](#refUnsafeURL)
 * [CLI](#refCLI)
 * [Test](#refTest)
 
@@ -418,6 +417,10 @@ objBot
     .http(objOptions)
     .bot(objMyBot, "/MyBot")
     .logger(cbLogger);
+    
+objBot
+    .virtual(objOptions)
+    .logger(cbLogger);
 ```
 
 
@@ -620,14 +623,16 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 
 
-<a name="refUnsafeURI"></a>
-#### Unsafe URI 
+<a name="refUnsafeURL"></a>
+#### Unsafe URL 
 
 ```js
-objBot
-    .enable("url.unsafe") // <-- Sanitize Incoming message
+objMyBot.enable("url.unsafe") // <-- Sanitize Incoming message
 
-    .polling()
+
+objBotFather
+    .http(objSrvOptions)
+    .bot(objMyBot, "/MyBot")
     .on("*", console.log);
 ```
 

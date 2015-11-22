@@ -42,6 +42,8 @@ const objSrv = objBot.http(objSrvOptions);
 
 //-----------]>
 
+objMyBot.enable("url.unsafe"); // <-- Sanitize Incoming message
+
 objSrv
     .bot(objMyBot, "/myBot")
     .logger(cbBotLogger)
