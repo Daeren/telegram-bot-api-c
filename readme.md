@@ -21,35 +21,31 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 [Telegram Bot API][3]
 
 * Safety improvement: +
-* Coverage: +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
 * Set engine(render)/promise: +
-* BotCommands: /start [text], /start@bot [text], @bot /start [text]
-* LoadFileByUrl: photo, audio, document, sticker, voice
-* Redirect: +
 * Analytics: [tgb-pl-botanio][4]
 
 
 #### Index
 
 * [Start](#refStart)
-* [Test](#refTest)
-* [CLI](#refCLI)
-* [Download](#refDownload)
 * [Polling](#refPolling)
 * [HTTP](#refHTTP)
 * [Virtual](#refVirtual)
 * [mServer](#refMServer)
-* [Response Builder](#refResponseBuilder)
 * [Nginx+Node.js](#refExampleNginxNodejs)
+* [Response Builder](#refResponseBuilder)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
 * [Render](#refRender)
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
+* [Download](#refDownload)
 * [Errors](#refErrors)
+* [CLI](#refCLI)
+* [Test](#refTest)
 
 
 
@@ -139,82 +135,6 @@ api.sendMessage(data()).then(data).then(function(x) {
 
     api.sendPhoto(x);
 });
-```
-
-
-
-<a name="refTest"></a>
-#### Test
-
-```js
-npm -g install mocha
-npm install chai
-
-set TELEGRAM_BOT_TOKEN=X
-set TELEGRAM_CHAT_ID=X
-set TELEGRAM_MSG_ID=X
-
-cd <module>
-
-npm test
-```
-
-![npm test][image-test]
-
-
-
-<a name="refCLI"></a>
-#### CLI
-
-```js
-> tg-api TOKEN METHOD -bool --key=val
-> node telegram-bot-api-c TOKEN METHOD -bool --key=val
-
-...
-
-> tg-api X sendMessage --chat_id=0 --text="Hi" -disable_web_page_preview
-
-> tg-api X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
-> tg-api X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
-
-> tg-api X sendMessage < "./examples/msg.json"
-
-...
-
-> tg-api X sendMessage
-> {"chat_id": 0, "t
-> ext": "Hi"}
-> <enter> [\r\n]
-
-(result)
-
-> {"chat_id": 1, "text": "Hi 2"}
-> <enter> [\r\n]
-
-(result)
-```
-
-
-
-<a name="refDownload"></a>
-#### Download
-
-```js
-objBot.download("file_id", "dir");
-objBot.download("file_id", "dir", "name.mp3");
-
-
-objBot
-    .download("file_id")
-    .then(function(info) {
-        info.stream.pipe(require("fs").createWriteStream("O:/" + info.name));
-    });
-
-
-objBot
-    .download("file_id", function(error, info) {
-        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
-    });
 ```
 
 
@@ -409,6 +329,25 @@ objBot
 
 
 
+<a name="refExampleNginxNodejs"></a>
+#### NGINX + Node.js
+
+```js
+const objBot          = rBot();
+const objSrvOptions   = {
+    "http":         true,
+
+    "autoWebhook":  "site.xx:88", // <-- Default: (host + port); `false` - disable
+
+    "host":         "localhost",
+    "port":         1490
+};
+
+objBot.http(objSrvOptions, cbMsg);
+```
+
+
+
 <a name="refResponseBuilder"></a>
 #### Response Builder
 
@@ -457,55 +396,6 @@ objSrv
             .text("Hi")
             .keyboard(customKb)
             .send((e, r) => console.log(e || r));  // <-- Return: hashTable | result
-    });
-```
-
-
-
-<a name="refExampleNginxNodejs"></a>
-#### NGINX + Node.js
-
-```js
-const objBot          = rBot();
-const objSrvOptions   = {
-    "http":         true,
-
-    "autoWebhook":  "site.xx:88", // <-- Default: (host + port); `false` - disable
-
-    "host":         "localhost",
-    "port":         1490
-};
-
-objBot.http(objSrvOptions, cbMsg);
-```
-
-
-
-<a name="refRender"></a>
-#### Render 
-
-```js
-objBot
-    .engine(require("ejs"))
-    .promise(require("bluebird"))
-
-    .polling()
-
-    .use(function(type, bot) {
-        //-----[DEFAULT]-----}>
-
-        bot.data = ["H", "i"];
-        bot.render("Array | Text: {0} + {1}").then(console.log);
-
-        bot.data = {"x": "H", "y": "i"};
-        bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
-
-        //-----[EJS]-----}>
-
-        bot.data.input = {"x": "H", "y": "i"};
-        bot.data.reply_markup = bot.keyboard.hGb();
-
-        bot.render("EJS | Text: <%= x %> + <%= y %>");
     });
 ```
 
@@ -590,6 +480,36 @@ objSrv
 
 
 
+<a name="refRender"></a>
+#### Render 
+
+```js
+objBot
+    .engine(require("ejs"))
+    .promise(require("bluebird"))
+
+    .polling()
+
+    .use(function(type, bot) {
+        //-----[DEFAULT]-----}>
+
+        bot.data = ["H", "i"];
+        bot.render("Array | Text: {0} + {1}").then(console.log);
+
+        bot.data = {"x": "H", "y": "i"};
+        bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
+
+        //-----[EJS]-----}>
+
+        bot.data.input = {"x": "H", "y": "i"};
+        bot.data.reply_markup = bot.keyboard.hGb();
+
+        bot.render("EJS | Text: <%= x %> + <%= y %>");
+    });
+```
+
+
+
 <a name="refKeyboard"></a>
 #### Keyboard 
 
@@ -636,6 +556,29 @@ function cbMsg(bot) {
 | numpad            | 0-9                                  |
 |                   | -                                    |
 | hide              |                                      |
+
+
+
+<a name="refDownload"></a>
+#### Download
+
+```js
+objBot.download("file_id", "dir");
+objBot.download("file_id", "dir", "name.mp3");
+
+
+objBot
+    .download("file_id")
+    .then(function(info) {
+        info.stream.pipe(require("fs").createWriteStream("O:/" + info.name));
+    });
+
+
+objBot
+    .download("file_id", function(error, info) {
+        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+    });
+```
 
 
 
@@ -708,6 +651,59 @@ api.sendDocument({
     "document":     imgBuffer
 });
 ```
+
+
+
+<a name="refCLI"></a>
+#### CLI
+
+```js
+> tg-api TOKEN METHOD -bool --key=val
+> node telegram-bot-api-c TOKEN METHOD -bool --key=val
+
+...
+
+> tg-api X sendMessage --chat_id=0 --text="Hi" -disable_web_page_preview
+
+> tg-api X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
+> tg-api X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
+
+> tg-api X sendMessage < "./examples/msg.json"
+
+...
+
+> tg-api X sendMessage
+> {"chat_id": 0, "t
+> ext": "Hi"}
+> <enter> [\r\n]
+
+(result)
+
+> {"chat_id": 1, "text": "Hi 2"}
+> <enter> [\r\n]
+
+(result)
+```
+
+
+
+<a name="refTest"></a>
+#### Test
+
+```js
+npm -g install mocha
+npm install chai
+
+set TELEGRAM_BOT_TOKEN=X
+set TELEGRAM_CHAT_ID=X
+set TELEGRAM_MSG_ID=X
+
+cd <module>
+
+npm test
+```
+
+![npm test][image-test]
 
 
 
@@ -794,6 +790,8 @@ api.sendDocument({
 
 | Name          | Arguments                             | Return                                    |
 |---------------|---------------------------------------|-------------------------------------------|
+| input         | error, data                           |                                           |
+| middleware    |                                       |                                           |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | use           | [type], callback(type, bot[, next])   | this                                      |
