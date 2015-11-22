@@ -23,18 +23,31 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(objBot, data) {
-    const msg     = data.message,
-          msgChat = msg.chat;
+    if(!data || typeof(data) !== "object") {
+        return;
+    }
 
     //--------]>
 
-    const botPlugin       = objBot.plugin,
-          botFilters      = objBot.filters,
+    const msg = data.message;
 
-          ctxBot          = createCtx(),
+    //--------]>
 
-          msgType         = getTypeMsg(msg),
-          evName          = getEventNameByTypeMsg(msgType);
+    if(!msg || typeof(msg) !== "object") {
+        return;
+    }
+
+    //--------]>
+
+    const msgChat           = msg.chat;
+
+    const botPlugin         = objBot.plugin,
+          botFilters        = objBot.filters,
+
+          ctxBot            = createCtx(),
+
+          msgType           = getTypeMsg(msg),
+          evName            = getEventNameByTypeMsg(msgType);
 
     let cmdParam;
 

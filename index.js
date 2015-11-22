@@ -85,6 +85,7 @@ function main(token) {
 
         "server":       function(params, callback) { return rServer.http(this, params, callback); },
         "polling":      function(params, callback) { return rServer.polling(this, params, callback); },
+        "virtual":      function(callback) { return rServer.virtual(this, callback); },
 
         "parseCmd":     rParseCmd
     };

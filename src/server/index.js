@@ -11,5 +11,7 @@
 
 module.exports = {
     "polling":  require("./createPolling"),
-    "http":     require("./createHTTP")
+    "http":     require("./createHTTP"),
+
+    "virtual":  require("./createVirtual")
 };

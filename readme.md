@@ -20,6 +20,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* [Virtual](#refVirtual): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
 * [Response Builder](#refResponseBuilder): +
 * Set engine(render)/promise: +
@@ -27,8 +28,6 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 * Redirect: +
-* Plugin (Async/Sync): +
-* Goto (Plugin+Event): +
 * Analytics: [tgb-pl-botanio][4]
 
 
@@ -41,6 +40,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Polling](#refPolling)
 * [Server](#refServer)
 * [mServer](#refMServer)
+* [Virtual](#refVirtual)
 * [Response Builder](#refResponseBuilder)
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Plugin](#refPlugin)
@@ -346,6 +346,60 @@ objBot
 
         objBot.server(objSrvOptions, cbMsg);
     });
+```
+
+
+
+<a name="refVirtual"></a>
+#### Virtual
+
+```js
+const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const objSrv = objBot
+    .virtual(bot => {
+        bot.data().text("Not found!").send();
+    })
+    .on("photo", console.log);
+
+//----[Proxy: express]----}>
+
+objBot
+    .api
+    .setWebhook({"url": "site.xx/dev-bot"})
+    .then(isOk => {
+        const rExpress      = require("express"),
+              rBodyParser   = require("body-parser");
+
+        rExpress()
+            .use(rBodyParser.json())
+            .post("/dev-bot", objSrv.middleware)
+            .listen(3000, "localhost");
+    });
+    
+//----[For stress tests]----}>
+
+objSrv.input(null, {
+    "update_id": 0,
+    "message": {
+        "message_id": 0,
+
+        "from": {
+            "id": 0,
+            "first_name": "D",
+            "username": ""
+        },
+
+        "chat": {
+            "id": 0,
+            "first_name": "D",
+            "username": "",
+            "type": "private"
+        },
+
+        "date": 0,
+        "text": "Hello"
+    }
+});
 ```
 
 
@@ -685,6 +739,7 @@ api.sendDocument({
 |                   | -                                                                     |                                   |
 | server            | [options][, callback(bot, cmd)]                                       | object                            |
 | polling           | [options][, callback(bot, cmd)]                                       | object                            |
+| virtual           | [callback(bot, cmd)]                                                  | object                            |
 |                   | -                                                                     |                                   |
 | parseCmd          | text[, strict]                                                        |                                   |
 
@@ -730,6 +785,16 @@ api.sendDocument({
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
+#### Methods: virtual
+
+| Name          | Arguments                             | Return                                    |
+|---------------|---------------------------------------|-------------------------------------------|
+|               | -                                     |                                           |
+| logger        | callback(error, buffer)               | this                                      |
+| use           | [type], callback(type, bot[, next])   | this                                      |
+| on            | type[, params], callback(data, params)| this                                      |
+| off           | [type][, callback]                    | this                                      |
+
 
 #### Fields: bot (srv.on("*", bot => { })
 
@@ -742,10 +807,11 @@ api.sendDocument({
 | to                | undefined  |                                          |
 |                   | -          |                                          |
 | message           | object     | Incoming message                         |
-| data              | object     |                                          |
+| data              | function   | Response Builder                         |
 |                   | -          |                                          |
 | send              | function   | Uses: cid, data                          |
 | forward           | function   | Uses: mid, from, to                      |
+| render            | function   | Uses: cid, data                          |
 
 
 #### Events: on

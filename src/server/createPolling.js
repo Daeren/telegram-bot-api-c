@@ -48,7 +48,7 @@ function main(botFather, params, callback) {
     //----------------]>
 
     return (function() {
-        let result = Object.create(objBot);
+        const result = Object.create(objBot);
 
         result.start = tmStart;
         result.stop = tmStop;

@@ -110,7 +110,7 @@ function main(botFather, params, callback) {
     //-----------------]>
 
     return (function() {
-        let result = Object.create(srvBotDefault);
+        const result = Object.create(srvBotDefault);
 
         result.app = srv;
         result.bot = addBot;
