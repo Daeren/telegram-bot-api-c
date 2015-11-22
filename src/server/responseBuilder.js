@@ -92,24 +92,23 @@ gModifiers
 //----)>
 
 CMain.prototype.keyboard = function(data, params) {
-    const lastElem  = this.lastElem,
-          bot       = this.botReq;
+    const lastElem = this.lastElem;
 
     //--------]>
 
     if(typeof(data) === "undefined" || data === null) {
-        data = bot.keyboard.hide();
+        data = this.botFather.keyboard.hide();
     }
     else {
         if(typeof(data) !== "object" || Array.isArray(data)) {
-            data = bot.keyboard(data, params);
+            data = this.botFather.keyboard(data, params);
         }
     }
 
     lastElem.reply_markup = data;
 
     if(data.selective) {
-        lastElem.reply_to_message_id = bot.mid;
+        lastElem.reply_to_message_id = this.botReq.mid;
     }
     else {
         delete lastElem.reply_to_message_id;

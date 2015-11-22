@@ -70,7 +70,7 @@ describe("Instance: bot", function() {
 
     //-----------------]>
 
-    describe("Property", function() {
+    describe("Propertys", function() {
 
         const botMethods = [
             "engine", "promise", "token", "setToken",
@@ -105,7 +105,7 @@ describe("Instance: bot", function() {
 
     //-----------------]>
 
-    describe("Method", function() {
+    describe("Methods", function() {
 
         it("keyboard", function() {
             let buttons;
