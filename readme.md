@@ -39,9 +39,9 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [CLI](#refCLI)
 * [Download](#refDownload)
 * [Polling](#refPolling)
-* [Server](#refServer)
-* [mServer](#refMServer)
+* [HTTP](#refHTTP)
 * [Virtual](#refVirtual)
+* [mServer](#refMServer)
 * [Response Builder](#refResponseBuilder)
 * [Nginx+Node.js](#refExampleNginxNodejs)
 * [Plugin](#refPlugin)
@@ -50,6 +50,10 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Errors](#refErrors)
+
+
+
+![architecture][image-architecture]
 
 
 
@@ -242,8 +246,8 @@ function cbCmdStop(bot, params) {
 
 
 
-<a name="refServer"></a>
-#### Server
+<a name="refHTTP"></a>
+#### HTTP
 
 ```js
 const rBot = require("telegram-bot-api-c");
@@ -273,7 +277,7 @@ const objSrvOptions   = {
 const objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
       objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-let objSrv        = objBotFather.server(objSrvOptions);
+let objSrv        = objBotFather.http(objSrvOptions);
 
 objSrv
     .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
@@ -332,25 +336,6 @@ function cbCmdStop(bot, params) {
 
 
 
-<a name="refMServer"></a>
-#### mServer
-
-```js
-const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
-
-objBot
-    .api
-    .setWebhook({"url": "site.xx/myBot"})
-    .then(isOk => {
-        if(!isOk)
-            throw new Error("Oops...problems with webhook...");
-
-        objBot.server(objSrvOptions, cbMsg);
-    });
-```
-
-
-
 <a name="refVirtual"></a>
 #### Virtual
 
@@ -401,6 +386,25 @@ objSrv.input(null, {
         "text": "Hello"
     }
 });
+```
+
+
+
+<a name="refMServer"></a>
+#### mServer
+
+```js
+const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
+
+objBot
+    .api
+    .setWebhook({"url": "site.xx/myBot"})
+    .then(isOk => {
+        if(!isOk)
+            throw new Error("Oops...problems with webhook...");
+
+        objBot.http(objSrvOptions, cbMsg);
+    });
 ```
 
 
@@ -472,7 +476,7 @@ const objSrvOptions   = {
     "port":         1490
 };
 
-objBot.server(objSrvOptions, cbMsg);
+objBot.http(objSrvOptions, cbMsg);
 ```
 
 
@@ -516,11 +520,11 @@ objBot
     .logger(cbLogger);
     
 objBot
-    .server(objOptions, cbMsg)
+    .http(objOptions, cbMsg)
     .logger(cbLogger);
     
 objBot
-    .server(objOptions)
+    .http(objOptions)
     .bot(objMyBot, "/MyBot")
     .logger(cbLogger);
 ```
@@ -738,7 +742,7 @@ api.sendDocument({
 | send              | id, data[, callback(error, json, response)]                           | promise or undefined              |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
-| server            | [options][, callback(bot, cmd)]                                       | object                            |
+| http              | [options][, callback(bot, cmd)]                                       | object                            |
 | polling           | [options][, callback(bot, cmd)]                                       | object                            |
 | virtual           | [callback(bot, cmd)]                                                  | object                            |
 |                   | -                                                                     |                                   |
@@ -774,7 +778,7 @@ api.sendDocument({
 | on            | type[, params], callback(data, params)| this                                      |
 | off           | [type][, callback]                    | this                                      |
 
-#### Methods: server
+#### Methods: http
 
 | Name          | Arguments                             | Return                                    |
 |---------------|---------------------------------------|-------------------------------------------|
@@ -865,4 +869,5 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
 
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png

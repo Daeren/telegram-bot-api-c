@@ -26,6 +26,11 @@ const objSrv    = objBot
         bot.data().text("Not found!").send();
     })
     //.on(/./, console.log)
+    .on("sticker", bot => {
+        console.log(bot);
+        console.log(bot.message.sticker.thumb);
+        console.log("+------");
+    })
     .on("photo", bot => {
         console.log(bot);
         console.log(bot.message.photo);
@@ -36,7 +41,8 @@ const objSrv    = objBot
 
 objBot
     .api
-    .setWebhook({"url": "site.xx/dev-bot"})
+    .setWebhook({"url": "db.gg:88/dev-bot"})
+    //.setWebhook({"url": "site.xx/dev-bot"})
     .then(isOk => {
         if(!isOk)
             throw new Error("Oops...problems with webhook...");
@@ -55,6 +61,8 @@ objBot
 //-------[Input]-------}>
 
 setInterval(function() {
+    return;
+
     objSrv.input(null, {
         "update_id": 0,
         "message": {

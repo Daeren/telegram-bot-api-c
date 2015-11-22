@@ -119,103 +119,9 @@ const typesMap = (function(data) {
 
 //-----------------------------------------------------
 
-module.exports = main;
+module.exports = sanitize;
 
 //-----------------------------------------------------
-
-function main(data) {
-    return sanitize("update", data);
-}
-
-//-----------------------------------------------------
-
-function buildType(schema) {
-    const fieldsParams = [];
-
-    let fields      = [],
-        fieldsLen   = 0;
-
-    //--------------]>
-
-    const result = function(data) {
-        const r = {};
-
-        if(!data || typeof(data) !== "object") {
-            return r;
-        }
-
-        for(let field, i = 0; i < fieldsLen; i++) {
-            field = fields[i];
-
-            if(hasOwnProperty(data, field)) {
-                const fieldData = data[field];
-
-                const fieldParams   = fieldsParams[field];
-
-                const fieldType     = fieldParams[0],
-                      fieldArray    = fieldParams[1];
-
-                //---------]>
-
-                switch(fieldArray) {
-                    case 1:
-                        r[field] = fieldData.map(function(d) {
-                            return sanitize(fieldType, d);
-                        });
-
-                        break;
-
-                    case 2:
-                        r[field] = fieldData
-                            .map(function(a) {
-                                return a.map(function(d) {
-                                    return sanitize(fieldType, d);
-                                });
-                            });
-
-                        break;
-
-                    default:
-                        r[field] = sanitize(fieldType, fieldData);
-                }
-            }
-         }
-
-        return r;
-    };
-
-    //-----]>
-
-    schema.forEach(function(element) {
-        element = element.split(":");
-
-        let type      = element[0],
-            tpFields  = (element[1] || type).split(" ");
-
-        let typeArray;
-
-        for(let i = 0; i < type.length; i++) {
-            if(type[i] !== "*") {
-                type = type.substr(i);
-                typeArray = i;
-
-                break;
-            }
-        }
-
-        fields = fields.concat(tpFields);
-
-        tpFields.forEach(function(field) {
-            fieldsParams[field] = [type, typeArray];
-        });
-    });
-
-    fieldsLen = fields.length;
-
-    //--------------]>
-
-    return result;
-}
 
 function sanitize(type, data) {
     switch(type) {
@@ -244,9 +150,97 @@ function sanitize(type, data) {
             throw new Error("Unknown type: " + type);
     }
 }
+//-----------------------------------------------------
 
-//-------------------------------------]>
+function buildType(schema) {
+    const fieldsParams = [];
 
-function hasOwnProperty(obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
+    let fields      = [],
+        fieldsLen   = 0;
+
+    //--------------]>
+
+    const result = function(data) {
+        const r = {};
+
+        //---------]>
+
+        if(!data || typeof(data) !== "object") {
+            return r;
+        }
+
+        for(let field, i = 0; i < fieldsLen; i++) {
+            field = fields[i];
+
+            if(Object.prototype.hasOwnProperty.call(data, field)) {
+                const fieldData = data[field];
+
+                const fieldParams   = fieldsParams[field];
+
+                const fieldType     = fieldParams[0],
+                      fieldArray    = fieldParams[1];
+
+                //---------]>
+
+                switch(fieldArray) {
+                    case 1:
+                        r[field] = fieldData
+                            .map(function(d) {
+                                return sanitize(fieldType, d);
+                            });
+
+                        break;
+
+                    case 2:
+                        r[field] = fieldData
+                            .map(function(a) {
+                                return a.map(function(d) {
+                                    return sanitize(fieldType, d);
+                                });
+                            });
+
+                        break;
+
+                    default:
+                        r[field] = sanitize(fieldType, fieldData);
+                }
+            }
+         }
+
+        return r;
+    };
+
+    //-----[Init: schema]-----}>
+
+    schema.forEach(function(element) {
+        element = element.split(":");
+
+        let type      = element[0],
+            tpFields  = (element[1] || type).split(" ");
+
+        let typeArray;
+
+        //---------]>
+
+        for(let i = 0; i < type.length; i++) {
+            if(type[i] !== "*") {
+                type = type.substr(i);
+                typeArray = i;
+
+                break;
+            }
+        }
+
+        fields = fields.concat(tpFields);
+
+        tpFields.forEach(function(field) {
+            fieldsParams[field] = [type, typeArray];
+        });
+    });
+
+    fieldsLen = fields.length;
+
+    //--------------]>
+
+    return result;
 }

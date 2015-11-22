@@ -37,7 +37,7 @@ function main(botFather, params, callback) {
 
     //-----------------]>
 
-    const isHTTPS       = !params.http;
+    const isHTTPS       = params.ssl !== false && !params.http;
     const srvBotDefault = rCreateBot(botFather, callback);
 
     let srv, srvBots;

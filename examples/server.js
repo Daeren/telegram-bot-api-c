@@ -38,7 +38,7 @@ const objSrvOptions   = {
 const objMyBot      = rBot(process.env.TG_BOT_TOKEN_MY),
       objOtherBot   = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-const objSrv = objBot.server(objSrvOptions);
+const objSrv = objBot.http(objSrvOptions);
 
 //-----------]>
 

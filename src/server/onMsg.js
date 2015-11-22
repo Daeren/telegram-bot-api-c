@@ -25,7 +25,7 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(objBot, data) {
-    data = rMsgType(data);
+    data = rMsgType("update", data); // <-- Prototype
 
     //--------]>
 

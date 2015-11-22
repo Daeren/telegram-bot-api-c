@@ -72,8 +72,7 @@ function main(token) {
 
     CMain.prototype = {
         "token":        function(t) { token = t; return this; },
-        "setToken":     function(t) { token = t; return this; },
-
+          "setToken":     function(t) { token = t; return this; }, // <-- Depr.
         "engine":       function(t) { this.mdEngine = t; return this; },
         "promise":      function(t) { this.mdPromise = t; return this; },
 
@@ -83,8 +82,9 @@ function main(token) {
         "send":         mthCMainSend,
         "download":     mthCMainDownload,
 
-        "server":       function(params, callback) { return rServer.http(this, params, callback); },
+          "server":       function(params, callback) { return rServer.http(this, params, callback); }, // <-- Depr.
         "polling":      function(params, callback) { return rServer.polling(this, params, callback); },
+        "http":         function(params, callback) { return rServer.http(this, params, callback); },
         "virtual":      function(callback) { return rServer.virtual(this, callback); },
 
         "parseCmd":     rParseCmd

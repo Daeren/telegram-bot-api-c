@@ -46,7 +46,7 @@ objBot
             throw new Error("Oops...problems with webhook...");
 
         objBot
-            .server(objSrvOptions, cbMsg)
+            .http(objSrvOptions, cbMsg)
             .logger(cbLogger)
 
             .on("/start", cbCmdStart);
