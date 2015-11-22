@@ -21,10 +21,16 @@ const rBot      = require("./../index");
 const objBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
 const objSrv    = objBot
     .virtual(bot => {
+        console.log(bot);
+
         bot.data().text("Not found!").send();
     })
-    .on(/./, console.log)
-    .on("photo", console.log);
+    //.on(/./, console.log)
+    .on("photo", bot => {
+        console.log(bot);
+        console.log(bot.message.photo);
+        console.log("+------");
+    });
 
 //-----------------------------------------------------
 

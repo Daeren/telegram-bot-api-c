@@ -9,7 +9,9 @@
 
 //-----------------------------------------------------
 
-const rParseCmd         = require("./../parseCmd");
+const rParseCmd         = require("./../parseCmd"),
+      rMsgType          = require("./../msgType");
+
 const CResponseBuilder  = require("./responseBuilder");
 
 //-----------------------------------------------------
@@ -23,9 +25,7 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(objBot, data) {
-    if(!data || typeof(data) !== "object") {
-        return;
-    }
+    data = rMsgType(data);
 
     //--------]>
 

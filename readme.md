@@ -20,11 +20,12 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
-* [Virtual (StressTest / Express)](#refVirtual): +
-* [Send file as Buffer](#refSendFileAsBuffer): +
-* [Response Builder](#refResponseBuilder): +
-* Set engine(render)/promise: +
+* Safety improvement: +
 * Coverage: +
+* [Virtual (StressTest / Express)](#refVirtual): +
+* [Response Builder](#refResponseBuilder): +
+* [Send file as Buffer](#refSendFileAsBuffer): +
+* Set engine(render)/promise: +
 * BotCommands: /start [text], /start@bot [text], @bot /start [text]
 * LoadFileByUrl: photo, audio, document, sticker, voice
 * Redirect: +
