@@ -73,10 +73,8 @@ function main(text, strict) {
 
     //---------]>
 
-    if(strict) {
-        if(name.length > 32 || !gReValidCmd.test(name)) {
-            return null;
-        }
+    if(strict && (name.length > 32 || !gReValidCmd.test(name))) {
+        return null;
     }
 
     //---------]>

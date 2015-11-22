@@ -233,9 +233,9 @@ function main(botFather, params, callback) {
     //-----------------]>
 
     function addBot(bot, path, callback) {
-        srvBots = srvBots || {};
+        srvBots = srvBots || Object.create(null);
 
-        if(hasOwnProperty(srvBots, path)) {
+        if(srvBots[path]) {
             throw new Error("Path '" + path + "' has already been used");
         }
 
@@ -276,10 +276,4 @@ function main(botFather, params, callback) {
 
         return srvBot;
     }
-}
-
-//----------------------------------------]>
-
-function hasOwnProperty(obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
 }
