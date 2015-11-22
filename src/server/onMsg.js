@@ -222,7 +222,13 @@ function getEventNameByTypeMsg(type) {
         case "new_chat_title":          return "chatTitle";
         case "new_chat_photo":          return "chatNewPhoto";
         case "delete_chat_photo":       return "chatDeletePhoto";
+
         case "group_chat_created":      return "chatCreated";
+        case "supergroup_chat_created": return "superChatCreated";
+        case "channel_chat_created":    return "channelChatCreated";
+
+        case "migrate_to_chat_id":      return "migrateToChatId";
+        case "migrate_from_chat_id":    return "migrateFromChatId";
     }
 
     return type;

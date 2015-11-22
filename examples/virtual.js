@@ -18,11 +18,12 @@ const rBot      = require("./../index");
 
 //-----------------------------------------------------
 
-const objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
-const objSrv  = objBot
+const objBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const objSrv    = objBot
     .virtual(bot => {
         bot.data().text("Not found!").send();
     })
+    .on(/./, console.log)
     .on("photo", console.log);
 
 //-----------------------------------------------------
@@ -65,7 +66,7 @@ setInterval(function() {
             },
 
             "date": 0,
-            "text": "Hello"
+            "text": 0
         }
     });
 }, 2000);

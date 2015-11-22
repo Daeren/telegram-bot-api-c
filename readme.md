@@ -20,7 +20,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
-* [Virtual](#refVirtual): +
+* [Virtual (StressTest / Express)](#refVirtual): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
 * [Response Builder](#refResponseBuilder): +
 * Set engine(render)/promise: +
@@ -825,7 +825,13 @@ api.sendDocument({
 | chatTitle         | bot, data                             |                                           |
 | chatNewPhoto      | bot, data                             |                                           |
 | chatDeletePhoto   | bot, data                             |                                           |
+|                   | -                                     |                                           |
 | chatCreated       | bot, data                             |                                           |
+| superChatCreated  | bot, data                             |                                           |
+| channelChatCreated| bot, data                             |                                           |
+|                   | -                                     |                                           |
+| migrateToChatId   | bot, data                             |                                           |
+| migrateFromChatId | bot, data                             |                                           |
 |                   | -                                     |                                           |
 | text              | bot, data                             |                                           |
 | photo             | bot, data                             |                                           |
