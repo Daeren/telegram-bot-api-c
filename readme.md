@@ -44,6 +44,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
 * [Errors](#refErrors)
+* [Unsafe URI](#refUnsafeURI)
 * [CLI](#refCLI)
 * [Test](#refTest)
 
@@ -335,7 +336,7 @@ objBot
 ```js
 const objBot          = rBot();
 const objSrvOptions   = {
-    "http":         true,
+    "ssl":          false,
 
     "autoWebhook":  "site.xx:88", // <-- Default: (host + port); `false` - disable
 
@@ -618,6 +619,19 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 ```
 
 
+
+<a name="refUnsafeURI"></a>
+#### Unsafe URI 
+
+```js
+objBot
+    .enable("url.unsafe") // <-- Sanitize Incoming message
+
+    .polling()
+    .on("*", console.log);
+```
+
+
 <a name="refSendFileAsBuffer"></a>
 #### Send file as Buffer 
 
@@ -727,6 +741,9 @@ npm test
 
 | Method            | Arguments                                                             | Return                            |
 |-------------------|-----------------------------------------------------------------------|-----------------------------------|
+|                   | -                                                                     |                                   |
+| enable            | key                                                                   | this                              |
+| disabled          | key                                                                   | true/false                        |
 |                   | -                                                                     |                                   |
 | engine            | instance                                                              | this                              |
 | promise           | instance                                                              | this                              |

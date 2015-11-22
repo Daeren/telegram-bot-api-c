@@ -20,6 +20,8 @@ const rBot      = require("./../index");
 
 const objBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
 const objSrv    = objBot
+    .enable("url.unsafe")
+
     .virtual(bot => {
         console.log(bot);
 
@@ -41,8 +43,7 @@ const objSrv    = objBot
 
 objBot
     .api
-    .setWebhook({"url": "db.gg:88/dev-bot"})
-    //.setWebhook({"url": "site.xx/dev-bot"})
+    .setWebhook({"url": "site.xx/dev-bot"})
     .then(isOk => {
         if(!isOk)
             throw new Error("Oops...problems with webhook...");
@@ -61,8 +62,6 @@ objBot
 //-------[Input]-------}>
 
 setInterval(function() {
-    return;
-
     objSrv.input(null, {
         "update_id": 0,
         "message": {

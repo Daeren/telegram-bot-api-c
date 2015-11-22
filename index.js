@@ -68,9 +68,14 @@ function main(token) {
         this.keyboard   = rKeyboard;
 
         this.mdPromise  = Promise;
+
+        this.kvCfgStore = Object.create(null);
     }
 
     CMain.prototype = {
+        "enable":        function(key) { this.kvCfgStore[key] = true; return this; },
+        "disabled":      function(key) { return this.kvCfgStore[key] !== true; },
+
         "token":        function(t) { token = t; return this; },
           "setToken":     function(t) { token = t; return this; }, // <-- Depr.
         "engine":       function(t) { this.mdEngine = t; return this; },

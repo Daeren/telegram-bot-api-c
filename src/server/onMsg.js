@@ -25,7 +25,13 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(objBot, data) {
-    data = rMsgType("update", data); // <-- Prototype
+    if(!data || typeof(data) !== "object") {
+        return;
+    }
+
+    if(!objBot.bot.disabled("url.unsafe")) {
+        data = rMsgType("update", data); // <-- Prototype
+    }
 
     //--------]>
 
