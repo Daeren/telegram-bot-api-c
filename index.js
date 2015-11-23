@@ -703,7 +703,9 @@ function main(token) {
                 break;
 
             case "getFile":
-                if(!data) break;
+                if(!data) {
+                    break;
+                }
 
                 //------]>
 
