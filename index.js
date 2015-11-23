@@ -717,7 +717,9 @@ function main(token) {
                 break;
 
             case "setWebhook":
-                if(!data) break;
+                if(!data) {
+                    break;
+                }
 
                 //------]>
 
