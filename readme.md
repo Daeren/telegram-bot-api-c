@@ -359,14 +359,14 @@ objBot.http(objSrvOptions, cbMsg);
 ```js
 objSrv
     .use(function(type, bot, next) {
-        //----[Send | One element]----}>
+        //----[Send | RBuilder: One element]----}>
         
         bot
         .data()
         .text("Hi")
         .send();
         
-        //----[Send | Queue]----}>
+        //----[Send | RBuilder: Queue]----}>
         
         bot
         .data()
@@ -388,6 +388,7 @@ objSrv
 
         bot.to = "chatId";
         bot.forward();
+    });
 ```
 
 
