@@ -252,22 +252,22 @@ function getTypeMsg(m) {
     let t;
 
     if(
-        hasOwnProperty(m, t = "text") ||
-        hasOwnProperty(m, t = "photo") ||
-        hasOwnProperty(m, t = "audio") ||
-        hasOwnProperty(m, t = "document") ||
-        hasOwnProperty(m, t = "sticker") ||
-        hasOwnProperty(m, t = "video") ||
-        hasOwnProperty(m, t = "voice") ||
-        hasOwnProperty(m, t = "contact") ||
-        hasOwnProperty(m, t = "location") ||
+        objHasOwnProperty(m, t = "text") ||
+        objHasOwnProperty(m, t = "photo") ||
+        objHasOwnProperty(m, t = "audio") ||
+        objHasOwnProperty(m, t = "document") ||
+        objHasOwnProperty(m, t = "sticker") ||
+        objHasOwnProperty(m, t = "video") ||
+        objHasOwnProperty(m, t = "voice") ||
+        objHasOwnProperty(m, t = "contact") ||
+        objHasOwnProperty(m, t = "location") ||
 
-        hasOwnProperty(m, t = "new_chat_participant") ||
-        hasOwnProperty(m, t = "left_chat_participant") ||
-        hasOwnProperty(m, t = "new_chat_title") ||
-        hasOwnProperty(m, t = "new_chat_photo") ||
-        hasOwnProperty(m, t = "delete_chat_photo") ||
-        hasOwnProperty(m, t = "group_chat_created")
+        objHasOwnProperty(m, t = "new_chat_participant") ||
+        objHasOwnProperty(m, t = "left_chat_participant") ||
+        objHasOwnProperty(m, t = "new_chat_title") ||
+        objHasOwnProperty(m, t = "new_chat_photo") ||
+        objHasOwnProperty(m, t = "delete_chat_photo") ||
+        objHasOwnProperty(m, t = "group_chat_created")
     ) {
         return t;
     }
@@ -275,7 +275,7 @@ function getTypeMsg(m) {
 
 //---------]>
 
-function hasOwnProperty(obj, prop) {
+function objHasOwnProperty(obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
 }
 

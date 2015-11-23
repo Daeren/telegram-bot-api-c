@@ -646,7 +646,9 @@ function main(token) {
                 break;
 
             case "getUpdates":
-                if(!data) break;
+                if(!data) {
+                    break;
+                }
 
                 //------]>
 
@@ -953,7 +955,7 @@ function main(token) {
                 while(len--) {
                     type = rSendApiMethods.keys[len];
 
-                    if(hasOwnProperty(d, type)) {
+                    if(Object.prototype.hasOwnProperty.call(d, type)) {
                         return type;
                     }
                 }
@@ -1211,10 +1213,6 @@ function genErrorByTgResponse(data) {
 }
 
 //----------]>
-
-function hasOwnProperty(obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
-}
 
 function forEachAsync(data, iter, cbEnd) {
     let i   = 0,

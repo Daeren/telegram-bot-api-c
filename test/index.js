@@ -348,10 +348,11 @@ describe("Instance: bot", function() {
 
             //-----]>
 
-            for(let cmd of fakeCmds)
+            for(let cmd of fakeCmds) {
                 it(cmd, function() {
                     expect(parseCmd(cmd)).to.be.null;
                 });
+            }
         });
 
         //-----------------]>
