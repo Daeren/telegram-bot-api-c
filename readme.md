@@ -671,7 +671,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 #### Unsafe URL 
 
 ```js
-objMyBot.enable("onMsg.sanitize") // <-- Sanitize Incoming message
+objMyBot.enable("onMsg.sanitize") // <-- Sanitize Incoming message (Prototype)
 
 objBotFather
     .http(objSrvOptions)
@@ -791,12 +791,13 @@ npm test
 |-------------------|-----------------------------------------------------------------------|-----------------------------------|
 |                   | -                                                                     |                                   |
 | enable            | key                                                                   | this                              |
+| disable           | key                                                                   | this                              |
 | enabled           | key                                                                   | true/false                        |
 | disabled          | key                                                                   | true/false                        |
 |                   | -                                                                     |                                   |
 | engine            | instance                                                              | this                              |
 | promise           | instance                                                              | this                              |
-| token             | token:str                                                             | this                              |
+| token             | [token]                                                               | this or token                     |
 |                   | -                                                                     |                                   |
 | call              | method, data[, callback(error, buffer, response)]                     |                                   |
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |

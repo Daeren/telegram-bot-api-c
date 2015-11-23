@@ -74,10 +74,19 @@ function main(token) {
 
     CMain.prototype = {
         "enable":        function(key) { this.kvCfgStore[key] = true; return this; },
+        "disable":       function(key) { delete this.kvCfgStore[key]; return this; },
         "enabled":       function(key) { return this.kvCfgStore[key] === true; },
         "disabled":      function(key) { return this.kvCfgStore[key] !== true; },
 
-        "token":        function(t) { token = t; return this; },
+        "token":        function(t) {
+            if(!arguments.length)
+                return token;
+
+            token = t;
+
+            return this;
+        },
+
           "setToken":     function(t) { token = t; return this; }, // <-- Depr.
         "engine":       function(t) { this.mdEngine = t; return this; },
         "promise":      function(t) { this.mdPromise = t; return this; },

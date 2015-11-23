@@ -70,14 +70,19 @@ describe("Instance: bot", function() {
 
     //-----------------]>
 
-    describe("Propertys", function() {
+    describe("Properties", function() {
 
         const botMethods = [
-            "engine", "promise", "token", "setToken",
+            "enable", "disable", "enabled", "disabled",
+
+            "setToken", "engine", "promise", "token",
+
             "call", "callJson",
             "send", "download",
-            "server", "polling",
-            "parseCmd"
+
+            "server", "polling", "http", "virtual",
+
+            "parseCmd", "parseCmd"
         ];
 
         //-----------------]>
@@ -106,6 +111,44 @@ describe("Instance: bot", function() {
     //-----------------]>
 
     describe("Methods", function() {
+
+        it("enable/enabled/disable/disabled", function() {
+            const key = "test";
+
+            //--------]>
+
+            expect(objBot.disabled(key)).to.equal(true);
+            expect(objBot.enabled(key)).to.equal(false);
+
+            objBot.enable(key);
+
+            expect(objBot.disabled(key)).to.equal(false);
+            expect(objBot.enabled(key)).to.equal(true);
+
+            objBot.disable(key);
+
+            expect(objBot.disabled(key)).to.equal(true);
+            expect(objBot.enabled(key)).to.equal(false);
+        });
+
+        it("token", function() {
+            const key       = "test",
+                  shToken   = token;
+
+            //--------]>
+
+            expect(objBot.token()).to.equal(token);
+
+            objBot.token(key);
+
+            expect(objBot.token()).to.equal(key);
+
+            objBot.token(shToken);
+
+            expect(objBot.token()).to.equal(token);
+        });
+
+        //------)>
 
         it("keyboard", function() {
             let buttons;
