@@ -627,8 +627,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 #### Unsafe URL 
 
 ```js
-objMyBot.enable("url.unsafe") // <-- Sanitize Incoming message
-
+objMyBot.enable("onMsg.sanitize") // <-- Sanitize Incoming message
 
 objBotFather
     .http(objSrvOptions)
@@ -748,6 +747,7 @@ npm test
 |-------------------|-----------------------------------------------------------------------|-----------------------------------|
 |                   | -                                                                     |                                   |
 | enable            | key                                                                   | this                              |
+| enabled           | key                                                                   | true/false                        |
 | disabled          | key                                                                   | true/false                        |
 |                   | -                                                                     |                                   |
 | engine            | instance                                                              | this                              |

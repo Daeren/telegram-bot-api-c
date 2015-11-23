@@ -123,17 +123,6 @@ describe("CResponseBuilder", function() {
     describe("Send", function() {
         const rb = gCreateRB();
 
-        it("send(text) | callback", function(done) {
-            rb
-                .text("test")
-                .keyboard()
-                .send(function(error, result) {
-                    checkSendMessage(error, result);
-
-                    done();
-                });
-        });
-
         it("send(photo-url) | promise", function(done) {
             const url = "https://www.google.ru/images/logos/ps_logo2.png";
 
@@ -153,6 +142,20 @@ describe("CResponseBuilder", function() {
                     done();
                 }, function(error) {
                     checkPromiseError(error);
+                    done();
+                });
+        });
+
+        it("send(text) | callback", function(done) {
+            expect(rb.stack).to.be.empty;
+            expect(rb.lastElement).to.equal(null);
+
+            rb
+                .text("test")
+                .keyboard()
+                .send(function(error, result) {
+                    checkSendMessage(error, result);
+
                     done();
                 });
         });

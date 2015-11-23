@@ -74,6 +74,7 @@ function main(token) {
 
     CMain.prototype = {
         "enable":        function(key) { this.kvCfgStore[key] = true; return this; },
+        "enabled":       function(key) { return this.kvCfgStore[key] === true; },
         "disabled":      function(key) { return this.kvCfgStore[key] !== true; },
 
         "token":        function(t) { token = t; return this; },

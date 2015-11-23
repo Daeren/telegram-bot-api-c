@@ -119,37 +119,14 @@ const typesMap = (function(data) {
 
 //-----------------------------------------------------
 
-module.exports = sanitize;
+module.exports = main;
 
 //-----------------------------------------------------
 
-function sanitize(type, data) {
-    switch(type) {
-        case "boolean":
-            return !!data;
-
-        case "integer":
-            return parseInt(data, 10);
-
-        case "float":
-            return parseFloat(data);
-
-        case "string":
-            return typeof(data) === "string" ? data : (typeof(data) === "undefined" || data === null ? "" : data + "");
-
-        case "inputFile":
-            return data;
-
-        default:
-            const tp = typesMap[type];
-
-            if(tp) {
-                return tp(data);
-            }
-
-            throw new Error("Unknown type: " + type);
-    }
+function main(data) {
+    return sanitize("update", data);
 }
+
 //-----------------------------------------------------
 
 function buildType(schema) {
@@ -243,4 +220,32 @@ function buildType(schema) {
     //--------------]>
 
     return result;
+}
+
+function sanitize(type, data) {
+    switch(type) {
+        case "boolean":
+            return !!data;
+
+        case "integer":
+            return parseInt(data, 10);
+
+        case "float":
+            return parseFloat(data);
+
+        case "string":
+            return typeof(data) === "string" ? data : (typeof(data) === "undefined" || data === null ? "" : data + "");
+
+        case "inputFile":
+            return data;
+
+        default:
+            const tp = typesMap[type];
+
+            if(tp) {
+                return tp(data);
+            }
+
+            throw new Error("Unknown type: " + type);
+    }
 }

@@ -9,11 +9,10 @@
 
 //-----------------------------------------------------
 
-const rParseCmd         = require("./../parseCmd"),
+const rParseCmd         = require("./../parseCmd");
 
-      rMsgSanitize      = require("./msgSanitize");
-
-const CResponseBuilder  = require("./responseBuilder");
+const rMsgSanitize      = require("./msgSanitize"),
+      rResponseBuilder  = require("./responseBuilder");
 
 //-----------------------------------------------------
 
@@ -30,8 +29,14 @@ function main(objBot, data) {
         return;
     }
 
-    if(!objBot.bot.disabled("url.unsafe")) {
-        data = rMsgSanitize("update", data); // <-- Prototype
+    //--------]>
+
+    const botPCurrent = objBot.bot;
+
+    //--------]>
+
+    if(botPCurrent.enabled("onMsg.sanitize") || botPCurrent.enabled("url.unsafe")) {
+        data = rMsgSanitize(data); // <-- Prototype
     }
 
     //--------]>
@@ -214,7 +219,7 @@ function main(objBot, data) {
         //---------------]>
 
         function createFResponseBuilder() {
-            return function() { return new CResponseBuilder(result, objBot.bot); };
+            return function() { return new rResponseBuilder(result, botPCurrent); };
         }
     }
 }

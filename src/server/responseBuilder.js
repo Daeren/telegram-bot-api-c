@@ -30,14 +30,15 @@ module.exports = CMain;
 
 //-----------------------------------------------------
 
-function CMain(botReq, botFather) {
-    // botFather.(send) => || srvCtx => [srvBot.(ctx send)] || => reqCtx.(data cid)
+function CMain(botReq, botPCurrent) {
+    // botPCurrent.(send) => || srvCtx => [srvBot.(ctx send)] || => reqCtx.(data cid)
     // ^-| use
 
     this.botReq         = botReq;
-    this.botFather      = botFather;
+    this.botPCurrent    = botPCurrent;
 
     this.stack          = [];
+    this.lastElement    = null;
 }
 
 //-----[Elements]-----}>
@@ -45,18 +46,18 @@ function CMain(botReq, botFather) {
 gElements
     .forEach(function(name) {
         CMain.prototype[name] = function(data, params) {
-            const lastElem = this.lastElem,
-                  elem     = params ? Object.create(params) : {};
+            const lastElement   = this.lastElement,
+                  elem          = params ? Object.create(params) : {};
 
             //--------]>
 
             elem[name] = data;
 
-            if(lastElem) {
-                this.stack.push(lastElem);
+            if(lastElement) {
+                this.stack.push(lastElement);
             }
 
-            this.lastElem = elem;
+            this.lastElement = elem;
 
             //--------]>
 
@@ -84,7 +85,7 @@ gModifiers
         //--------]>
 
         CMain.prototype[funcName] = function(v) {
-            this.lastElem[name] = typeof(v) === "undefined" ? defValue : v;
+            this.lastElement[name] = typeof(v) === "undefined" ? defValue : v;
             return this;
         };
     });
@@ -92,26 +93,26 @@ gModifiers
 //----)>
 
 CMain.prototype.keyboard = function(data, params) {
-    const lastElem = this.lastElem;
+    const lastElement = this.lastElement;
 
     //--------]>
 
     if(typeof(data) === "undefined" || data === null) {
-        data = this.botFather.keyboard.hide();
+        data = this.botPCurrent.keyboard.hide();
     }
     else {
         if(typeof(data) !== "object" || Array.isArray(data)) {
-            data = this.botFather.keyboard(data, params);
+            data = this.botPCurrent.keyboard(data, params);
         }
     }
 
-    lastElem.reply_markup = data;
+    lastElement.reply_markup = data;
 
     if(data.selective) {
-        lastElem.reply_to_message_id = this.botReq.mid;
+        lastElement.reply_to_message_id = this.botReq.mid;
     }
     else {
-        delete lastElem.reply_to_message_id;
+        delete lastElement.reply_to_message_id;
     }
 
     //--------]>
@@ -122,25 +123,20 @@ CMain.prototype.keyboard = function(data, params) {
 //-----[Exec]-----}>
 
 CMain.prototype.send = function(callback) {
-    const stack     = this.stack,
-          bot       = this.botReq;
+    const stack     = this.stack;
 
-    const stackLen  = stack.length;
-
-    //-------]>
-
-    let lastElem    = this.lastElem;
+    let lastElement = this.lastElement;
 
     //-------]>
 
-    if(stackLen) {
-        stack.push(lastElem);
-        lastElem = stack;
+    if(stack.length) {
+        stack.push(lastElement);
+        lastElement = stack;
 
         this.stack = [];
-    } else {
-        this.lastElem = null;
     }
 
-    return this.botFather.send(bot.cid, lastElem, callback);
+    this.lastElement = null;
+
+    return this.botPCurrent.send(this.botReq.cid, lastElement, callback);
 };
