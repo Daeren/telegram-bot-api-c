@@ -101,6 +101,7 @@ function tCheckBaseBotFields(bot) {
     expect(msg).to.have.property("chat").that.is.an("object");
     expect(msg).to.have.property("date");
 
+    expect(bot).to.have.property("isGroup").that.is.an("boolean");
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
     expect(bot).to.have.property("from").that.equal(msg.chat.id);
@@ -110,4 +111,5 @@ function tCheckBaseBotFields(bot) {
     expect(bot).to.have.property("data").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
+    expect(bot).to.have.property("render").that.is.an("function");
 }

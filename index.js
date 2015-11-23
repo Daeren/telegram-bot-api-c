@@ -842,11 +842,11 @@ function main(token) {
             //--------]>
 
             if(Array.isArray(data)) {
-                let results = {};
+                const results = {};
 
                 forEachAsync(data, function(next, d) {
                     call(d, function(error, body) {
-                        let stack = results[cmdName] = results[cmdName] || [];
+                        const stack = results[cmdName] = results[cmdName] || [];
                         stack.push(body);
 
                         next(error, results);
