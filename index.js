@@ -46,8 +46,9 @@ main.parseCmd = rParseCmd;
 
 module.exports = main;
 
-if(!module.parent)
+if(!module.parent) {
     require("./src/cli");
+}
 
 //-----------------------------------------------------
 
@@ -79,8 +80,9 @@ function main(token) {
         "disabled":      function(key) { return this.kvCfgStore[key] !== true; },
 
         "token":        function(t) {
-            if(!arguments.length)
+            if(!arguments.length) {
                 return token;
+            }
 
             token = t;
 
@@ -134,8 +136,12 @@ function main(token) {
                     callback = data;
                 }
 
-                if(typeof(callback) === "function")
-                    cbPromise(); else defer = new bot.mdPromise(cbPromise);
+                if(typeof(callback) === "function") {
+                    cbPromise();
+                }
+                else {
+                    defer = new bot.mdPromise(cbPromise);
+                }
 
                 //-------------------------]>
 
@@ -146,19 +152,25 @@ function main(token) {
                 function cbPromise(resolve, reject) {
                     if(typeof(callback) !== "function") {
                         callback = function(error, body) {
-                            if(error)
-                                reject(error); else resolve(body);
+                            if(error) {
+                                reject(error);
+                            }
+                            else {
+                                resolve(body);
+                            }
                         };
                     }
 
-                    if(typeof(callback) !== "function")
+                    if(typeof(callback) !== "function") {
                         throw new Error("API [" + method + "]: `callback` not specified");
+                    }
 
                     callAPIJson(method, data, function(error, data) {
                         error = error || genErrorByTgResponse(data) || null;
 
-                        if(!error)
+                        if(!error) {
                             data = data.result;
+                        }
 
                         callback(error, data);
                     });
@@ -189,8 +201,9 @@ function main(token) {
                 break;
 
             case "json":
-                if(typeof(value) !== "string")
+                if(typeof(value) !== "string") {
                     value = JSON.stringify(value);
+                }
 
                 value = "Content-Disposition: form-data; name=\"" + field + "\"\r\nContent-Type: application/json\r\n\r\n" + value;
 
@@ -231,8 +244,9 @@ function main(token) {
     function getReadStreamByUrl(url, type, method, data, callback) {
         let redirectCount = 3;
 
-        if(!(/^https?:\/\//).test(url))
+        if(!(/^https?:\/\//).test(url)) {
             return false;
+        }
 
         create();
 
@@ -245,8 +259,9 @@ function main(token) {
         function create() {
             createReadStreamByUrl(url, function(error, response) {
                 if(error) {
-                    if(callback)
+                    if(callback) {
                         callback(error);
+                    }
 
                     return;
                 }
@@ -281,15 +296,20 @@ function main(token) {
                 //-----[Filters]-----}>
 
                 if(!error && data.maxSize) {
-                    if(!contentLength)
+                    if(!contentLength) {
                         error = new Error("Unknown size");
-                    else if(contentLength > data.maxSize)
-                        error = new Error("maxSize");
+                    }
+                    else {
+                        if(contentLength > data.maxSize) {
+                            error = new Error("maxSize");
+                        }
+                    }
                 }
 
                 if(error) {
-                    if(callback)
+                    if(callback) {
                         callback(error);
+                    }
 
                     return;
                 }
@@ -315,8 +335,9 @@ function main(token) {
     //-----------[L1]----------}>
 
     function callAPI(method, data, callback) {
-        if(!token || typeof(token) !== "string")
+        if(!token || typeof(token) !== "string") {
             throw new Error("callAPI | Forbidden. Check the Access Token: " + token + " [" + method + "]");
+        }
 
         //-------------------------]>
 
@@ -326,15 +347,16 @@ function main(token) {
             body, bodyBegin, bodyEnd,
             file, fileName, fileId;
 
-        if(arguments.length == 2) {
+        if(arguments.length === 2) {
             if(typeof(data) === "function") {
                 callback = data;
                 data = null;
             }
         }
 
-        if(Date.now() - gBoundaryUDate >= gBoundaryUIntr)
+        if(Date.now() - gBoundaryUDate >= gBoundaryUIntr) {
             updateBoundary();
+        }
 
         //-------------------------]>
 
@@ -350,42 +372,51 @@ function main(token) {
                 body = genBodyField("text", "chat_id", data.chat_id);
 
                 if((t = data.text) && typeof(t) !== "undefined") {
-                    if(t && typeof(t) === "object")
+                    if(t && typeof(t) === "object") {
                         t = JSON.stringify(t);
+                    }
 
                     body += genBodyField("text", "text", t);
                 }
 
-                if((t = data.parse_mode) && typeof(t) !== "undefined")
+                if((t = data.parse_mode) && typeof(t) !== "undefined") {
                     body += genBodyField("text", "parse_mode", t);
+                }
 
-                if(data.disable_web_page_preview)
+                if(data.disable_web_page_preview) {
                     body += genBodyField("text", "disable_web_page_preview", "1");
+                }
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     body += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     body += genBodyField("json", "reply_markup", t);
+                }
 
                 break;
 
             case "sendPhoto":
-                if(fileProcessing("photo"))
+                if(fileProcessing("photo")) {
                     return;
+                }
 
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.caption)
+                if(t = data.caption) {
                     result += genBodyField("text", "caption", t);
+                }
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     result += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     result += genBodyField("json", "reply_markup", t);
+                }
 
                 //-------------------]>
 
@@ -402,27 +433,33 @@ function main(token) {
                 break;
 
             case "sendAudio":
-                if(fileProcessing("audio"))
+                if(fileProcessing("audio")) {
                     return;
+                }
 
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.duration)
+                if(t = data.duration) {
                     result += genBodyField("text", "duration", t);
+                }
 
-                if(t = data.performer)
+                if(t = data.performer) {
                     result += genBodyField("text", "performer", t);
+                }
 
-                if(t = data.title)
+                if(t = data.title) {
                     result += genBodyField("text", "title", t);
+                }
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     result += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     result += genBodyField("json", "reply_markup", t);
+                }
 
                 //-------------------]>
 
@@ -439,18 +476,21 @@ function main(token) {
                 break;
 
             case "sendDocument":
-                if(fileProcessing("document"))
+                if(fileProcessing("document")) {
                     return;
+                }
 
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     result += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     result += genBodyField("json", "reply_markup", t);
+                }
 
                 //-------------------]>
 
@@ -467,18 +507,21 @@ function main(token) {
                 break;
 
             case "sendSticker":
-                if(fileProcessing("sticker"))
+                if(fileProcessing("sticker")) {
                     return;
+                }
 
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     result += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     result += genBodyField("json", "reply_markup", t);
+                }
 
                 //-------------------]>
 
@@ -495,24 +538,29 @@ function main(token) {
                 break;
 
             case "sendVideo":
-                if(fileProcessing("video"))
+                if(fileProcessing("video")) {
                     return;
+                }
 
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.duration)
+                if(t = data.duration) {
                     result += genBodyField("text", "duration", t);
+                }
 
-                if(t = data.caption)
+                if(t = data.caption) {
                     result += genBodyField("text", "caption", t);
+                }
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     result += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     result += genBodyField("json", "reply_markup", t);
+                }
 
                 //-------------------]>
 
@@ -529,21 +577,25 @@ function main(token) {
                 break;
 
             case "sendVoice":
-                if(fileProcessing("voice"))
+                if(fileProcessing("voice")) {
                     return;
+                }
 
                 //-------------------]>
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.duration)
+                if(t = data.duration) {
                     result += genBodyField("text", "duration", t);
+                }
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     result += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     result += genBodyField("json", "reply_markup", t);
+                }
 
                 //-------------------]>
 
@@ -564,11 +616,13 @@ function main(token) {
                 body += genBodyField("text", "latitude", data.latitude);
                 body += genBodyField("text", "longitude", data.longitude);
 
-                if(t = data.reply_to_message_id)
+                if(t = data.reply_to_message_id) {
                     body += genBodyField("text", "reply_to_message_id", t);
+                }
 
-                if(t = data.reply_markup)
+                if(t = data.reply_markup) {
                     body += genBodyField("json", "reply_markup", t);
+                }
 
                 break;
 
@@ -581,11 +635,13 @@ function main(token) {
             case "getUserProfilePhotos":
                 body = genBodyField("text", "user_id", data.user_id);
 
-                if(t = data.offset)
+                if(t = data.offset) {
                     body += genBodyField("text", "offset", t);
+                }
 
-                if(t = data.limit)
+                if(t = data.limit) {
                     body += genBodyField("text", "limit", t);
+                }
 
                 break;
 
@@ -596,17 +652,21 @@ function main(token) {
 
                 result = "";
 
-                if(t = data.offset)
+                if(t = data.offset) {
                     result += genBodyField("text", "offset", t);
+                }
 
-                if(t = data.limit)
+                if(t = data.limit) {
                     result += genBodyField("text", "limit", t);
+                }
 
-                if(t = data.timeout)
+                if(t = data.timeout) {
                     result += genBodyField("text", "timeout", t);
+                }
 
-                if(result)
+                if(result) {
                     body = result;
+                }
 
                 break;
 
@@ -615,8 +675,9 @@ function main(token) {
 
                 //------]>
 
-                if(t = data.file_id)
+                if(t = data.file_id) {
                     body = genBodyField("text", "file_id", t);
+                }
 
                 break;
 
@@ -636,8 +697,9 @@ function main(token) {
                         file = file.trim();
 
                         if(file[0] !== "." && file[0] !== "/" && file[1] !== ":") {
-                            if(file[0] !== "-")
+                            if(file[0] !== "-") {
                                 file = "-----BEGIN RSA PUBLIC KEY-----\r\n" + file + "\r\n-----END RSA PUBLIC KEY-----";
+                            }
 
                             certLikeStrKey = file;
                             file = undefined;
@@ -654,8 +716,9 @@ function main(token) {
                 if((t = data.url) && typeof(t) === "string") {
                     result = "https://" + gTgHostWebhook + "/bot" + token + "/setWebhook?url=";
 
-                    if(!(/^https:\/\//i).test(t))
+                    if(!(/^https:\/\//i).test(t)) {
                         result += "https://";
+                    }
 
                     t = result + t;
                     result = undefined;
@@ -663,11 +726,13 @@ function main(token) {
 
                 result = genBodyField("text", "url", t || "");
 
-                if(fileName)
+                if(fileName) {
                     result += genBodyField("certificate", fileName);
+                }
 
-                if(certLikeStrKey)
+                if(certLikeStrKey) {
                     result += certLikeStrKey;
+                }
 
                 //---)>
 
@@ -907,8 +972,12 @@ function main(token) {
             name = undefined;
         }
 
-        if(typeof(callback) !== "undefined")
-            cbPromise(); else defer = new this.mdPromise(cbPromise);
+        if(typeof(callback) !== "undefined") {
+            cbPromise();
+        }
+        else {
+            defer = new this.mdPromise(cbPromise);
+        }
 
         //-------------------------]>
 
@@ -918,8 +987,12 @@ function main(token) {
 
         function cbPromise(resolve, reject) {
             const cbEnd = callback ? callback : function(error, results) {
-                if(error)
-                    reject(error); else resolve(results);
+                if(error) {
+                    reject(error);
+                }
+                else {
+                    resolve(results);
+                }
             };
 
             //--------]>
@@ -951,22 +1024,25 @@ function main(token) {
                 if(name) {
                     fileName = fileName.match(/\.(.+)$/);
                     fileName = fileName && fileName[0] || "";
-                } else
+                } else {
                     name = Date.now();
+                }
 
                 //--------]>
 
                 if(typeof(dir) === "undefined" || typeof(name) === "undefined") {
                     createReadStreamByUrl(url, function(error, response) {
-                        if(error)
+                        if(error) {
                             cbEnd(error);
-                        else
+                        }
+                        else {
                             cbEnd(null, {
                                 "id":       fileId,
                                 "size":     fileSize,
                                 "file":     fileName,
                                 "stream":   response
                             });
+                        }
                     });
 
                     return;

@@ -215,8 +215,6 @@ objSrv
 //------------------]>
 
 function cbOtherBot(bot) {
-    // bot.cid = bot.message.chat.id; <-- Default
-
     bot
         .api
         .getMe()
@@ -226,9 +224,6 @@ function cbOtherBot(bot) {
             return bot.send();
         })
         .then(() => {
-            // bot.mid = bot.message.message_id; <-- Default
-            // bot.from = bot.message.chat.id; <-- Default
-            
             bot.to = bot.message.text;
             return bot.forward();
         })
@@ -464,7 +459,7 @@ objBot
     .logger(cbLogger);
     
 objBot
-    .virtual(objOptions)
+    .virtual(cbMsg)
     .logger(cbLogger);
 ```
 

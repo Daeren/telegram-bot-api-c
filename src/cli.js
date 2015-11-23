@@ -9,32 +9,34 @@
 
 //-----------------------------------------------------
 
-var rBot = require("./../index");
+const rBot = require("./../index");
 
 //-----------------------------------------------------
 
-var reToken = /^(\d+:\w+)/;
+const gCRLF     = "\r\n",
+      gReToken  = /^(\d+:\w+)/;
 
-var token,
-    method,
-    params;
 
-//-----------------]>
+let gToken, gMethod, gParams;
+
+//-----------------------------------------------------
 
 process.argv.forEach(parseArgv);
 
-if(!params) {
-    var isEnded = false;
+//-----------------]>
 
-    var bufEnd = new Buffer("\r\n"),
-        chunks = [];
+if(!gParams) {
+    const bufEnd = new Buffer(gCRLF);
 
-    var onEnd = function() {
-        if(!chunks.length)
+    let chunks = [];
+
+    const onEnd = function() {
+        if(!chunks.length) {
             return;
+        }
 
-        params = Buffer.concat(chunks);
-        params = JSON.parse(params);
+        gParams = Buffer.concat(chunks);
+        gParams = JSON.parse(gParams);
 
         chunks = [];
 
@@ -44,18 +46,23 @@ if(!params) {
     //----------]>
 
     process.stdin.on("data", function(chunk) {
-        if(bufEnd.equals(chunk))
-            onEnd(); else chunks.push(chunk);
+        if(bufEnd.equals(chunk)) {
+            onEnd();
+        }
+        else {
+            chunks.push(chunk);
+        }
     });
 
     process.stdin.on("end", onEnd);
-} else
+} else {
     call();
+}
 
 //-----------------]>
 
 function call() {
-    rBot(token).call(method, params, function(error, result) {
+    rBot(gToken).call(gMethod, gParams, function(error, result) {
         if(error) {
             error = error.toString();
             process.stderr.write(error);
@@ -69,43 +76,46 @@ function call() {
 
 //-----------------------------------------------------
 
-function parseArgv(val, index, array) {
+function parseArgv(value, index) {
     switch(index) {
         case 0:
         case 1:
             break;
 
         case 2:
-            if(val.match(reToken))
-                token = val;
+            if(value.match(gReToken)) {
+                gToken = value;
+            }
 
             break;
 
         case 3:
-            method = val;
+            gMethod = value;
             break;
 
         default:
-            params = params || {};
+            gParams = gParams || {};
 
-            var name = val.match(/^--(\w+)=/);
+            //---------]>
+
+            let name = value.match(/^--(\w+)=/);
 
             if(name) {
                 name = name && name[1];
 
-                val = val.match(new RegExp("^--" + name + "\\=([\\s\\S]+)"));
-                val = val && val[1];
+                value = value.match(new RegExp("^--" + name + "\\=([\\s\\S]+)"));
+                value = value && value[1];
 
-                params[name] = val;
+                gParams[name] = value;
 
                 break;
             }
 
-            name = val.match(/^-(\w+)/);
+            name = value.match(/^-(\w+)/);
 
             if(name) {
                 name = name && name[1];
-                params[name] = true;
+                gParams[name] = true;
             }
     }
 }

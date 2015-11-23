@@ -215,8 +215,9 @@ function main(botFather, params, callback) {
                 console.error(error.stack);
             }
 
-            if(evName === "STOP")
+            if(evName === "STOP") {
                 process.exit();
+            }
         }
 
         //---)>
