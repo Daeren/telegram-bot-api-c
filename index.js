@@ -371,7 +371,8 @@ function main(token) {
             case "sendMessage":
                 body = genBodyField("text", "chat_id", data.chat_id);
 
-                if((t = data.text) && typeof(t) !== "undefined") {
+                t = data.text;
+                if(typeof(t) !== "undefined") {
                     if(t && typeof(t) === "object") {
                         t = JSON.stringify(t);
                     }
@@ -379,7 +380,8 @@ function main(token) {
                     body += genBodyField("text", "text", t);
                 }
 
-                if((t = data.parse_mode) && typeof(t) !== "undefined") {
+                t = data.parse_mode;
+                if(typeof(t) !== "undefined") {
                     body += genBodyField("text", "parse_mode", t);
                 }
 
@@ -387,11 +389,13 @@ function main(token) {
                     body += genBodyField("text", "disable_web_page_preview", "1");
                 }
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     body += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     body += genBodyField("json", "reply_markup", t);
                 }
 
@@ -406,15 +410,18 @@ function main(token) {
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.caption) {
+                t = data.caption;
+                if(t) {
                     result += genBodyField("text", "caption", t);
                 }
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     result += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     result += genBodyField("json", "reply_markup", t);
                 }
 
@@ -441,23 +448,28 @@ function main(token) {
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.duration) {
+                t = data.duration;
+                if(t) {
                     result += genBodyField("text", "duration", t);
                 }
 
-                if(t = data.performer) {
+                t = data.performer;
+                if(t) {
                     result += genBodyField("text", "performer", t);
                 }
 
-                if(t = data.title) {
+                t = data.title;
+                if(t) {
                     result += genBodyField("text", "title", t);
                 }
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     result += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     result += genBodyField("json", "reply_markup", t);
                 }
 
@@ -484,11 +496,13 @@ function main(token) {
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     result += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     result += genBodyField("json", "reply_markup", t);
                 }
 
@@ -515,11 +529,13 @@ function main(token) {
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     result += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     result += genBodyField("json", "reply_markup", t);
                 }
 
@@ -546,19 +562,23 @@ function main(token) {
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.duration) {
+                t = data.duration;
+                if(t) {
                     result += genBodyField("text", "duration", t);
                 }
 
-                if(t = data.caption) {
+                t = data.caption;
+                if(t) {
                     result += genBodyField("text", "caption", t);
                 }
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     result += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     result += genBodyField("json", "reply_markup", t);
                 }
 
@@ -585,15 +605,18 @@ function main(token) {
 
                 result = genBodyField("text", "chat_id", data.chat_id);
 
-                if(t = data.duration) {
+                t = data.duration;
+                if(t) {
                     result += genBodyField("text", "duration", t);
                 }
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     result += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     result += genBodyField("json", "reply_markup", t);
                 }
 
@@ -616,11 +639,13 @@ function main(token) {
                 body += genBodyField("text", "latitude", data.latitude);
                 body += genBodyField("text", "longitude", data.longitude);
 
-                if(t = data.reply_to_message_id) {
+                t = data.reply_to_message_id;
+                if(t) {
                     body += genBodyField("text", "reply_to_message_id", t);
                 }
 
-                if(t = data.reply_markup) {
+                t = data.reply_markup;
+                if(t) {
                     body += genBodyField("json", "reply_markup", t);
                 }
 
@@ -635,11 +660,13 @@ function main(token) {
             case "getUserProfilePhotos":
                 body = genBodyField("text", "user_id", data.user_id);
 
-                if(t = data.offset) {
+                t = data.offset;
+                if(t) {
                     body += genBodyField("text", "offset", t);
                 }
 
-                if(t = data.limit) {
+                t = data.limit;
+                if(t) {
                     body += genBodyField("text", "limit", t);
                 }
 
@@ -654,15 +681,18 @@ function main(token) {
 
                 result = "";
 
-                if(t = data.offset) {
+                t = data.offset;
+                if(t) {
                     result += genBodyField("text", "offset", t);
                 }
 
-                if(t = data.limit) {
+                t = data.limit;
+                if(t) {
                     result += genBodyField("text", "limit", t);
                 }
 
-                if(t = data.timeout) {
+                t = data.timeout;
+                if(t) {
                     result += genBodyField("text", "timeout", t);
                 }
 
@@ -677,7 +707,8 @@ function main(token) {
 
                 //------]>
 
-                if(t = data.file_id) {
+                t = data.file_id;
+                if(t) {
                     body = genBodyField("text", "file_id", t);
                 }
 
