@@ -268,7 +268,9 @@ function getTypeMsg(m) {
         hasOwnProperty(m, t = "new_chat_photo") ||
         hasOwnProperty(m, t = "delete_chat_photo") ||
         hasOwnProperty(m, t = "group_chat_created")
-    ) return t;
+    ) {
+        return t;
+    }
 }
 
 //---------]>

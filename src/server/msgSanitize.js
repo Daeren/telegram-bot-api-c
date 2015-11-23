@@ -12,8 +12,10 @@
 const typesMap = (function(data) {
     const result = Object.create(null);
 
-    for(const type in data) {
-        result[type] = buildType(data[type]);
+    for(let type in data) {
+        if(data.hasOwnProperty(type)) {
+            result[type] = buildType(data[type]);
+        }
     }
 
     return result;
@@ -150,7 +152,7 @@ function buildType(schema) {
             field = fields[i];
 
             if(Object.prototype.hasOwnProperty.call(data, field)) {
-                const fieldData = data[field];
+                const fieldData     = data[field];
 
                 const fieldParams   = fieldsParams[field];
 
@@ -161,21 +163,11 @@ function buildType(schema) {
 
                 switch(fieldArray) {
                     case 1:
-                        r[field] = fieldData
-                            .map(function(d) {
-                                return sanitize(fieldType, d);
-                            });
-
+                        r[field] = fieldData.map(d => sanitize(fieldType, d));
                         break;
 
                     case 2:
-                        r[field] = fieldData
-                            .map(function(a) {
-                                return a.map(function(d) {
-                                    return sanitize(fieldType, d);
-                                });
-                            });
-
+                        r[field] = fieldData.map(a => a.map(d => sanitize(fieldType, d)));
                         break;
 
                     default:

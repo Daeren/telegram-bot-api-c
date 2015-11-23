@@ -5,14 +5,15 @@
 //
 //-----------------------------------------------------
 
+/*jshint expr: true*/
+
 "use strict";
 
 //-----------------------------------------------------
 
 const rChai     = require("chai");
 
-const assert    = rChai.assert,
-      expect    = rChai.expect;
+const expect    = rChai.expect;
 
 const rBot      = require("./../index");
 
@@ -97,14 +98,16 @@ describe("Instance: bot", function() {
 
             expect(api).to.be.a("object");
 
-            for(let method of apiMethods)
+            for(let method of apiMethods) {
                 expect(api).to.have.property(method);
+            }
         });
 
-        for(let method of botMethods)
+        for(let method of botMethods) {
             it(method, function() {
                 expect(objBot).to.have.property(method).that.is.an("function");
             });
+        }
 
     });
 
@@ -267,10 +270,11 @@ describe("Instance: bot", function() {
 
             //-----]>
 
-            for(let cmd of fakeCmds)
+            for(let cmd of fakeCmds) {
                 it(cmd, function() {
                     expect(parseCmd(cmd, true)).to.be.null;
                 });
+            }
         });
 
         describe("parseCmd | normal", function() {
@@ -826,8 +830,9 @@ function checkSendLocation(error, data) {
 //-----------]>
 
 function checkCallbackError(error) {
-    if(error)
+    if(error) {
         expect(error).to.be.an.instanceof(Error);
+    }
 
     expect(error).to.be.null;
 }

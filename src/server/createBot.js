@@ -185,11 +185,13 @@ function main(bot, onMsg) {
                 if(rule instanceof RegExp) {
                     if(!fltEv.listenerCount(rule)) {
                         if(params) {
-                            if(typeof(params) === "string")
+                            if(typeof(params) === "string") {
                                 params = params.split(/\s+/);
+                            }
 
-                            if(!Array.isArray(params))
+                            if(!Array.isArray(params)) {
                                 throw new Error("on | RegExp | `params` is not an array");
+                            }
                         }
 
                         fltRe.push({
@@ -228,8 +230,9 @@ function main(bot, onMsg) {
 
         //------]>
 
-        if(arguments.length && !fltEv.listenerCount(rule))
+        if(arguments.length && !fltEv.listenerCount(rule)) {
             return this;
+        }
 
         //------]>
 
@@ -266,8 +269,9 @@ function main(bot, onMsg) {
                     if(id >= 0) {
                         fltEv.removeListener(rule, func);
 
-                        if(!fltEv.listenerCount(rule))
+                        if(!fltEv.listenerCount(rule)) {
                             removeFltRegExp(id);
+                        }
                     }
                 }
 

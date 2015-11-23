@@ -5,14 +5,15 @@
 //
 //-----------------------------------------------------
 
+/*jshint expr: true*/
+
 "use strict";
 
 //-----------------------------------------------------
 
 const rChai     = require("chai");
 
-const assert    = rChai.assert,
-      expect    = rChai.expect;
+const expect    = rChai.expect;
 
 const rBot      = require("./../index");
 
@@ -183,8 +184,9 @@ function checkSendMessage(error, data) {
 //-----------]>
 
 function checkCallbackError(error) {
-    if(error)
+    if(error) {
         expect(error).to.be.an.instanceof(Error);
+    }
 
     expect(error).to.be.null;
 }
