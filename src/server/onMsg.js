@@ -264,10 +264,17 @@ function getTypeMsg(m) {
 
         objHasOwnProperty(m, t = "new_chat_participant") ||
         objHasOwnProperty(m, t = "left_chat_participant") ||
+
         objHasOwnProperty(m, t = "new_chat_title") ||
         objHasOwnProperty(m, t = "new_chat_photo") ||
         objHasOwnProperty(m, t = "delete_chat_photo") ||
-        objHasOwnProperty(m, t = "group_chat_created")
+
+        objHasOwnProperty(m, t = "group_chat_created") ||
+        objHasOwnProperty(m, t = "supergroup_chat_created") ||
+        objHasOwnProperty(m, t = "channel_chat_created") ||
+            
+        objHasOwnProperty(m, t = "migrate_to_chat_id") ||
+        objHasOwnProperty(m, t = "migrate_from_chat_id")
     ) {
         return t;
     }
