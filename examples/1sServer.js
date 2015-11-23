@@ -1,9 +1,11 @@
 ﻿//-----------------------------------------------------
 //
-// Author: Daeren Torn
+// Author: Daeren
 // Site: 666.io
 //
 //-----------------------------------------------------
+
+/*jshint expr: true*/
 
 "use strict";
 
@@ -11,8 +13,7 @@
 
 const rChai     = require("chai");
 
-const assert    = rChai.assert,
-      expect    = rChai.expect;
+const expect    = rChai.expect;
 
 const rBot      = require("./../index");
 
@@ -32,16 +33,18 @@ let objSrv;
 objSrv = objBot
     .polling(objOptions, onNotFound)
     .logger(function cbLogger(error, data) {
-        if(error)
+        if(error) {
             expect(error).to.be.an.instanceof(Error);
+        }
         else {
             expect(error).to.be.null;
             expect(data).to.be.a("object");
 
             expect(data).to.have.property("ok");
 
-            if(data.ok)
+            if(data.ok) {
                 expect(data).to.have.property("result");
+            }
         }
     });
 
@@ -66,8 +69,12 @@ objSrv
 
         console.log("Async | Type: %s", type);
 
-        if(bot.message.text === "room")
-            next("room.menu"); else next();
+        if(bot.message.text === "room") {
+            next("room.menu");
+        }
+        else {
+            next();
+        }
     })
     .use(function(type, bot) {
         expect(type).to.be.a("string");

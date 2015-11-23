@@ -1,9 +1,11 @@
 ﻿//-----------------------------------------------------
 //
-// Author: Daeren Torn
+// Author: Daeren
 // Site: 666.io
 //
 //-----------------------------------------------------
+
+/*jshint expr: true*/
 
 "use strict";
 
@@ -11,8 +13,7 @@
 
 const rChai     = require("chai");
 
-const assert    = rChai.assert,
-      expect    = rChai.expect;
+const expect    = rChai.expect;
 
 const rBot      = require("./../index");
 

@@ -5,14 +5,15 @@
 //
 //-----------------------------------------------------
 
+/*jshint expr: true*/
+
 "use strict";
 
 //-----------------------------------------------------
 
 const rChai     = require("chai");
 
-const assert    = rChai.assert,
-      expect    = rChai.expect;
+const expect    = rChai.expect;
 
 const rBot      = require("./../index");
 
@@ -45,8 +46,9 @@ objBot
     .api
     .setWebhook({"url": "site.xx/dev-bot"})
     .then(isOk => {
-        if(!isOk)
+        if(!isOk) {
             throw new Error("Oops...problems with webhook...");
+        }
 
         //-------]>
 

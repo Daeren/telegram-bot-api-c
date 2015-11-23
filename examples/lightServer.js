@@ -1,9 +1,11 @@
 ﻿//-----------------------------------------------------
 //
-// Author: Daeren Torn
+// Author: Daeren
 // Site: 666.io
 //
 //-----------------------------------------------------
+
+/*jshint expr: true*/
 
 "use strict";
 
@@ -11,8 +13,7 @@
 
 const rChai     = require("chai");
 
-const assert    = rChai.assert,
-      expect    = rChai.expect;
+const expect    = rChai.expect;
 
 const rBot      = require("./../index");
 
@@ -42,8 +43,9 @@ objBot
     .then(isOk => {
         expect(isOk).to.be.a("boolean");
 
-        if(!isOk)
+        if(!isOk) {
             throw new Error("Oops...problems with webhook...");
+        }
 
         objBot
             .http(objSrvOptions, cbMsg)
@@ -59,8 +61,9 @@ objBot
 //------------------]>
 
 function cbLogger(error, data) {
-    if(error)
+    if(error) {
         expect(error).to.be.an.instanceof(Error);
+    }
     else {
         expect(error).to.be.null;
         expect(data).to.be.a("object");
@@ -92,8 +95,9 @@ function cbMsg(bot, cmd) {
     let cmdFunc,
         cmdParams = bot.parseCmd(bot.message.text);
 
-    if(cmdParams)
-         (cmdFunc = commands[cmdParams.name]) ? cmdFunc(cmdParams) : console.log(cmdParams);
+    if(cmdParams) {
+        (cmdFunc = commands[cmdParams.name]) ? cmdFunc(cmdParams) : console.log(cmdParams);
+    }
 
     //--------------]>
 
