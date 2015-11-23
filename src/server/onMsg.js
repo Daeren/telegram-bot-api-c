@@ -272,7 +272,7 @@ function getTypeMsg(m) {
         objHasOwnProperty(m, t = "group_chat_created") ||
         objHasOwnProperty(m, t = "supergroup_chat_created") ||
         objHasOwnProperty(m, t = "channel_chat_created") ||
-            
+
         objHasOwnProperty(m, t = "migrate_to_chat_id") ||
         objHasOwnProperty(m, t = "migrate_from_chat_id")
     ) {
