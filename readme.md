@@ -8,7 +8,7 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 #### OneShot
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(x => { x.data().text("Hi").send(); });
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.data().text("Hi").send());
 ```
 
 ```js
