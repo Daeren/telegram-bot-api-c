@@ -204,6 +204,8 @@ function main(objBot, data) {
     function createCtx() {
         let result = Object.create(objBot.ctx);
 
+        result.isGroup = msgChat.type === "group";
+
         result.from = result.cid = msgChat.id;
         result.mid = msg.message_id;
 

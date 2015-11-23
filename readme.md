@@ -20,6 +20,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* "bot.isGroup": +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
@@ -155,12 +156,15 @@ let objSrv = objBot
     .on("/stop", cbCmdStop);
 
 function cbMsg(bot) {
-    bot.data().text("Stop me: /stop").send();
+    const msg = bot.isGroup ? ">_>" : "Stop me: /stop";
+    
+    bot.data().text(msg).send();
 }
 
 function cbCmdStop(bot, params) {
-    bot.data().text(params).send();
     objSrv.stop();
+    
+    bot.data().text(params).send();
 }
 ```
 
@@ -823,20 +827,22 @@ npm test
 
 #### Fields: bot (srv.on("*", bot => { })
 
-| Name              | Type       | Note                                     |
-|-------------------|------------|------------------------------------------|
-|                   | -          |                                          |
-| cid               | number     | bot.cid = bot.message.chat.id            |
-| mid               | number     | bot.mid = bot.message.message_id         |
-| from              | number     | bot.from = bot.message.chat.id           |
-| to                | undefined  |                                          |
-|                   | -          |                                          |
-| message           | object     | Incoming message                         |
-| data              | function   | Response Builder                         |
-|                   | -          |                                          |
-| send              | function   | Uses: cid, data                          |
-| forward           | function   | Uses: mid, from, to                      |
-| render            | function   | Uses: cid, data                          |
+| Name              | Type       | Note                                             |
+|-------------------|------------|--------------------------------------------------|
+|                   | -          |                                                  |
+| isGroup           | boolean    | bot.isGroup = bot.message.chat.type === "group"  |
+|                   | -          |                                                  |
+| cid               | number     | bot.cid = bot.message.chat.id                    |
+| mid               | number     | bot.mid = bot.message.message_id                 |
+| from              | number     | bot.from = bot.message.chat.id                   |
+| to                | undefined  |                                                  |
+|                   | -          |                                                  |
+| message           | object     | Incoming message                                 |
+| data              | function   | Response Builder                                 |
+|                   | -          |                                                  |
+| send              | function   | Uses: cid, data                                  |
+| forward           | function   | Uses: mid, from, to                              |
+| render            | function   | Uses: cid, data                                  |
 
 
 #### Events: on
