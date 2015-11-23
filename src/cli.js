@@ -101,21 +101,23 @@ function parseArgv(value, index) {
             let name = value.match(/^--(\w+)=/);
 
             if(name) {
-                name = name && name[1];
+                name = name[1];
 
                 value = value.match(new RegExp("^--" + name + "\\=([\\s\\S]+)"));
-                value = value && value[1];
 
-                gParams[name] = value;
+                if(value) {
+                    gParams[name] = value[1];
+                }
 
                 break;
             }
 
+            //-----)>
+
             name = value.match(/^-(\w+)/);
 
             if(name) {
-                name = name && name[1];
-                gParams[name] = true;
+                gParams[name[1]] = true;
             }
     }
 }
