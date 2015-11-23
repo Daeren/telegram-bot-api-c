@@ -863,7 +863,7 @@ function main(token) {
                 cmdName = getName(d);
 
                 if(!cmdName) {
-                    throw new Error("Command not found!");
+                    throw new Error("Send: element not found!");
                 }
 
                 cmdData = d[cmdName];

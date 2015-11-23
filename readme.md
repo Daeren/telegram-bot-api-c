@@ -36,6 +36,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Virtual](#refVirtual)
 * [mServer](#refMServer)
 * [Nginx+Node.js](#refExampleNginxNodejs)
+* [Server Response](#refServerResponse)
 * [Response Builder](#refResponseBuilder)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
@@ -348,6 +349,45 @@ const objSrvOptions   = {
 };
 
 objBot.http(objSrvOptions, cbMsg);
+```
+
+
+
+<a name="refServerResponse"></a>
+#### Server Response
+
+```js
+objSrv
+    .use(function(type, bot, next) {
+        //----[Send | One element]----}>
+        
+        bot
+        .data()
+        .text("Hi")
+        .send();
+        
+        //----[Send | Queue]----}>
+        
+        bot
+        .data()
+        .text("Hi")
+        .text("Hi 2")
+        .send();
+        
+        //----[Send | HashTable: One element]----}>
+        
+        bot.data.text = "Hi";
+        bot.send();
+
+        //----[Send | HashTable: Queue]----}>
+        
+        bot.data = [{"text": "Hi"}, {"text": "Hi 2"}];
+        bot.send();
+        
+        //----[Forward]----}>
+
+        bot.to = "chatId";
+        bot.forward();
 ```
 
 

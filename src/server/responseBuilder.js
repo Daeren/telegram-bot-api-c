@@ -37,7 +37,7 @@ function CMain(botReq, botPCurrent) {
     this.botReq         = botReq;
     this.botPCurrent    = botPCurrent;
 
-    this.stack          = [];
+    this.queue          = [];
     this.lastElement    = null;
 }
 
@@ -54,7 +54,7 @@ gElements
             elem[name] = data;
 
             if(lastElement) {
-                this.stack.push(lastElement);
+                this.queue.push(lastElement);
             }
 
             this.lastElement = elem;
@@ -123,17 +123,17 @@ CMain.prototype.keyboard = function(data, params) {
 //-----[Exec]-----}>
 
 CMain.prototype.send = function(callback) {
-    const stack     = this.stack;
+    const queue     = this.queue;
 
     let lastElement = this.lastElement;
 
     //-------]>
 
-    if(stack.length) {
-        stack.push(lastElement);
-        lastElement = stack;
+    if(queue.length) {
+        queue.push(lastElement);
+        lastElement = queue;
 
-        this.stack = [];
+        this.queue = [];
     }
 
     this.lastElement = null;

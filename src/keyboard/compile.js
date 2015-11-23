@@ -9,6 +9,10 @@
 
 //-----------------------------------------------------
 
+const gReKbParamsExplode = /\s+/;
+
+//-----------------------------------------------------
+
 module.exports = main;
 
 //-----------------------------------------------------
@@ -28,7 +32,7 @@ function main(input) {
         }
 
         if(!Array.isArray(params)) {
-            params = params.split(/\s+/);
+            params = params.split(gReKbParamsExplode);
         }
 
         if(params.indexOf("resize") !== -1) {
