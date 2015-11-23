@@ -242,6 +242,8 @@ function main(token) {
     }
 
     function getReadStreamByUrl(url, type, method, data, callback) {
+        /*jshint -W069 */
+        
         let redirectCount = 3;
 
         if(!(/^https?:\/\//).test(url)) {
