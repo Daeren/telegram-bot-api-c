@@ -42,7 +42,7 @@ const objSrv = objBot.http(objSrvOptions);
 
 //-----------]>
 
-objMyBot.enable("url.unsafe"); // <-- Sanitize Incoming message
+objMyBot.enable("onMsg.sanitize"); // <-- Sanitize Incoming message
 
 objSrv
     .bot(objMyBot, "/myBot")
