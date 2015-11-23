@@ -18,6 +18,27 @@ const rCreateBot    = require("./createBot"),
 
 //-----------------------------------------------------
 
+const gCiphers = [
+    "ECDHE-RSA-AES256-SHA384",
+    "DHE-RSA-AES256-SHA384",
+    "ECDHE-RSA-AES256-SHA256",
+    "DHE-RSA-AES256-SHA256",
+    "ECDHE-RSA-AES128-SHA256",
+    "DHE-RSA-AES128-SHA256",
+    "HIGH",
+    "!aNULL",
+    "!eNULL",
+    "!EXPORT",
+    "!DES",
+    "!RC4",
+    "!MD5",
+    "!PSK",
+    "!SRP",
+    "!CAMELLIA"
+].join(":");
+
+//-----------------------------------------------------
+
 module.exports = main;
 
 //-----------------------------------------------------
@@ -28,16 +49,22 @@ function main(botFather, params, callback) {
         params = undefined;
     }
 
-    params = params || {
-        "host": "127.0.0.1",
-        "http": true
-    };
+    if(params) {
+        params.port = params.port || 88;
+    }
+    else {
+        params = {
+            "host":         "localhost",
+            "port":         1488,
 
-    params.port = params.port || 88;
+            "autoWebhook":  false,
+            "ssl":          false
+        };
+    }
 
     //-----------------]>
 
-    const isHTTPS       = params.ssl !== false && !params.http;
+    const isHTTPS       = params.ssl !== false && !params.http; // <-- http : Depr.
     const srvBotDefault = rCreateBot(botFather, callback);
 
     let srv, srvBots;
@@ -72,24 +99,7 @@ function main(botFather, params, callback) {
             "cert":   optCert,
             "ca":     optCa,
 
-            "ciphers": [
-                "ECDHE-RSA-AES256-SHA384",
-                "DHE-RSA-AES256-SHA384",
-                "ECDHE-RSA-AES256-SHA256",
-                "DHE-RSA-AES256-SHA256",
-                "ECDHE-RSA-AES128-SHA256",
-                "DHE-RSA-AES128-SHA256",
-                "HIGH",
-                "!aNULL",
-                "!eNULL",
-                "!EXPORT",
-                "!DES",
-                "!RC4",
-                "!MD5",
-                "!PSK",
-                "!SRP",
-                "!CAMELLIA"
-            ].join(":"),
+            "ciphers": gCiphers,
 
             "honorCipherOrder":     true,
 
