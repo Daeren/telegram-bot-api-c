@@ -5,8 +5,6 @@
 //
 //-----------------------------------------------------
 
-/*jshint validthis:true */
-
 "use strict";
 
 //-----------------------------------------------------
@@ -24,6 +22,8 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(bot, onMsg) {
+    /*jshint validthis:true */
+
     let result;
 
     const ctx   = Object.create(bot),

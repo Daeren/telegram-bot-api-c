@@ -53,6 +53,8 @@ if(!module.parent) {
 //-----------------------------------------------------
 
 function main(token) {
+    /*jshint validthis:true */
+
     let gBoundaryKey, gBoundaryDiv, gBoundaryEnd,
 
         gBoundaryUDate,
@@ -243,7 +245,7 @@ function main(token) {
 
     function getReadStreamByUrl(url, type, method, data, callback) {
         /*jshint -W069 */
-        
+
         let redirectCount = 3;
 
         if(!(/^https?:\/\//).test(url)) {
