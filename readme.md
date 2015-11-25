@@ -463,6 +463,14 @@ objBot
 objBot
     .virtual(cbMsg)
     .logger(cbLogger);
+    
+//----------]>
+
+function cbLogger(error, data) {
+    if(!error) {
+        data = data.toString(); // <-- Buffer
+    }
+}
 ```
 
 
@@ -769,11 +777,11 @@ npm test
 
 #### Module 
 
-| Attribute         | Type           | Note                                                                     |
-|-------------------|----------------|--------------------------------------------------------------------------|
-|                   | -              |                                                                          |
-| keyboard          | function       | return: object                                                           |
-| parseCmd          | text[, strict] | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore|
+| Attribute         | Type                          | Note                                                                      |
+|-------------------|-------------------------------|---------------------------------------------------------------------------|
+|                   | -                             |                                                                           |
+| keyboard          | function(buttons[, params])   | return: object; buttons: string/array; params: "resize once selective"    |
+| parseCmd          | function(text[, strict])      | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore |
 
 
 #### Instance 
@@ -781,7 +789,7 @@ npm test
 | Attribute         | Type           | Note                                 |
 |-------------------|----------------|--------------------------------------|
 |                   | -              |                                      |
-| api               | Object         | See [Telegram Bot API][3]            |
+| api               | object         | See [Telegram Bot API][3]            |
 | keyboard          | function       | return: object                       |
 
 
