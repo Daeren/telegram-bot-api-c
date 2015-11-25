@@ -149,7 +149,7 @@ describe("CResponseBuilder", function() {
         });
 
         it("send(text) | callback", function(done) {
-            expect(rb.queue).to.be.empty;
+            expect(rb.queue).to.equal(null);
             expect(rb.lastElement).to.equal(null);
 
             rb
