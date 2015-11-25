@@ -33,17 +33,21 @@ function main(text, strict) {
         type = "common",
         name, cmdText, cmd;
 
+    //---------]>
+
     switch(text[0]) {
         case "/":
             t = text.match(gReFindCmd);
 
-            if(t) {
-                cmd = t[1];
-                cmdText = t[2];
+            if(!t) {
+                break;
+            }
 
-                if(cmd) {
-                    type = "private";
-                }
+            cmd = t[1];
+            cmdText = t[2];
+
+            if(cmd) {
+                type = "private";
             }
 
             break;

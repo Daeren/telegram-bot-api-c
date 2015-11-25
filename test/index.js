@@ -84,16 +84,16 @@ describe("Instance: bot", function() {
 
             "server", "polling", "http", "virtual",
 
-            "parseCmd", "parseCmd"
+            "keyboard", "parseCmd"
         ];
 
         //-----------------]>
 
         it("api", function() {
             const apiMethods = [
-                "getMe", "forwardMessage",
+                "forwardMessage",
                 "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
-                "getUserProfilePhotos", "getUpdates", "getFile",
+                "getMe", "getUserProfilePhotos", "getUpdates", "getFile",
                 "setWebhook"
             ];
 

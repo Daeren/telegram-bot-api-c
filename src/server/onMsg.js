@@ -35,7 +35,7 @@ function main(objBot, data) {
 
     //--------]>
 
-    if(botPCurrent.enabled("onMsg.sanitize") || botPCurrent.enabled("url.unsafe")) {
+    if(botPCurrent.enabled("onMsg.sanitize") || botPCurrent.enabled("url.unsafe")) { // <-- url.unsafe | Depr.
         data = rMsgSanitize(data); // <-- Prototype
     }
 
@@ -52,6 +52,9 @@ function main(objBot, data) {
     //--------]>
 
     const msgChat           = msg.chat;
+
+    const msgChatId         = msgChat.id,
+          msgIsGroup        = msgChat.type === "group";
 
     const botPlugin         = objBot.plugin,
           botFilters        = objBot.filters,
@@ -95,7 +98,8 @@ function main(objBot, data) {
 
         if(plCallback.length < 3) {
             onEnd(plCallback(evName, ctxBot));
-        }  else {
+        }
+        else {
             plCallback(evName, ctxBot, onEnd);
         }
 
@@ -115,42 +119,32 @@ function main(objBot, data) {
     function onEndPlugin(state) {
         switch(evName) {
             case "text":
-                let rule, len;
+                let msgText = msg.text;
+
+                cmdParam = rParseCmd(msgText);
 
                 //-----[Filter: botName]----}>
 
-                if(!msg.reply_to_message && msgChat.id < 0 && msgChat.type === "group") {
-                    let msgText = msg.text;
-
-                    if(msgText[0] === "@") {
-                        msg.text = msgText.replace(gReReplaceBotName, "");
-                    }
+                if(msgIsGroup && msgChatId < 0 && msgText[0] === "@" && !msg.reply_to_message) {
+                    msg.text = msgText = msgText.replace(gReReplaceBotName, "");
                 }
 
                 //-----[CMD]----}>
 
-                cmdParam = rParseCmd(msg.text);
-
-                if(cmdParam) {
-                    rule = "/" + cmdParam.name;
-
-                    if(callEvent(rule, cmdParam) || callEvent("/", cmdParam)) {
-                        return;
-                    }
+                if(cmdParam && (callEvent(cmdParam.cmd, cmdParam) || callEvent("/", cmdParam))) {
+                    return;
                 }
 
                 //-----[RE]----}>
 
-                len = botFilters.regexp.length;
+                const ftLenRe = botFilters.regexp.length;
 
-                if(len) {
-                    let reParams;
+                if(ftLenRe) {
+                    let rule, reParams;
 
-                    rule = undefined;
-
-                    for(let re, i = 0; !rule && i < len; i++) {
+                    for(let re, i = 0; !rule && i < ftLenRe; i++) {
                         re = botFilters.regexp[i];
-                        reParams = msg.text.match(re.rule);
+                        reParams = msgText.match(re.rule);
 
                         if(reParams) {
                             rule = re.rule;
@@ -202,11 +196,11 @@ function main(objBot, data) {
     //-------)>
 
     function createCtx() {
-        let result = Object.create(objBot.ctx);
+        const result = Object.create(objBot.ctx);
 
-        result.isGroup = msgChat.type === "group";
+        result.isGroup = msgIsGroup;
 
-        result.from = result.cid = msgChat.id;
+        result.from = result.cid = msgChatId;
         result.mid = msg.message_id;
 
         result.message = msg;
@@ -221,7 +215,7 @@ function main(objBot, data) {
         //---------------]>
 
         function createFResponseBuilder() {
-            return function() { return new rResponseBuilder(result, botPCurrent); };
+            return () => new rResponseBuilder(result, botPCurrent);
         }
     }
 }
