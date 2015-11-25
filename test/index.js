@@ -328,7 +328,6 @@ describe("Instance: bot", function() {
                     expect(t).to.have.property("name").that.is.equal(cmdName);
                     expect(t).to.have.property("text").that.is.equal("/" + cmdText);
                     expect(t).to.have.property("cmd").that.is.equal(cmdSelf);
-
                 }.bind(this, cmd, cmdType));
 
                 cmdType = "private";
