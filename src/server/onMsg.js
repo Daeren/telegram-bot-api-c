@@ -64,7 +64,7 @@ function main(objBot, data) {
           msgType           = getTypeMsg(msg),
           evName            = getEventNameByTypeMsg(msgType);
 
-    let cmdParam;
+    let cmdParam            = null;
 
     //------------]>
 

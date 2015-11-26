@@ -22,7 +22,7 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(text, strict) {
-    if(!text || text[0] !== "/" && text[0] !== "@" || text.length === 1) {
+    if(typeof(text) !== "string" || text.length <= 1 || text[0] !== "/" && text[0] !== "@") {
         return null;
     }
 

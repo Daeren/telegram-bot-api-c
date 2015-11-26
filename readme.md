@@ -450,7 +450,8 @@ objSrv
             "btnOptions":   "Options"
         };
 
-        bot.data()
+        bot
+            .data()
             .text(template)
             .keyboard(buttons, "resize")
             .render(input) // <-- text + keyboard
