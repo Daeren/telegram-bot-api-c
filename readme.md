@@ -22,7 +22,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
-* "render (ResponseBuilder/module)": +
+* "render ([ResponseBuilder](#refResponseBuilder)/[module](#refRender))": +
 * "bot.isGroup": +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
