@@ -247,13 +247,17 @@ function main(token) {
     function getReadStreamByUrl(url, type, method, data, callback) {
         /*jshint -W069 */
 
-        let redirectCount = 3;
-
         if(!(/^https?:\/\//).test(url)) {
             return false;
         }
 
-        create();
+        //--------------]>
+
+        let redirectCount = 3;
+
+        //------]>
+
+        createStream();
 
         //--------------]>
 
@@ -261,79 +265,83 @@ function main(token) {
 
         //--------------]>
 
-        function create() {
-            createReadStreamByUrl(url, function(error, response) {
-                if(error) {
-                    if(callback) {
-                        callback(error);
-                    }
+        function createStream() {
+            createReadStreamByUrl(url, onResponse);
+        }
 
-                    return;
-                }
+        function onResponse(error, response) {
+            if(error) {
+                onEnd(error);
+                return;
+            }
 
-                const statusCode = response.statusCode;
+            //--------------]>
 
-                if(statusCode < 200 || statusCode > 399) {
-                    response = undefined;
-                    onEnd();
+            const statusCode = response.statusCode;
 
-                    return;
-                }
-
-                //--------------]>
-
-                const headers         = response.headers;
-
-                const location        = headers["location"],
-                      contentLength   = headers["content-length"];
-
-                //-----[Redirect]-----}>
-
-                if(location && redirectCount) {
-                    redirectCount--;
-                    url = location;
-
-                    create();
-
-                    return;
-                }
-
-                //-----[Filters]-----}>
-
-                if(!error && data.maxSize) {
-                    if(!contentLength) {
-                        error = new Error("Unknown size");
-                    }
-                    else {
-                        if(contentLength > data.maxSize) {
-                            error = new Error("maxSize");
-                        }
-                    }
-                }
-
-                if(error) {
-                    if(callback) {
-                        callback(error);
-                    }
-
-                    return;
-                }
-
-                //--------------]>
-
+            if(statusCode < 200 || statusCode > 399) {
+                response.destroy();
                 onEnd();
 
-                //--------------]>
+                return;
+            }
 
-                function onEnd() {
-                    let result = Object.create(data);
-                    result[type] = response;
+            //--------------]>
 
-                    //-----[API]-----}>
+            const headers         = response.headers;
 
-                    callAPI(method, result, callback);
+            const location        = headers["location"],
+                  contentLength   = headers["content-length"];
+
+            //-----[Redirect]-----}>
+
+            if(location && redirectCount) {
+                redirectCount--;
+                url = location;
+
+                createStream();
+
+                return;
+            }
+
+            //-----[Filters]-----}>
+
+            if(data.maxSize) {
+                if(!contentLength) {
+                    error = new Error("Unknown size");
                 }
-            });
+                else {
+                    if(contentLength > data.maxSize) {
+                        error = new Error("maxSize");
+                    }
+                }
+
+                if(error) {
+                    response.destroy();
+                    response = undefined;
+                }
+            }
+
+            onEnd(error, response);
+        }
+
+        function onEnd(error, response) {
+            if(error) {
+                if(callback) {
+                    callback(error);
+                }
+
+                return;
+            }
+
+            //-------]>
+
+            const result = Object.create(data);
+            result[type] = response;
+
+            //-------]>
+
+            callAPI(method, result, callback);
         }
     }
 
