@@ -77,25 +77,11 @@ function main(bot, onMsg) {
     function ctxRender(template, callback) {
         let data = this.data;
 
-        if(hasOwnProperty(data, "input")) {
+        if(hasOwnProperty.call(data, "input")) {
             data = data.input;
         }
 
-        if(bot.mdEngine) {
-            template = bot.mdEngine.render(template, data);
-        }
-        else {
-            if(Array.isArray(data)) {
-                data.forEach(defRender);
-            }
-            else {
-                for(let name in data) {
-                    if(hasOwnProperty(data, name)) {
-                        defRender(data[name], name);
-                    }
-                }
-            }
-        }
+        template = bot.render(template, data);
 
         //------]>
 
@@ -109,12 +95,6 @@ function main(bot, onMsg) {
         //-------------]>
 
         return arguments.length < 2 ? bot.api.sendMessage(data) : bot.api.sendMessage(data, callback);
-
-        //-------------]>
-
-        function defRender(e, i) {
-            template = template.replace("{" + i + "}", e);
-        }
     }
 
     function ctxSend(callback) {

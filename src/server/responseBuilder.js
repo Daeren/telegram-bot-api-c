@@ -126,6 +126,29 @@ CMain.prototype.keyboard = function(data, params) {
     return this;
 };
 
+CMain.prototype.render = function(data) {
+    const bot           = this.botPCurrent,
+          lastElement   = this.lastElement,
+
+          kb            = lastElement.reply_markup;
+
+    //--------]>
+
+    lastElement.text = bot.render(lastElement.text, data);
+
+    if(kb && kb.keyboard) {
+        kb.keyboard.forEach(x => {
+            x.forEach((y, i) => {
+                x[i] = bot.render(y, data);
+            });
+        });
+    }
+
+    //--------]>
+
+    return this;
+};
+
 //-----[Exec]-----}>
 
 CMain.prototype.send = function(callback) {
@@ -142,6 +165,8 @@ CMain.prototype.send = function(callback) {
     }
 
     this.lastElement = null;
+
+    //--------]>
 
     return this.botPCurrent.send(this.botReq.cid, lastElement, callback);
 };

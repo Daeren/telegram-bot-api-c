@@ -246,39 +246,35 @@ function getTypeMsg(m) {
     let t;
 
     if(
-        objHasOwnProperty(m, t = "text") ||
-        objHasOwnProperty(m, t = "photo") ||
-        objHasOwnProperty(m, t = "audio") ||
-        objHasOwnProperty(m, t = "document") ||
-        objHasOwnProperty(m, t = "sticker") ||
-        objHasOwnProperty(m, t = "video") ||
-        objHasOwnProperty(m, t = "voice") ||
-        objHasOwnProperty(m, t = "contact") ||
-        objHasOwnProperty(m, t = "location") ||
+        hasOwnProperty.call(m, t = "text") ||
+        hasOwnProperty.call(m, t = "photo") ||
+        hasOwnProperty.call(m, t = "audio") ||
+        hasOwnProperty.call(m, t = "document") ||
+        hasOwnProperty.call(m, t = "sticker") ||
+        hasOwnProperty.call(m, t = "video") ||
+        hasOwnProperty.call(m, t = "voice") ||
+        hasOwnProperty.call(m, t = "contact") ||
+        hasOwnProperty.call(m, t = "location") ||
 
-        objHasOwnProperty(m, t = "new_chat_participant") ||
-        objHasOwnProperty(m, t = "left_chat_participant") ||
+        hasOwnProperty.call(m, t = "new_chat_participant") ||
+        hasOwnProperty.call(m, t = "left_chat_participant") ||
 
-        objHasOwnProperty(m, t = "new_chat_title") ||
-        objHasOwnProperty(m, t = "new_chat_photo") ||
-        objHasOwnProperty(m, t = "delete_chat_photo") ||
+        hasOwnProperty.call(m, t = "new_chat_title") ||
+        hasOwnProperty.call(m, t = "new_chat_photo") ||
+        hasOwnProperty.call(m, t = "delete_chat_photo") ||
 
-        objHasOwnProperty(m, t = "group_chat_created") ||
-        objHasOwnProperty(m, t = "supergroup_chat_created") ||
-        objHasOwnProperty(m, t = "channel_chat_created") ||
+        hasOwnProperty.call(m, t = "group_chat_created") ||
+        hasOwnProperty.call(m, t = "supergroup_chat_created") ||
+        hasOwnProperty.call(m, t = "channel_chat_created") ||
 
-        objHasOwnProperty(m, t = "migrate_to_chat_id") ||
-        objHasOwnProperty(m, t = "migrate_from_chat_id")
+        hasOwnProperty.call(m, t = "migrate_to_chat_id") ||
+        hasOwnProperty.call(m, t = "migrate_from_chat_id")
     ) {
         return t;
     }
 }
 
 //---------]>
-
-function objHasOwnProperty(obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop);
-}
 
 function forEachAsync(data, iter, cbEnd) {
     let i   = 0,

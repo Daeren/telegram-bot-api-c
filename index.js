@@ -68,7 +68,9 @@ function main(token) {
 
     function CMain() {
         this.api        = genApiMethods(this);
+
         this.keyboard   = rKeyboard;
+        this.parseCmd   = rParseCmd;
 
         this.mdPromise  = Promise;
 
@@ -98,15 +100,14 @@ function main(token) {
         "call":         callAPI,
         "callJson":     callAPIJson,
 
+        "render":       mthCMainRender,
         "send":         mthCMainSend,
         "download":     mthCMainDownload,
 
           "server":       function(params, callback) { return rServer.http(this, params, callback); }, // <-- Depr.
         "polling":      function(params, callback) { return rServer.polling(this, params, callback); },
         "http":         function(params, callback) { return rServer.http(this, params, callback); },
-        "virtual":      function(callback) { return rServer.virtual(this, callback); },
-
-        "parseCmd":     rParseCmd
+        "virtual":      function(callback) { return rServer.virtual(this, callback); }
     };
 
     //-------------------------]>
@@ -924,6 +925,43 @@ function main(token) {
 
     //-----------[L2]----------}>
 
+    function mthCMainRender(template, data) {
+        if(!template) {
+            return "";
+        }
+
+        if(!data) {
+            return template;
+        }
+
+        if(this.mdEngine) {
+            return this.mdEngine.render(template, data);
+        }
+
+        //-------------]>
+
+        if(Array.isArray(data)) {
+            data.forEach(defRender);
+        }
+        else if(typeof(data) === "object") {
+            for(let name in data) {
+                if(hasOwnProperty.call(data, name)) {
+                    defRender(data[name], name);
+                }
+            }
+        }
+
+        //-------------]>
+
+        return template;
+
+        //-------------]>
+
+        function defRender(e, i) {
+            template = template.replace("{" + i + "}", e);
+        }
+    }
+
     function mthCMainSend(id, data, callback) {
         const self = this;
 
@@ -994,7 +1032,7 @@ function main(token) {
                 while(len--) {
                     type = rSendApiMethods.keys[len];
 
-                    if(Object.prototype.hasOwnProperty.call(d, type)) {
+                    if(hasOwnProperty.call(d, type)) {
                         return type;
                     }
                 }

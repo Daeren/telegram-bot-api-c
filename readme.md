@@ -22,11 +22,11 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* "render (ResponseBuilder/module)": +
 * "bot.isGroup": +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
-* Set engine(render)/promise: +
 * Analytics: [tgb-pl-botanio][4]
 
 
@@ -438,6 +438,30 @@ objSrv
             .text("Hi")
             .keyboard(customKb)
             .send((e, r) => console.log(e || r));  // <-- Return: hashTable | result
+
+        //------[RENDER]------}>
+        
+        const template = "Hi, {name}!";
+        const buttons = [["{btnMenu}", "{btnOptions}"]];
+        const input = {
+            "name":         "MiElPotato",
+
+            "btnMenu":      "Menu +",
+            "btnOptions":   "Options"
+        };
+
+        bot.data()
+            .text(template)
+            .keyboard(buttons, "resize")
+            .render(input) // <-- text + keyboard
+            .send();
+            
+        bot
+            .data()
+            .text("Msg: {0} + {1}")
+            .render(["H", "i"]) // <-- text
+            .keyboard([["X: {0}", "Y: {1}"]])
+            .send();
     });
 ```
 
@@ -540,26 +564,30 @@ objSrv
 ```js
 objBot
     .engine(require("ejs"))
-    .promise(require("bluebird"))
+    .promise(require("bluebird"));
 
-    .polling()
+//--------------]> 
 
-    .use(function(type, bot) {
-        //-----[DEFAULT]-----}>
+objBot.render("R: <%= value %>", {"value": 13});
 
-        bot.data = ["H", "i"];
-        bot.render("Array | Text: {0} + {1}").then(console.log);
+//--------------]> 
 
-        bot.data = {"x": "H", "y": "i"};
-        bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
+objBot.polling(bot => {
+    //-----[DEFAULT]-----}>
 
-        //-----[EJS]-----}>
+    bot.data = ["H", "i"];
+    bot.render("Array | Text: {0} + {1}").then(console.log);
 
-        bot.data.input = {"x": "H", "y": "i"};
-        bot.data.reply_markup = bot.keyboard.hGb();
+    bot.data = {"x": "H", "y": "i"};
+    bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
 
-        bot.render("EJS | Text: <%= x %> + <%= y %>");
-    });
+    //-----[EJS]-----}>
+
+    bot.data.input = {"x": "H", "y": "i"};
+    bot.data.reply_markup = bot.keyboard.hGb();
+
+    bot.render("EJS | Text: <%= x %> + <%= y %>");
+});
 ```
 
 
@@ -808,6 +836,7 @@ npm test
 | call              | method, data[, callback(error, buffer, response)]                     |                                   |
 | callJson          | method, data[, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
+| render            | template, data                                                        | string                            |
 | send              | id, data[, callback(error, json, response)]                           | promise or undefined              |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |

@@ -80,7 +80,7 @@ describe("Instance: bot", function() {
             "setToken", "engine", "promise", "token",
 
             "call", "callJson",
-            "send", "download",
+            "render", "send", "download",
 
             "server", "polling", "http", "virtual",
 
@@ -150,6 +150,42 @@ describe("Instance: bot", function() {
             objBot.token(shToken);
 
             expect(objBot.token()).to.equal(token);
+        });
+
+        it("render", function() {
+            let r,
+
+                templateObject  = "{name} {x}",
+                templateArray   = "{0} {1}",
+
+                equal           = "MiElPotato 13";
+
+            const inputObject   = {"name": "MiElPotato", "x": 13},
+                  inputArray    = ["MiElPotato", 13];
+
+            //--------]>
+
+            r = objBot.render(templateObject, inputObject);
+            expect(r).to.equal(equal);
+
+            r = objBot.render(templateArray, inputArray);
+            expect(r).to.equal(equal);
+
+            //--------]>
+
+            r = objBot.render(templateObject);
+            expect(r).to.equal(templateObject);
+
+            r = objBot.render(templateArray);
+            expect(r).to.equal(templateArray);
+
+            //--------]>
+
+            r = objBot.render();
+            expect(r).to.equal("");
+
+            r = objBot.render();
+            expect(r).to.equal("");
         });
 
         //------)>
