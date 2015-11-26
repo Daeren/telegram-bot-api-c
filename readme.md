@@ -83,8 +83,7 @@ srv
     .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
     .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp)
 
-    .on(/^id\s+(\d+)/i, onTextRegExp)
-    .off(/^id\s+(\d+)/i, onTextRegExp);
+    .on(/^id\s+(\d+)/i, onTextRegExp);
 
 //----)>
 
@@ -216,44 +215,10 @@ objSrv
     
 //------------------]>
 
-function cbOtherBot(bot) {
-    bot
-        .api
-        .getMe()
+function cbOtherBot(bot) { }
 
-        .then(() => {
-            bot.data.chatAction = "typing";
-            return bot.send();
-        })
-        .then(() => {
-            bot.to = bot.message.text;
-            return bot.forward();
-        })
-        .then(() => {
-            bot.data.text = "Forward: ok";
-            return bot.send();
-        })
-        .then(console.log, console.error);
-}
-
-//--------------)>
-
-function cbCmdStart(bot, params) {
-    bot.data = [
-        {"chatAction": "typing"},
-        {"text": params.name + " " + params.text},
-        {
-            "photo":        "https://www.google.ru/images/logos/ps_logo2.png",
-            "maxSize":      26189, // <-- decimal number of OCTETs
-            "reply_markup": bot.keyboard.hOx()
-        }
-    ];
-
-    bot.send();
-}
-
-function cbCmdStop(bot, params) {
-}
+function cbCmdStart(bot, params) { }
+function cbCmdStop(bot, params) { }
 ```
 
 
@@ -972,7 +937,7 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=1
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=2
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
