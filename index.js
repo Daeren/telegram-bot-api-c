@@ -974,6 +974,8 @@ function main(token) {
     }
 
     function mthCMainDownload(fid, dir, name, callback) {
+        const self = this;
+
         if(typeof(dir) === "function") {
             callback = dir;
             dir = undefined;
@@ -1002,11 +1004,7 @@ function main(token) {
 
             //--------]>
 
-            callAPIJson("getFile", {"file_id": fid}, function(error, data) {
-                error = error || genErrorByTgResponse(data);
-
-                //--------]>
-
+            self.api.getFile({"file_id": fid}, function(error, data) {
                 if(error) {
                     callback(error, data);
                     return;
@@ -1014,11 +1012,9 @@ function main(token) {
 
                 //--------]>
 
-                const dataResult  = data.result;
-
-                const fileId      = dataResult.file_id,
-                      fileSize    = dataResult.file_size,
-                      filePath    = dataResult.file_path;
+                const fileId      = data.file_id,
+                      fileSize    = data.file_size,
+                      filePath    = data.file_path;
 
                 const url         = "https://" + gTgHostFile + "/file/bot" + token +"/" + filePath;
 
@@ -1055,11 +1051,11 @@ function main(token) {
 
                 //--------]>
 
-                dir += name + fileName;
+                dir += "/" + name + fileName;
 
                 //----[Write]----}>
 
-                const file = rFs.createWriteStream(dir);
+                const file = rFs.createWriteStream(rPath.normalize(dir));
 
                 //--------]>
 
@@ -1097,6 +1093,8 @@ function createReadStreamByUrl(url, callback) {
         return;
     }
 
+    //-------]>
+
     const isHTTPS = urlObj.protocol === "https:";
     const options = {
         "host": urlObj.hostname,
@@ -1104,16 +1102,15 @@ function createReadStreamByUrl(url, callback) {
         "path": urlObj.path,
 
         "headers": {
-            "User-Agent":   "TgBotApic",
+            "User-Agent":   "TgBApic",
             "Referer":      url
         }
     };
 
     //-----------]>
 
-    const request = (isHTTPS ? rHttps : rHttp).get(options);
-
-    request
+    (isHTTPS ? rHttps : rHttp)
+        .get(options)
         .on("error", callback)
         .on("response", function(res) {
             callback(null, res);
@@ -1263,14 +1260,14 @@ function genApiMethods(bot) {
             }
         };
     }
-}
 
-function genErrorByTgResponse(data) {
-    if(data && !data.ok) {
-        const error = new Error(data.description);
-        error.code = data.error_code;
+    function genErrorByTgResponse(data) {
+        if(data && !data.ok) {
+            const error = new Error(data.description);
+            error.code = data.error_code;
 
-        return error;
+            return error;
+        }
     }
 }
 
