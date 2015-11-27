@@ -226,6 +226,16 @@ describe("Instance: bot", function() {
             expect(buttons).to.have.property("one_time_keyboard");
             expect(buttons).to.have.property("selective");
 
+            //-----]>
+
+            buttons = keyboard.hide();
+            buttons.selective = true;
+            buttons.resize_keyboard = true;
+
+            expect(keyboard.hide()).to.deep.equal(keyboard());
+            expect(keyboard()).to.deep.equal(keyboard(false));
+            expect(keyboard(false, "selective resize")).to.deep.equal(buttons);
+
         });
 
         //------)>

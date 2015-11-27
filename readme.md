@@ -569,6 +569,7 @@ rBot.keyboard.numpad(false, true); // <-- Selective
 
 function cbMsg(bot) {
     bot.data.text = "Hell Word!";
+    bot.data.reply_markup = bot.keyboard() === bot.keyboard.hide();
     bot.data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
     bot.data.reply_markup = bot.keyboard.hOx();
     
@@ -576,16 +577,17 @@ function cbMsg(bot) {
 }
 
 
-// rBot.keyboard(buttons[, params])
-// buttons: string or array
+// rBot.keyboard([buttons][, params])
+//
+// buttons: string or array or false
 // params: "resize once selective"
 
 
 // v - vertically; h - horizontally;
-
+//
 // vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
 // abcd, numpad, hide
-
+//
 // vOx(once, selective)
 // numpad(once, selective)
 
@@ -822,7 +824,7 @@ npm test
 | photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp                                |
 | audio         | string, stream                        | Ext: mp3                                                          |
 | document      | string, stream                        |                                                                   |
-| sticker       | string, stream                        | Ext: webp, jpg, jpeg, gif, tif, png, bmp                          |
+| sticker       | string, stream                        | Ext: webp[, jpg, jpeg, gif, tif, png, bmp]                        |
 | video         | string, stream                        | Ext: mp4                                                          |
 | voice         | string, stream                        | Ext: ogg                                                          |
 | location      | string, json                          | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
@@ -847,7 +849,7 @@ npm test
 | Name          | Arguments                             | Return                                    |
 |---------------|---------------------------------------|-------------------------------------------|
 |               | -                                     |                                           |
-| bot           | bot, path, callback(json, request)    | srv                                       |
+| bot           | bot, path[, callback(json, request)]  | srv                                       |
 |               | -                                     |                                           |
 | logger        | callback(error, buffer)               | this                                      |
 | use           | [type], callback(type, bot[, next])   | this                                      |

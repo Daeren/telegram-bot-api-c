@@ -25,7 +25,7 @@ function main(input) {
             buttons = buttons.split(/\s+/).map(function(x) { return [x]; });
         }
 
-        buttons = {"keyboard": buttons};
+        buttons = buttons === false || !arguments.length ? {"hide_keyboard": true} : {"keyboard": buttons};
 
         if(!params) {
             return buttons;

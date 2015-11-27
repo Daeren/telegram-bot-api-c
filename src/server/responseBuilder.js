@@ -103,16 +103,7 @@ CMain.prototype.keyboard = function(data, params) {
 
     //--------]>
 
-    if(typeof(data) === "undefined" || data === null) {
-        data = this.botPCurrent.keyboard.hide();
-    }
-    else {
-        if(typeof(data) !== "object" || Array.isArray(data)) {
-            data = this.botPCurrent.keyboard(data, params);
-        }
-    }
-
-    lastElement.reply_markup = data;
+    lastElement.reply_markup = data = this.botPCurrent.keyboard(data, params);
 
     if(data.selective) {
         lastElement.reply_to_message_id = this.botReq.mid;
