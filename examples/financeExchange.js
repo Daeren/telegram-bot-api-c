@@ -68,13 +68,8 @@ gBot
 
             //------]>
 
-            if(query.count === 1) {
-                rate = [rate];
-            }
-
-            if(rate) {
-                rate = rate.filter(r => r.Name !== "N/A");
-            }
+            rate = query.count === 1 ? [rate] : rate;
+            rate = rate ? rate.filter(r => r.Name !== "N/A") : rate;
 
             if(!rate || !rate.length) {
                 rb.text(gStringTable.texts.notFound).send();
