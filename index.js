@@ -1121,8 +1121,13 @@ function createReadStreamByUrl(url, callback) {
 }
 
 function prepareDataForSendApi(id, cmdName, cmdData, data) {
-    let result = Object.create(data);
+    const result = Object.create(data);
+
+    //----------]>
+
     result.chat_id = id;
+
+    //----------]>
 
     switch(typeof(cmdData)) {
         case "string":
@@ -1179,6 +1184,8 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
 
             break;
     }
+    
+    //----------]>
 
     return result;
 }
