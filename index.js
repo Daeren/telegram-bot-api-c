@@ -114,74 +114,6 @@ function main(token) {
 
     return new CMain();
 
-    //-------------------------]>
-
-    function genApiMethods(bot) {
-        let result = {};
-
-        rApiMethods.forEach(add);
-
-        //--------------]>
-
-        return result;
-
-        //--------------]>
-
-        function add(method) {
-            result[method] = function(data, callback) {
-                const argsLen = arguments.length;
-
-                let defer;
-
-                //---------]>
-
-                if(argsLen === 1 && typeof(data) === "function") {
-                    callback = data;
-                }
-
-                if(typeof(callback) === "function") {
-                    cbPromise();
-                }
-                else {
-                    defer = new bot.mdPromise(cbPromise);
-                }
-
-                //-------------------------]>
-
-                return defer;
-
-                //-------------------------]>
-
-                function cbPromise(resolve, reject) {
-                    if(typeof(callback) !== "function") {
-                        callback = function(error, body) {
-                            if(error) {
-                                reject(error);
-                            }
-                            else {
-                                resolve(body);
-                            }
-                        };
-                    }
-
-                    if(typeof(callback) !== "function") {
-                        throw new Error("API [" + method + "]: `callback` not specified");
-                    }
-
-                    callAPIJson(method, data, function(error, data) {
-                        error = error || genErrorByTgResponse(data) || null;
-
-                        if(!error) {
-                            data = data.result;
-                        }
-
-                        callback(error, data);
-                    });
-                }
-            };
-        }
-    }
-
     //-----------[L0]----------}>
 
     function updateBoundary() {
@@ -973,25 +905,18 @@ function main(token) {
     function mthCMainSend(id, data, callback) {
         const self = this;
 
-        let defer;
-
-        if(typeof(callback) !== "undefined") {
-            cbPromise();
-        }
-        else {
-            defer = new this.mdPromise(cbPromise);
+        if(typeof(callback) === "undefined") {
+            return new this.mdPromise(cbPromise);
         }
 
-        //-------------------------]>
-
-        return defer;
+        cbPromise();
 
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
             let cmdName, cmdData;
 
-            const cbEnd = callback ? callback : function(error, results) {
+            callback = callback || function(error, results) {
                 if(error) {
                     reject(error);
                 }
@@ -1012,10 +937,10 @@ function main(token) {
 
                         next(error, results);
                     });
-                }, cbEnd);
+                }, callback);
             }
             else {
-                call(data, cbEnd);
+                call(data, callback);
             }
 
             //--------]>
@@ -1049,8 +974,6 @@ function main(token) {
     }
 
     function mthCMainDownload(fid, dir, name, callback) {
-        let defer;
-
         if(typeof(dir) === "function") {
             callback = dir;
             dir = undefined;
@@ -1059,21 +982,16 @@ function main(token) {
             name = undefined;
         }
 
-        if(typeof(callback) !== "undefined") {
-            cbPromise();
-        }
-        else {
-            defer = new this.mdPromise(cbPromise);
+        if(typeof(callback) === "undefined") {
+            return new this.mdPromise(cbPromise);
         }
 
-        //-------------------------]>
-
-        return defer;
+        cbPromise();
 
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
-            const cbEnd = callback ? callback : function(error, results) {
+            callback = callback || function(error, results) {
                 if(error) {
                     reject(error);
                 }
@@ -1090,7 +1008,7 @@ function main(token) {
                 //--------]>
 
                 if(error) {
-                    cbEnd(error, data);
+                    callback(error, data);
                     return;
                 }
 
@@ -1120,10 +1038,10 @@ function main(token) {
                 if(typeof(dir) === "undefined" || typeof(name) === "undefined") {
                     createReadStreamByUrl(url, function(error, response) {
                         if(error) {
-                            cbEnd(error);
+                            callback(error);
                         }
                         else {
-                            cbEnd(null, {
+                            callback(null, {
                                 "id":       fileId,
                                 "size":     fileSize,
                                 "file":     fileName,
@@ -1139,18 +1057,18 @@ function main(token) {
 
                 dir += name + fileName;
 
-                //---)>
+                //----[Write]----}>
 
                 const file = rFs.createWriteStream(dir);
 
                 //--------]>
 
                 file
-                    .on("error", cbEnd)
+                    .on("error", callback)
                     .on("open", function() {
                         createReadStreamByUrl(url, function(error, response) {
                             if(error) {
-                                cbEnd(error);
+                                callback(error);
                                 return;
                             }
 
@@ -1158,7 +1076,7 @@ function main(token) {
                         });
                     })
                     .on("finish", function() {
-                        cbEnd(null, {
+                        callback(null, {
                             "id":   fileId,
                             "size": fileSize,
                             "file": dir
@@ -1288,9 +1206,61 @@ function getNameByMime(contentType) {
 
 //----------]>
 
+function genApiMethods(bot) {
+    let result = {};
+
+    //--------------]>
+
+    rApiMethods.forEach(setMethod);
+
+    //--------------]>
+
+    return result;
+
+    //--------------]>
+
+    function setMethod(method) {
+        result[method] = function(data, callback) {
+            if(arguments.length === 1 && typeof(data) === "function") {
+                callback = data;
+                data = undefined;
+            }
+
+            if(typeof(callback) === "undefined") {
+                return new bot.mdPromise(cbPromise);
+            }
+
+            cbPromise();
+
+            //-------------------------]>
+
+            function cbPromise(resolve, reject) {
+                callback = callback || function(error, results) {
+                    if(error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(results);
+                    }
+                };
+
+                bot.callJson(method, data, function(error, data) {
+                    error = error || genErrorByTgResponse(data) || null;
+
+                    if(!error) {
+                        data = data.result;
+                    }
+
+                    callback(error, data);
+                });
+            }
+        };
+    }
+}
+
 function genErrorByTgResponse(data) {
     if(data && !data.ok) {
-        let error = new Error(data.description);
+        const error = new Error(data.description);
         error.code = data.error_code;
 
         return error;
