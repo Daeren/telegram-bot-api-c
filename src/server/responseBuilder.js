@@ -103,7 +103,10 @@ CMain.prototype.keyboard = function(data, params) {
 
     //--------]>
 
-    lastElement.reply_markup = data = this.botPCurrent.keyboard(data, params);
+    data = arguments.length ? data : false;
+    data = this.botPCurrent.keyboard(data, params);
+
+    lastElement.reply_markup = data;
 
     if(data.selective) {
         lastElement.reply_to_message_id = this.botReq.mid;
@@ -121,11 +124,14 @@ CMain.prototype.render = function(data) {
     const bot           = this.botPCurrent,
           lastElement   = this.lastElement,
 
+          text          = lastElement.text,
           kb            = lastElement.reply_markup;
 
     //--------]>
 
-    lastElement.text = bot.render(lastElement.text, data);
+    if(text) {
+        lastElement.text = bot.render(text, data);
+    }
 
     if(kb && kb.keyboard) {
         kb.keyboard.forEach(x => {

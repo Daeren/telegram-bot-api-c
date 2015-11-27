@@ -128,12 +128,25 @@ describe("CResponseBuilder", function() {
         it("send(photo-url) | promise", function(done) {
             const url = "https://www.google.ru/images/logos/ps_logo2.png";
 
+            //----------]>
+
             rb
                 .chatAction("typing")
 
                 .photo(url)
-                .keyboard("1 2 3")
+                .keyboard("1 2 3");
 
+            //----------]>
+
+            let lastElement = rb.lastElement;
+
+            //----------]>
+
+            expect(lastElement.reply_markup).to.deep.equal(gBotFather.keyboard("1 2 3"));
+
+            //----------]>
+
+            rb
                 .send()
                 .then(function(result) {
                     expect(result).to.be.a("object");
@@ -149,12 +162,29 @@ describe("CResponseBuilder", function() {
         });
 
         it("send(text) | callback", function(done) {
+            let lastElement = rb.lastElement;
+
+            //----------]>
+
             expect(rb.queue).to.equal(null);
-            expect(rb.lastElement).to.equal(null);
+            expect(lastElement).to.equal(null);
+
+            //----------]>
 
             rb
                 .text("test")
-                .keyboard()
+                .keyboard();
+
+            lastElement = rb.lastElement;
+
+            //----------]>
+
+            expect(lastElement).to.be.a("object");
+            expect(lastElement.reply_markup).to.deep.equal(gBotFather.keyboard());
+
+            //----------]>
+
+            rb
                 .send(function(error, result) {
                     checkSendMessage(error, result);
 
