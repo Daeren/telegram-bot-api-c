@@ -847,7 +847,7 @@ function main(token) {
         //-----------]>
 
         function cbCallAPI(error, result, response) {
-            if(result) {
+            if(response.statusCode === 200) {
                 try {
                     result = JSON.parse(result);
                 } catch(e) {
@@ -855,7 +855,7 @@ function main(token) {
                     result = null;
                 }
             } else {
-                error = error || new Error("Empty: `result`");
+                error = error || new Error(result || "Empty: `result`");
                 result = null;
             }
 
@@ -1184,7 +1184,7 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
 
             break;
     }
-    
+
     //----------]>
 
     return result;
