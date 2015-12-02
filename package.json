@@ -1,9 +1,9 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "6.6.5",
+    "version": "6.6.6",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
-    "homepage": "http://666.io",
+    "homepage": "https://666.io",
     "keywords": [
         "node",
         "bot",

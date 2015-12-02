@@ -847,15 +847,28 @@ function main(token) {
         //-----------]>
 
         function cbCallAPI(error, result, response) {
-            if(response.statusCode === 200) {
-                try {
-                    result = JSON.parse(result);
-                } catch(e) {
-                    error = error || e;
-                    result = null;
+            if(!error && response) {
+                const statusCode = response.statusCode;
+
+                if(statusCode !== 200) {
+                    error = new Error("response.statusCode: " + statusCode);
                 }
-            } else {
-                error = error || new Error(result || "Empty: `result`");
+                else if(result) {
+                    try {
+                        result = JSON.parse(result);
+                    } catch(e) {
+                        error = e;
+                    }
+                }
+                else {
+                    error = new Error("result: empty");
+                }
+            }
+            else {
+                error = error || new Error("response: undefined");
+            }
+
+            if(error) {
                 result = null;
             }
 
