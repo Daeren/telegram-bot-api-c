@@ -847,7 +847,7 @@ function main(token) {
         //-----------]>
 
         function cbCallAPI(error, result, response) {
-            if(!error && response) {
+            if(!error) {
                 const statusCode = response.statusCode;
 
                 if(statusCode !== 200) {
@@ -863,9 +863,6 @@ function main(token) {
                 else {
                     error = new Error("result: empty");
                 }
-            }
-            else {
-                error = error || new Error("response: undefined");
             }
 
             if(error) {
