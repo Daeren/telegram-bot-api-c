@@ -737,7 +737,26 @@ function main(token) {
 
         //-------------------------]>
 
-        req = rApiRequest(token, method, callback);
+        req = rApiRequest(token, method, function(error, body, response) {
+            if(callback) {
+                if(!error) {
+                    const statusCode = response.statusCode;
+
+                    if(statusCode >= 500) {
+                        error = new Error("response.statusCode: " + statusCode);
+                    }
+                    else if(statusCode === 401) {
+                        error = new Error("Invalid access token provided: " + token);
+                    }
+                }
+
+                if(error) {
+                    body = null;
+                }
+
+                callback(error, body, response);
+            }
+        });
 
         if(!body && !bodyBegin) {
             req.end();
@@ -857,12 +876,7 @@ function main(token) {
 
         function cbCallAPI(error, result, response) {
             if(!error) {
-                const statusCode = response.statusCode;
-
-                if(statusCode !== 200) {
-                    error = new Error("response.statusCode: " + statusCode);
-                }
-                else if(result) {
+                if(result) {
                     try {
                         result = JSON.parse(result);
                     } catch(e) {
@@ -956,6 +970,7 @@ function main(token) {
 
                         next(error, results);
                     });
+
                 }, callback);
             }
             else {

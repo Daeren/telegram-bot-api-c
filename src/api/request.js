@@ -36,15 +36,9 @@ function main(token, method, callback) {
 
     //--------------]>
 
-    const req = rHttps.request(gReqOptions, cbRequest);
-
-    if(typeof(callback) === "function") {
-        req.on("error", callback);
-    }
-
-    //--------------]>
-
-    return req;
+    return rHttps
+        .request(gReqOptions, cbRequest)
+        .on("error", callback);
 
     //--------------]>
 

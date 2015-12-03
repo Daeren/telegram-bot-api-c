@@ -414,6 +414,61 @@ describe("Instance: bot", function() {
                 });
         });
 
+        it("call(getMe-data:null) | callback", function(done) {
+            objBot
+                .call("getMe", null, function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.an.instanceof(Buffer);
+                    expect(response).to.be.a("object");
+
+                    done();
+                });
+        });
+
+        it("call(getFile) | callback", function(done) {
+            objBot
+                .call("getFile", {
+                    "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
+                }, function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.an.instanceof(Buffer);
+                    expect(response).to.be.a("object");
+
+                    done();
+                });
+        });
+
+        it("call(getFile-empty) | callback", function(done) {
+            objBot
+                .call("getFile", {
+                    "file_id": "0"
+                }, function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.an.instanceof(Buffer);
+                    expect(response).to.be.a("object");
+
+                    done();
+                });
+        });
+
+        it("call(getFile) | callback-undefined", function() {
+            objBot
+                .call("getFile", {
+                    "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
+                });
+        });
+
+        it("call(getFile-empty) | callback-undefined", function() {
+            objBot
+                .call("getFile", {
+                    "file_id": "0"
+                });
+        });
+
+
         it("callJson(getMe-2args) | callback", function(done) {
             objBot
                 .callJson("getMe", function(error, result, response) {
@@ -429,18 +484,6 @@ describe("Instance: bot", function() {
                 });
         });
 
-        it("call(getMe-data:null) | callback", function(done) {
-            objBot
-                .call("getMe", null, function(error, result, response) {
-                    checkCallbackError(error);
-
-                    expect(result).to.be.an.instanceof(Buffer);
-                    expect(response).to.be.a("object");
-
-                    done();
-                });
-        });
-
         it("callJson(getMe-data:null) | callback", function(done) {
             objBot
                 .callJson("getMe", null, function(error, result, response) {
@@ -451,18 +494,6 @@ describe("Instance: bot", function() {
 
                     expect(result).to.have.property("ok");
                     expect(result).to.have.property("result");
-
-                    done();
-                });
-        });
-
-        it("call(getFile) | callback", function(done) {
-            objBot
-                .call("getFile", {
-                    "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
-                }, function(error, result) {
-                    checkCallbackError(error);
-                    expect(result).to.be.an.instanceof(Buffer);
 
                     done();
                 });
