@@ -16,6 +16,7 @@ const rHttps = require("https");
 const gTgHostApi    = "api.telegram.org";
 
 const gReqOptions   = {
+    "path":         null,
     "host":         gTgHostApi,
     "method":       "POST"
 };

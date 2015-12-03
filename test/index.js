@@ -402,6 +402,60 @@ describe("Instance: bot", function() {
 
         //-----------------]>
 
+        it("call(getMe-2args) | callback", function(done) {
+            objBot
+                .call("getMe", function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.an.instanceof(Buffer);
+                    expect(response).to.be.a("object");
+
+                    done();
+                });
+        });
+
+        it("callJson(getMe-2args) | callback", function(done) {
+            objBot
+                .callJson("getMe", function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.a("object");
+                    expect(response).to.be.a("object");
+
+                    expect(result).to.have.property("ok");
+                    expect(result).to.have.property("result");
+
+                    done();
+                });
+        });
+
+        it("call(getMe-data:null) | callback", function(done) {
+            objBot
+                .call("getMe", null, function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.an.instanceof(Buffer);
+                    expect(response).to.be.a("object");
+
+                    done();
+                });
+        });
+
+        it("callJson(getMe-data:null) | callback", function(done) {
+            objBot
+                .callJson("getMe", null, function(error, result, response) {
+                    checkCallbackError(error);
+
+                    expect(result).to.be.a("object");
+                    expect(response).to.be.a("object");
+
+                    expect(result).to.have.property("ok");
+                    expect(result).to.have.property("result");
+
+                    done();
+                });
+        });
+
         it("call(getFile) | callback", function(done) {
             objBot
                 .call("getFile", {

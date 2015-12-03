@@ -802,8 +802,8 @@ npm test
 | promise           | instance                                                              | this                              |
 | token             | [token]                                                               | this or token                     |
 |                   | -                                                                     |                                   |
-| call              | method, data[, callback(error, buffer, response)]                     |                                   |
-| callJson          | method, data[, callback(error, json, response)]                       |                                   |
+| call              | method[, data][, callback(error, buffer, response)]                     |                                   |
+| callJson          | method[, data][, callback(error, json, response)]                       |                                   |
 |                   | -                                                                     |                                   |
 | render            | template, data                                                        | string                            |
 | send              | id, data[, callback(error, json, response)]                           | promise or undefined              |

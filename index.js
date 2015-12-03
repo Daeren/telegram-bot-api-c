@@ -292,6 +292,8 @@ function main(token) {
             body, bodyBegin, bodyEnd,
             file, fileName, fileId;
 
+        //---------]>
+
         if(arguments.length === 2) {
             if(typeof(data) === "function") {
                 callback = data;
@@ -842,6 +844,13 @@ function main(token) {
     }
 
     function callAPIJson(method, data, callback) {
+        if(typeof(data) === "function") {
+            callback = data;
+            data = null;
+        }
+
+        //-----------]>
+
         return callAPI(method, data, cbCallAPI);
 
         //-----------]>
