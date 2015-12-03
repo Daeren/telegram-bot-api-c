@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 [Telegram Bot API][3]
 
 * broadcast: +
-* control message limits (broadcast): +
+* control rate limits (broadcast): +
 * render ([ResponseBuilder](#refResponseBuilder)/[module](#refRender)): +
 * bot.isGroup: +
 * [Virtual (StressTest / Express)](#refVirtual): +
@@ -639,13 +639,27 @@ objBot
 #### Broadcast (Prototype)
 
 ```js
-const ids   = ["10", "1-0", "-20"],
+const ids   = ["10", "1-0", "-20"], // <-- An infinite number of identifiers
       data  = {"text": "Hi"};
 
 objBot.broadcast(ids, data, e => console.error(e));
 objBot.broadcast(ids, data).catch(console.error);
 
 // Error: e.index==1 + stop the queue
+
+/*
+When sending messages inside a particular chat,
+avoid sending more than one message per second.
+We may allow short bursts that go over this limit,
+but eventually you'll begin receiving 429 errors.
+
+If you're sending bulk notifications to multiple users,
+the API will not allow more than 30 messages per second or so.
+Consider spreading out notifications over large intervals of 8-12
+hours for best results.
+
+|> Broadcast solves this problem
+*/
 ```
 
 
