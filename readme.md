@@ -22,8 +22,8 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
-* broadcast: ~
-* control message limits: ~
+* broadcast: +
+* control message limits (broadcast): +
 * render ([ResponseBuilder](#refResponseBuilder)/[module](#refRender)): +
 * bot.isGroup: +
 * [Virtual (StressTest / Express)](#refVirtual): +
@@ -48,6 +48,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
+* [Broadcast](#refBroadcast)
 * [Errors](#refErrors)
 * [Unsafe URL](#refUnsafeURL)
 * [CLI](#refCLI)
@@ -634,6 +635,21 @@ objBot
 
 
 
+<a name="refBroadcast"></a>
+#### Broadcast (Prototype)
+
+```js
+const ids   = ["10", "1-0", "-20"],
+      data  = {"text": "Hi"};
+
+objBot.broadcast(ids, data, e => console.error(e));
+objBot.broadcast(ids, data).catch(console.error);
+
+// Error: e.index==1 + stop the queue
+```
+
+
+
 <a name="refErrors"></a>
 #### Errors 
 
@@ -803,11 +819,12 @@ npm test
 | promise           | instance                                                              | this                              |
 | token             | [token]                                                               | this or token                     |
 |                   | -                                                                     |                                   |
-| call              | method[, data][, callback(error, buffer, response)]                     |                                   |
-| callJson          | method[, data][, callback(error, json, response)]                       |                                   |
+| call              | method[, data][, callback(error, buffer, response)]                   |                                   |
+| callJson          | method[, data][, callback(error, json, response)]                     |                                   |
 |                   | -                                                                     |                                   |
 | render            | template, data                                                        | string                            |
 | send              | id, data[, callback(error, json, response)]                           | promise or undefined              |
+| broadcast         | ids, data[, callback(error)]                                          | promise or undefined              |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
 | http              | [options][, callback(bot, cmd)]                                       | object                            |
@@ -941,7 +958,7 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=3
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=4
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg

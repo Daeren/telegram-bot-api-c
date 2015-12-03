@@ -102,6 +102,7 @@ function main(token) {
 
         "render":       mthCMainRender,
         "send":         mthCMainSend,
+        "broadcast":    mthCMainBroadcast,
         "download":     mthCMainDownload,
 
           "server":       function(params, callback) { return rServer.http(this, params, callback); }, // <-- Depr.
@@ -938,6 +939,8 @@ function main(token) {
     function mthCMainSend(id, data, callback) {
         const self = this;
 
+        //-----]>
+
         if(typeof(callback) === "undefined") {
             return new this.mdPromise(cbPromise);
         }
@@ -1007,8 +1010,101 @@ function main(token) {
         }
     }
 
+    function mthCMainBroadcast(ids, data, callback) {
+        const self = this;
+
+        let countUsersPerSec, dTime, startTime;
+
+        //-----]>
+
+        if(typeof(callback) === "undefined") {
+            return new this.mdPromise(cbPromise);
+        }
+
+        cbPromise();
+
+        //-------------------------]>
+
+        function cbPromise(resolve, reject) {
+            callback = callback || function(error, results) {
+                if(error) {
+                    reject(error);
+                }
+                else {
+                    resolve(results);
+                }
+            };
+
+            //--------]>
+
+            init();
+
+            //--------]>
+
+            forEachAsync(ids, function(next, id, index) {
+                send();
+
+                //--------]>
+
+                function send() {
+                    self.send(id, data, onEnd);
+                }
+
+                function onEnd(error) {
+                    if(error) {
+                        if(error.code === 429) {
+                            setTimeout(send, 1000 * 45);
+                        }
+                        else {
+                            error.index = index;
+                            next(error);
+                        }
+
+                        return;
+                    }
+
+                    //---------]>
+
+                    countUsersPerSec--;
+                    dTime = startTime - Date.now();
+
+                    //---------]>
+
+                    if(!countUsersPerSec && dTime < 1000) {
+                        dTime = 1000 - dTime;
+
+                        if(dTime <= 20) {
+                            init();
+                            next(null);
+                        }
+                        else {
+                            setTimeout(function() {
+                                init();
+                                next(null);
+                            }, dTime);
+                        }
+                    }
+                    else if(dTime > 1000) {
+                        init();
+                        next(null);
+                    }
+                    else {
+                        next(null);
+                    }
+                }
+            }, callback);
+        }
+
+        function init() {
+            countUsersPerSec = 30;
+            startTime = Date.now();
+        }
+    }
+
     function mthCMainDownload(fid, dir, name, callback) {
         const self = this;
+
+        //-----]>
 
         if(typeof(dir) === "function") {
             callback = dir;

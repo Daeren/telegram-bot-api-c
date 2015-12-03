@@ -39,34 +39,56 @@ describe("broadcast", function() {
 
     //-----------------]>
 
-    it("", function(done) {
-        done();
+    it("[id, fake, id] | callback", function(done) {
+        const ids   = [chatId, "-", chatId],
+              data  = {"text": "Hi"};
+
+        gBotFather
+            .broadcast(ids, data, function(error) {
+                expect(error).to.be.an.instanceof(Error);
+                expect(error).to.have.property("index").that.is.an("number");
+                expect(error.index).to.equal(1);
+
+                done();
+            });
+    });
+
+    it("[id, fake, id] | promise", function(done) {
+        const ids   = [chatId, "-", chatId],
+              data  = {"text": "Hi"};
+
+        gBotFather
+            .broadcast(ids, data)
+            .then(done, function(error) {
+                expect(error).to.be.an.instanceof(Error);
+                expect(error).to.have.property("index").that.is.an("number");
+                expect(error.index).to.equal(1);
+
+                done();
+            });
+    });
+
+    it("[id, id] | promise", function(done) {
+        const ids   = [chatId, chatId],
+              data  = {"text": "Hi"};
+
+        gBotFather
+            .broadcast(ids, data)
+            .then(done, function(error) {
+                checkError(error, done);
+            });
     });
 });
 
 //----------------------------------]>
 
-function checkCallbackError(error) {
+function checkError(error, done) {
     if(error) {
         expect(error).to.be.an.instanceof(Error);
     }
 
-    expect(error).to.be.null;
-}
-
-function checkPromiseError(error) {
-    expect(error).to.be.an.instanceof(Error);
-    expect(error).to.be.null;
-}
-
-//-----------]>
-
-function checkBaseFields(error, data) {
-    checkCallbackError(error);
-    expect(data).to.be.a("object");
-
-    expect(data).to.have.property("message_id");
-    expect(data).to.have.property("from").that.is.an("object");
-    expect(data).to.have.property("chat").that.is.an("object");
-    expect(data).to.have.property("date");
+    setTimeout(function() {
+        expect(error).to.be.null;
+        done();
+    }, 0);
 }

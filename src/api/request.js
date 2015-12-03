@@ -13,11 +13,12 @@ const rHttps = require("https");
 
 //-----------------------------------------------------
 
-const gTgHostApi    = "api.telegram.org";
-
 const gReqOptions   = {
     "path":         null,
-    "host":         gTgHostApi,
+
+    "host":         "api.telegram.org",
+    "port":         443,
+
     "method":       "POST"
 };
 

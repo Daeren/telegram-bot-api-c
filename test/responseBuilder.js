@@ -156,7 +156,7 @@ describe("CResponseBuilder", function() {
 
                     done();
                 }, function(error) {
-                    checkPromiseError(error);
+                    checkError(error);
                     done();
                 });
         });
@@ -214,23 +214,21 @@ function checkSendMessage(error, data) {
 
 //-----------]>
 
-function checkCallbackError(error) {
+function checkError(error) {
     if(error) {
         expect(error).to.be.an.instanceof(Error);
     }
 
-    expect(error).to.be.null;
-}
-
-function checkPromiseError(error) {
-    expect(error).to.be.an.instanceof(Error);
-    expect(error).to.be.null;
+    setTimeout(function() {
+        expect(error).to.be.null;
+        done();
+    }, 0);
 }
 
 //-----------]>
 
 function checkBaseFields(error, data) {
-    checkCallbackError(error);
+    checkError(error);
     expect(data).to.be.a("object");
 
     expect(data).to.have.property("message_id");
