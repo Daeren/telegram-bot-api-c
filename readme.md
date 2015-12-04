@@ -980,7 +980,7 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=6
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=666
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
