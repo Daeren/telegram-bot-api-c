@@ -642,10 +642,10 @@ objBot
 const ids   = ["10", "1-0", "-20"], // <-- An infinite number of identifiers
       data  = {"text": "Hi"};
 
-objBot.broadcast(ids, data, e => console.error(e));
-objBot.broadcast(ids, data).catch(console.error);
+const bProc = objBot.broadcast(ids, data, (e, lastIndex) => console.log(e, lastIndex));
 
-// Error: e.index==1 + stop the queue
+// bProc.stop();
+// Error: stop the queue
 
 /*
 When sending messages inside a particular chat,
@@ -838,7 +838,7 @@ npm test
 |                   | -                                                                     |                                   |
 | render            | template, data                                                        | string                            |
 | send              | id, data[, callback(error, json, response)]                           | promise or undefined              |
-| broadcast         | ids, data[, callback(error)]                                          | promise or undefined              |
+| broadcast         | ids, data[, callback(error)]                                          | object {stop}                     |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
 | http              | [options][, callback(bot, cmd)]                                       | object                            |

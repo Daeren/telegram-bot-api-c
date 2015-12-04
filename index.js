@@ -1013,87 +1013,85 @@ function main(token) {
     function mthCMainBroadcast(ids, data, callback) {
         const self = this;
 
-        let countUsersPerSec, dTime, startTime;
+        let result  = {},
+            isEnd   = false,
+
+            countUsersPerSec, dTime, startTime;
 
         //-----]>
 
-        if(typeof(callback) === "undefined") {
-            return new this.mdPromise(cbPromise);
-        }
+        result.stop = function() {
+            isEnd = true;
+        };
 
-        cbPromise();
+        callback = callback || function() {};
+
+        //--------]>
+
+        init();
+
+        forEachAsync(ids, function(next, id, index) {
+            process.nextTick(send);
+
+            //--------------]>
+
+            function send() {
+                if(isEnd) {
+                    callback(null, index);
+                }
+                else {
+                    self.send(id, data, onEnd);
+                }
+            }
+
+            function onEnd(error) {
+                if(error) {
+                    if(error.code === 429) {
+                        setTimeout(send, 1000 * 45);
+                    }
+                    else {
+                        next(error, index);
+                    }
+
+                    return;
+                }
+
+                //---------]>
+
+                countUsersPerSec--;
+                dTime = startTime - Date.now();
+
+                //---------]>
+
+                if(!countUsersPerSec && dTime < 1000) {
+                    dTime = 1000 - dTime;
+
+                    if(dTime <= 20) {
+                        init();
+                        next(null, index);
+                    }
+                    else {
+                        setTimeout(function() {
+                            init();
+                            next(null, index);
+                        }, dTime);
+                    }
+                }
+                else if(dTime > 1000) {
+                    init();
+                    next(null, index);
+                }
+                else {
+                    next(null, index);
+                }
+            }
+        }, callback);
 
         //-------------------------]>
 
-        function cbPromise(resolve, reject) {
-            callback = callback || function(error, results) {
-                if(error) {
-                    reject(error);
-                }
-                else {
-                    resolve(results);
-                }
-            };
+        return result;
 
-            //--------]>
-
-            init();
-
-            //--------]>
-
-            forEachAsync(ids, function(next, id, index) {
-                send();
-
-                //--------]>
-
-                function send() {
-                    self.send(id, data, onEnd);
-                }
-
-                function onEnd(error) {
-                    if(error) {
-                        if(error.code === 429) {
-                            setTimeout(send, 1000 * 45);
-                        }
-                        else {
-                            error.index = index;
-                            next(error);
-                        }
-
-                        return;
-                    }
-
-                    //---------]>
-
-                    countUsersPerSec--;
-                    dTime = startTime - Date.now();
-
-                    //---------]>
-
-                    if(!countUsersPerSec && dTime < 1000) {
-                        dTime = 1000 - dTime;
-
-                        if(dTime <= 20) {
-                            init();
-                            next(null);
-                        }
-                        else {
-                            setTimeout(function() {
-                                init();
-                                next(null);
-                            }, dTime);
-                        }
-                    }
-                    else if(dTime > 1000) {
-                        init();
-                        next(null);
-                    }
-                    else {
-                        next(null);
-                    }
-                }
-            }, callback);
-        }
+        //-------------------------]>
 
         function init() {
             countUsersPerSec = 30;
@@ -1427,7 +1425,7 @@ function forEachAsync(data, iter, cbEnd) {
     function cbNext(error, result) {
         if(error) {
             if(cbEnd) {
-                cbEnd(error);
+                cbEnd(error, result);
             }
 
             return;

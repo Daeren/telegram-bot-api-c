@@ -43,52 +43,37 @@ describe("broadcast", function() {
         const ids   = [chatId, "-", chatId],
               data  = {"text": "Hi"};
 
-        gBotFather
-            .broadcast(ids, data, function(error) {
-                expect(error).to.be.an.instanceof(Error);
-                expect(error).to.have.property("index").that.is.an("number");
-                expect(error.index).to.equal(1);
+        gBotFather.broadcast(ids, data, function(error, lastIndex) {
+            expect(error).to.be.an.instanceof(Error);
+            expect(lastIndex).to.equal(1);
 
-                done();
-            });
+            done();
+        });
     });
 
-    it("[id, fake, id] | promise", function(done) {
+    it("[id, fake, id] | stop-callback", function(done) {
         const ids   = [chatId, "-", chatId],
               data  = {"text": "Hi"};
 
-        gBotFather
-            .broadcast(ids, data)
-            .then(done, function(error) {
-                expect(error).to.be.an.instanceof(Error);
-                expect(error).to.have.property("index").that.is.an("number");
-                expect(error.index).to.equal(1);
+        const bProc = gBotFather.broadcast(ids, data, function(error, lastIndex) {
+            expect(error).to.be.null;
+            expect(lastIndex).to.equal(0);
 
-                done();
-            });
+            done();
+        });
+
+        bProc.stop();
     });
 
-    it("[id, id] | promise", function(done) {
-        const ids   = [chatId, chatId],
+    it("[id, id, id] | callback", function(done) {
+        const ids   = [chatId, chatId, chatId],
               data  = {"text": "Hi"};
 
-        gBotFather
-            .broadcast(ids, data)
-            .then(done, function(error) {
-                checkError(error, done);
-            });
+        gBotFather.broadcast(ids, data, function(error, lastIndex) {
+            expect(error).to.be.null;
+            expect(lastIndex).to.equal(2);
+
+            done();
+        });
     });
 });
-
-//----------------------------------]>
-
-function checkError(error, done) {
-    if(error) {
-        expect(error).to.be.an.instanceof(Error);
-    }
-
-    setTimeout(function() {
-        expect(error).to.be.null;
-        done();
-    }, 0);
-}
