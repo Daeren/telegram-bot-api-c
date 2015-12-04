@@ -313,6 +313,15 @@ const objSrvOptions   = {
 };
 
 objBot.http(objSrvOptions, cbMsg);
+
+//----[DEFAULT]----}>
+
+objBot.http();
+objBot.http(cbMsg);
+
+// host: localhost
+// port: 1488
+// autoWebhook: false
 ```
 
 
