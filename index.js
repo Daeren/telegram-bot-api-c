@@ -764,11 +764,11 @@ function main(token) {
             return;
         }
 
-        //-------------------------]>
+        //-------------)>
 
         req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
 
-        //-------------------------]>
+        //-------------)>
 
         if(body) {
             body += genBodyField("end");
@@ -777,13 +777,13 @@ function main(token) {
             return;
         }
 
-        //-------[File: init]-------}>
+        //----[File: init]----}>
 
         bodyEnd = genBodyField("end");
 
         req.write(bodyBegin);
 
-        //-------[File: buffer]-------}>
+        //----[File: buffer]----}>
 
         if(Buffer.isBuffer(file)) {
             req.write(file);
@@ -792,7 +792,7 @@ function main(token) {
             return;
         }
 
-        //-------[File: stream]-------}>
+        //----[File: stream]----}>
 
         if(!file) {
             req.end(bodyEnd);

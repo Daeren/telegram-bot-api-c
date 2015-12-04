@@ -33,8 +33,11 @@ let objSrv;
 objSrv = objBot
     .polling(objOptions, onNotFound)
     .logger(function cbLogger(error, data) {
+        //console.log(error, data);
+
         if(error) {
             expect(error).to.be.an.instanceof(Error);
+            expect(data).to.be.null;
         }
         else {
             expect(error).to.be.null;
