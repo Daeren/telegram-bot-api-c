@@ -491,7 +491,6 @@ objSrv
         console.log("F:Sync | Type: text");
 
         bot.user = {};
-
     })
     .use(function(type, bot) {
         console.log("Sync | Type: %s", type);
@@ -713,7 +712,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 #### Unsafe URL 
 
 ```js
-objMyBot.enable("onMsg.sanitize") // <-- Sanitize Incoming message (Prototype)
+objMyBot.enable("onMsg.sanitize"); // <-- Sanitize Incoming message (Prototype)
 
 objBotFather
     .http(objSrvOptions)
@@ -923,7 +922,7 @@ npm test
 | to                | undefined  |                                                  |
 |                   | -          |                                                  |
 | message           | object     | Incoming message                                 |
-| data              | function   | Response Builder                                 |
+| data              | function   | Response Builder; Uses: cid, mid                 |
 |                   | -          |                                                  |
 | send              | function   | Uses: cid, data                                  |
 | forward           | function   | Uses: mid, from, to                              |

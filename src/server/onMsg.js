@@ -35,7 +35,7 @@ function main(objBot, data) {
 
     //--------]>
 
-    if(botPCurrent.enabled("onMsg.sanitize") || botPCurrent.enabled("url.unsafe")) { // <-- url.unsafe | Depr.
+    if(botPCurrent.enabled("onMsg.sanitize")) {
         data = rMsgSanitize(data); // <-- Prototype
     }
 

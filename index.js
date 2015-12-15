@@ -93,7 +93,6 @@ function main(token) {
             return this;
         },
 
-          "setToken":     function(t) { token = t; return this; }, // <-- Depr.
         "engine":       function(t) { this.mdEngine = t; return this; },
         "promise":      function(t) { this.mdPromise = t; return this; },
 
@@ -105,7 +104,6 @@ function main(token) {
         "broadcast":    mthCMainBroadcast,
         "download":     mthCMainDownload,
 
-          "server":       function(params, callback) { return rServer.http(this, params, callback); }, // <-- Depr.
         "polling":      function(params, callback) { return rServer.polling(this, params, callback); },
         "http":         function(params, callback) { return rServer.http(this, params, callback); },
         "virtual":      function(callback) { return rServer.virtual(this, callback); }
@@ -739,24 +737,26 @@ function main(token) {
         //-------------------------]>
 
         req = rApiRequest(token, method, function(error, body, response) {
-            if(callback) {
-                if(!error) {
-                    const statusCode = response.statusCode;
-
-                    if(statusCode >= 500) {
-                        error = new Error("response.statusCode: " + statusCode);
-                    }
-                    else if(statusCode === 401) {
-                        error = new Error("Invalid access token provided: " + token);
-                    }
-                }
-
-                if(error) {
-                    body = null;
-                }
-
-                callback(error, body, response);
+            if(typeof(callback) !== "function") {
+                return;
             }
+
+            if(!error) {
+                const statusCode = response.statusCode;
+
+                if(statusCode >= 500) {
+                    error = new Error("Server Error: " + statusCode);
+                }
+                else if(statusCode === 401) {
+                    error = new Error("Invalid access token provided: " + token);
+                }
+            }
+
+            if(error) {
+                body = null;
+            }
+
+            callback(error, body, response);
         });
 
         if(!body && !bodyBegin) {
