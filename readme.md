@@ -22,6 +22,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* isReply: +
 * [broadcast](#refBroadcast): +
 * control rate limits (broadcast): +
 * render ([ResponseBuilder](#refResponseBuilder)/[module](#refRender)): +
@@ -160,7 +161,7 @@ let objSrv = objBot
     .on("/stop", cbCmdStop);
 
 function cbMsg(bot) {
-    const msg = bot.isGroup ? ">_>" : "Stop me: /stop";
+    const msg = bot.isGroup && bot.isReply ? ">_>" : "Stop me: /stop";
     
     bot.data().text(msg).send();
 }
@@ -915,6 +916,7 @@ npm test
 |-------------------|------------|--------------------------------------------------|
 |                   | -          |                                                  |
 | isGroup           | boolean    | bot.isGroup = bot.message.chat.type === "group"  |
+| isReply           | boolean    | bot.isReply = !!bot.message.reply_to_message     |
 |                   | -          |                                                  |
 | cid               | number     | bot.cid = bot.message.chat.id                    |
 | mid               | number     | bot.mid = bot.message.message_id                 |

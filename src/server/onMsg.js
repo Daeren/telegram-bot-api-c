@@ -54,7 +54,8 @@ function main(objBot, data) {
     const msgChat           = msg.chat;
 
     const msgChatId         = msgChat.id,
-          msgIsGroup        = msgChat.type === "group";
+          msgIsGroup        = msgChat.type === "group",
+          msgIsReply        = !!msg.reply_to_message;
 
     const botPlugin         = objBot.plugin,
           botFilters        = objBot.filters,
@@ -199,6 +200,7 @@ function main(objBot, data) {
         const result = Object.create(objBot.ctx);
 
         result.isGroup = msgIsGroup;
+        result.isReply = msgIsReply;
 
         result.from = result.cid = msgChatId;
         result.mid = msg.message_id;
