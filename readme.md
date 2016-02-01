@@ -714,6 +714,16 @@ gBot
             .answer(results)
             .then(console.info, console.error);
     });
+	
+//------------]>
+
+bot
+    .api
+    .answerInlineQuery({
+        "inline_query_id": 0,
+        "results":         results
+    })
+    .then(console.info, console.error);
 ```
 
 
