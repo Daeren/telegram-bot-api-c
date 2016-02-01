@@ -60,6 +60,9 @@ function main(text, strict) {
             }
 
             break;
+
+        default:
+            break;
     }
 
     if(!t) {

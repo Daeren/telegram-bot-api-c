@@ -125,12 +125,6 @@ function main(token) {
         switch(type) {
             case "end":
                 return gCRLF + gBoundaryEnd;
-        }
-
-        switch(type) {
-            case "text":
-                value = "Content-Disposition: form-data; name=\"" + field + "\"\r\n\r\n" + value;
-                break;
 
             case "json":
                 if(typeof(value) !== "string") {
@@ -139,6 +133,10 @@ function main(token) {
 
                 value = "Content-Disposition: form-data; name=\"" + field + "\"\r\nContent-Type: application/json\r\n\r\n" + value;
 
+                break;
+
+            case "text":
+                value = "Content-Disposition: form-data; name=\"" + field + "\"\r\n\r\n" + value;
                 break;
 
             case "photo":
@@ -168,6 +166,9 @@ function main(token) {
             case "certificate":
                 value = "Content-Disposition: form-data; name=\"certificate\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
                 break;
+
+            default:
+                throw new Error("Type not found!");
         }
 
         return value ? (gCRLF + gBoundaryDiv + value) : "";
@@ -1326,6 +1327,9 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
                     }
             }
 
+            break;
+
+        default:
             break;
     }
 

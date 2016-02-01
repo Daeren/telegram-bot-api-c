@@ -198,6 +198,9 @@ function main(objBot, data) {
                 }
 
                 break;
+
+            default:
+                break;
         }
 
         if(!evName || !(msgType && callEvent(evName, msg[msgType])) && !callEvent("*", cmdParam)) {
@@ -246,6 +249,9 @@ function main(objBot, data) {
                 result.qid = inlineQuery.id;
                 result.inlineQuery = inlineQuery;
 
+                break;
+
+            default:
                 break;
         }
 

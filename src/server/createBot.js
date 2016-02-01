@@ -146,7 +146,7 @@ function main(bot, onMsg) {
         //------]>
 
         if(typeof(rule) === "string") {
-            let t = rule.split(/\s+/);
+            const t = rule.split(/\s+/);
 
             if(t.length > 1) {
                 rule = t;
@@ -165,12 +165,13 @@ function main(bot, onMsg) {
 
         //------]>
 
-        let fltEv   = result.filters.ev,
-            fltRe   = result.filters.regexp;
+        const fltEv   = result.filters.ev,
+              fltRe   = result.filters.regexp;
 
         switch(typeof(rule)) {
             case "string":
                 fltEv.on(rule, func);
+
                 break;
 
             case "object":
@@ -215,10 +216,10 @@ function main(bot, onMsg) {
 
         //------]>
 
-        let filters = result.filters;
+        const filters = result.filters;
 
-        let fltEv   = filters.ev,
-            fltRe   = filters.regexp;
+        const fltEv   = filters.ev,
+              fltRe   = filters.regexp;
 
         //------]>
 
@@ -237,8 +238,12 @@ function main(bot, onMsg) {
                         }
 
                         break;
+
+                    default:
+                        break;
                 }
-            } else {
+            }
+            else {
                 filters.regexp = [];
             }
 
@@ -252,11 +257,12 @@ function main(bot, onMsg) {
         switch(typeof(rule)) {
             case "string":
                 fltEv.removeListener(rule, func);
+
                 break;
 
             case "object":
                 if(rule instanceof RegExp) {
-                    let id = getIdFltRegExp(rule);
+                    const id = getIdFltRegExp(rule);
 
                     if(id >= 0) {
                         fltEv.removeListener(rule, func);
@@ -267,6 +273,9 @@ function main(bot, onMsg) {
                     }
                 }
 
+                break;
+
+            default:
                 break;
         }
 
