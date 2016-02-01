@@ -77,12 +77,12 @@ describe("Instance: bot", function() {
         const botMethods = [
             "enable", "disable", "enabled", "disabled",
 
-            "setToken", "engine", "promise", "token",
+            "engine", "promise", "token",
 
             "call", "callJson",
             "render", "send", "download",
 
-            "server", "polling", "http", "virtual",
+            "polling", "http", "virtual",
 
             "keyboard", "parseCmd"
         ];
@@ -91,6 +91,8 @@ describe("Instance: bot", function() {
 
         it("api", function() {
             const apiMethods = [
+                "answerInlineQuery",
+
                 "forwardMessage",
                 "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
                 "getMe", "getUserProfilePhotos", "getUpdates", "getFile",

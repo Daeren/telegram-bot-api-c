@@ -727,6 +727,27 @@ function main(token) {
 
                 break;
 
+            case "answerInlineQuery":
+                body = genBodyField("text", "inline_query_id", data.inline_query_id);
+
+                t = data.cache_time;
+                if(t) {
+                    body += genBodyField("text", "cache_time", t);
+                }
+
+                if(data.is_personal) {
+                    body += genBodyField("text", "is_personal", "1");
+                }
+
+                t = data.next_offset;
+                if(t) {
+                    body += genBodyField("text", "next_offset", t);
+                }
+
+                body += genBodyField("json", "results", data.results);
+
+                break;
+
             case "getMe":
                 break;
 

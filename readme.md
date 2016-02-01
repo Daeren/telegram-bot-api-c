@@ -22,10 +22,9 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 
 [Telegram Bot API][3]
 
+* [InlineQuery](#refInlineQuery): +
 * isReply: +
 * [broadcast](#refBroadcast): +
-* control rate limits (broadcast): +
-* render ([ResponseBuilder](#refResponseBuilder)/[module](#refRender)): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
 * [Send file as Buffer](#refSendFileAsBuffer): +
@@ -49,6 +48,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
 * [Broadcast](#refBroadcast)
+* [InlineQuery](#refInlineQuery)
 * [Errors](#refErrors)
 * [Unsafe URL](#refUnsafeURL)
 * [CLI](#refCLI)
@@ -672,6 +672,50 @@ hours for best results.
 
 
 
+<a name="refInlineQuery"></a>
+#### InlineQuery
+
+```js
+gBot
+    .polling()
+    .on("inlineQuery", function(bot, query) {
+        const idx = Date.now().toString(32) + Math.random().toString(24);
+
+        const results = [
+            {
+                "type":         "article",
+                "title":        "Title #1",
+                "message_text": "Text...",
+
+                "thumb_url":    "https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg"
+            },
+
+            {
+                "type":         "article",
+                "title":        "Title #2: " + query,
+                "message_text": "Text...yeah"
+            },
+
+            {
+                "type":         "photo",
+
+                "photo_width":  128,
+                "photo_height": 128,
+
+                "photo_url":    "https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg",
+                "thumb_url":    "https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg"
+            }
+        ]
+            .map((t, i) => { t.id = idx + i; return t; });
+
+        bot
+            .answer(results)
+            .then(console.info, console.error);
+    });
+```
+
+
+
 <a name="refErrors"></a>
 #### Errors 
 
@@ -918,10 +962,11 @@ npm test
 | isGroup           | boolean    | bot.isGroup = bot.message.chat.type === "group"  |
 | isReply           | boolean    | bot.isReply = !!bot.message.reply_to_message     |
 |                   | -          |                                                  |
+| qid               | string     | bot.qid = bot.inlineQuery.id                     |
 | cid               | number     | bot.cid = bot.message.chat.id                    |
 | mid               | number     | bot.mid = bot.message.message_id                 |
 | from              | number     | bot.from = bot.message.chat.id                   |
-| to                | undefined  |                                                  |
+| to                | number     | bot.to = undefined                               |
 |                   | -          |                                                  |
 | message           | object     | Incoming message                                 |
 | data              | function   | Response Builder; Uses: cid, mid                 |
@@ -929,12 +974,15 @@ npm test
 | send              | function   | Uses: cid, data                                  |
 | forward           | function   | Uses: mid, from, to                              |
 | render            | function   | Uses: cid, data                                  |
+| answer            | function   | Uses: qid                                  		|
 
 
 #### Events: on
 
 | Name              | Args                                  | Note                                      |
 |-------------------|---------------------------------------|-------------------------------------------|
+|                   | -                                     |                                           |
+| inlineQuery       | bot, query                            |                                           |
 |                   | -                                     |                                           |
 | enterChat         | bot, data                             |                                           |
 | leftChat          | bot, data                             |                                           |
