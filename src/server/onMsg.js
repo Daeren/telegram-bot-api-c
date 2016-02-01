@@ -54,8 +54,24 @@ function main(objBot, data) {
 
     //--------]>
 
-    if(bdataType === C_BD_TYPE_UNKNOWN) {
-        return;
+    let msgType             = null,
+        evName              = null,
+        cmdParam            = null;
+
+    switch(bdataType) {
+        case C_BD_TYPE_MESSAGE:
+            msgType = getTypeMsg(msg);
+            evName = getEventNameByTypeMsg(msgType);
+
+            break;
+
+        case C_BD_TYPE_INLINE_QUERY:
+            evName = "inlineQuery";
+
+            break;
+
+        default:
+            return;
     }
 
     //--------]>
@@ -71,25 +87,6 @@ function main(objBot, data) {
           botFilters        = objBot.filters,
 
           ctxBot            = createCtx(bdataType);
-
-    let msgType             = null,
-        evName              = null,
-        cmdParam            = null;
-
-    //-----)>
-
-    switch(bdataType) {
-        case C_BD_TYPE_MESSAGE:
-            msgType = getTypeMsg(msg);
-            evName = getEventNameByTypeMsg(msgType);
-
-            break;
-
-        case C_BD_TYPE_INLINE_QUERY:
-            evName = "inlineQuery";
-
-            break;
-    }
 
     //------------]>
 
