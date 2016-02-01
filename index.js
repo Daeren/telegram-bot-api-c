@@ -825,7 +825,8 @@ function main(token) {
             file.on("open", function() {
                 file.pipe(req, gPipeOptions);
             });
-        } else {
+        }
+        else {
             if(file.closed) {
                 req.end(bodyEnd);
                 return;
@@ -1127,7 +1128,8 @@ function main(token) {
         if(typeof(dir) === "function") {
             callback = dir;
             dir = undefined;
-        } else if(typeof(name) === "function") {
+        }
+        else if(typeof(name) === "function") {
             callback = name;
             name = undefined;
         }
@@ -1304,7 +1306,8 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
                     if(Array.isArray(cmdData)) {
                         result.latitude = cmdData[0];
                         result.longitude = cmdData[1];
-                    } else if(cmdData) {
+                    }
+                    else if(cmdData) {
                         result.latitude = cmdData.latitude;
                         result.longitude = cmdData.longitude;
                     }
