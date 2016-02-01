@@ -675,6 +675,8 @@ hours for best results.
 <a name="refInlineQuery"></a>
 #### InlineQuery
 
+https://core.telegram.org/bots/inline
+
 ```js
 gBot
     .polling()
