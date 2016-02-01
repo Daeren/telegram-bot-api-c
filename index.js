@@ -16,9 +16,7 @@ const rHttp             = require("http"),
       rStream           = require("stream"),
       rPath             = require("path");
 
-const rApiMethods       = require("./src/api/methods"),
-      rApiRequest       = require("./src/api/request");
-
+const rTgApi            = require("./src/api");
 const rSendApiMethods   = require("./src/send/methods");
 
 const rParseCmd         = require("./src/parseCmd"),
@@ -67,7 +65,7 @@ function main(token) {
     //---------)>
 
     function CMain() {
-        this.api        = genApiMethods(this);
+        this.api        = rTgApi.genMethodsForMe(this);
 
         this.keyboard   = rKeyboard;
         this.parseCmd   = rParseCmd;
@@ -757,7 +755,7 @@ function main(token) {
 
         //-------------------------]>
 
-        req = rApiRequest(token, method, function(error, body, response) {
+        req = rTgApi.request(token, method, function(error, body, response) {
             if(typeof(callback) !== "function") {
                 return;
             }
@@ -1355,69 +1353,6 @@ function getNameByMime(contentType) {
     }
 
     return result || "";
-}
-
-//----------]>
-
-function genApiMethods(bot) {
-    let result = {};
-
-    //--------------]>
-
-    rApiMethods.forEach(setMethod);
-
-    //--------------]>
-
-    return result;
-
-    //--------------]>
-
-    function setMethod(method) {
-        result[method] = function(data, callback) {
-            if(arguments.length === 1 && typeof(data) === "function") {
-                callback = data;
-                data = undefined;
-            }
-
-            if(typeof(callback) === "undefined") {
-                return new bot.mdPromise(cbPromise);
-            }
-
-            cbPromise();
-
-            //-------------------------]>
-
-            function cbPromise(resolve, reject) {
-                callback = callback || function(error, results) {
-                    if(error) {
-                        reject(error);
-                    }
-                    else {
-                        resolve(results);
-                    }
-                };
-
-                bot.callJson(method, data, function(error, data) {
-                    error = error || genErrorByTgResponse(data) || null;
-
-                    if(!error) {
-                        data = data.result;
-                    }
-
-                    callback(error, data);
-                });
-            }
-        };
-    }
-
-    function genErrorByTgResponse(data) {
-        if(data && !data.ok) {
-            const error = new Error(data.description);
-            error.code = data.error_code;
-
-            return error;
-        }
-    }
 }
 
 //----------]>
