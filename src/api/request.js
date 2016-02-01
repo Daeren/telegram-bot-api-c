@@ -47,9 +47,7 @@ function main(token, method, callback) {
 
     //--------------]>
 
-    return rHttps
-        .request(gReqOptions, cbRequest)
-        .on("error", callback);
+    return rHttps.request(gReqOptions, cbRequest).on("error", callback);
 
     //--------------]>
 
@@ -58,7 +56,7 @@ function main(token, method, callback) {
 
         //---------]>
 
-        response.on("data", function(chunk) {
+        response.on("data", function responseData(chunk) {
             if(!firstChunk) {
                 firstChunk = chunk;
             }
@@ -68,7 +66,7 @@ function main(token, method, callback) {
             }
         });
 
-        response.on("end", function() {
+        response.on("end", function responseEnd() {
             callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
         });
     }

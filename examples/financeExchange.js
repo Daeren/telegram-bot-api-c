@@ -11,7 +11,7 @@
 
 //-----------------------------------------------------
 
-const rTgBot    = require("telegram-bot-api-c"),
+const rTgBot    = require("./../index"),
       rUnirest  = require("unirest");
 
 const gBot      = rTgBot(process.env.TELEGRAM_BOT_TOKEN);

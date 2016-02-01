@@ -18,6 +18,10 @@ const rMsgSanitize      = require("./msgSanitize"),
 
 const gReReplaceBotName = /^@\S+\s+/;
 
+const C_BD_TYPE_UNKNOWN      = 0,
+      C_BD_TYPE_MESSAGE      = 1,
+      C_BD_TYPE_INLINE_QUERY = 2;
+
 //-----------------------------------------------------
 
 module.exports = main;
@@ -35,36 +39,57 @@ function main(objBot, data) {
 
     //--------]>
 
-    if(botPCurrent.enabled("onMsg.sanitize") || botPCurrent.enabled("url.unsafe")) { // <-- url.unsafe | Depr.
+    if(botPCurrent.enabled("onMsg.sanitize")) {
         data = rMsgSanitize(data); // <-- Prototype
     }
 
     //--------]>
 
-    const msg = data.message;
+    const inlineQuery   = data.inline_query,
+          msg           = data.message;
+
+    const bdataType     =
+                            inlineQuery && typeof(inlineQuery) === "object" ? C_BD_TYPE_INLINE_QUERY :
+                            (msg && typeof(msg) === "object" ? C_BD_TYPE_MESSAGE : C_BD_TYPE_UNKNOWN);
 
     //--------]>
 
-    if(!msg || typeof(msg) !== "object") {
+    if(bdataType === C_BD_TYPE_UNKNOWN) {
         return;
     }
 
     //--------]>
 
-    const msgChat           = msg.chat;
+    const msgChat           = msg ? msg.chat : null;
 
-    const msgChatId         = msgChat.id,
-          msgIsGroup        = msgChat.type === "group";
+    const msgChatId         = msgChat ? msgChat.id : 0,
+
+          msgIsGroup        = !!(msgChat && msgChat.type === "group"),
+          msgIsReply        = !!(msg && msg.reply_to_message);
 
     const botPlugin         = objBot.plugin,
           botFilters        = objBot.filters,
 
-          ctxBot            = createCtx(),
+          ctxBot            = createCtx(bdataType);
 
-          msgType           = getTypeMsg(msg),
-          evName            = getEventNameByTypeMsg(msgType);
+    let msgType             = null,
+        evName              = null,
+        cmdParam            = null;
 
-    let cmdParam            = null;
+    //-----)>
+
+    switch(bdataType) {
+        case C_BD_TYPE_MESSAGE:
+            msgType = getTypeMsg(msg);
+            evName = getEventNameByTypeMsg(msgType);
+
+            break;
+
+        case C_BD_TYPE_INLINE_QUERY:
+            evName = "inlineQuery";
+
+            break;
+    }
 
     //------------]>
 
@@ -118,6 +143,10 @@ function main(objBot, data) {
 
     function onEndPlugin(state) {
         switch(evName) {
+            case "inlineQuery":
+                callEvent(evName, inlineQuery.query);
+                break;
+
             case "text":
                 let msgText = msg.text;
 
@@ -171,7 +200,7 @@ function main(objBot, data) {
                 break;
         }
 
-        if(!evName || !callEvent(evName, msg[msgType]) && !callEvent("*", cmdParam)) {
+        if(!evName || !(msgType && callEvent(evName, msg[msgType])) && !callEvent("*", cmdParam)) {
             if(objBot.onMsg) {
                 setImmediate(objBot.onMsg, ctxBot, cmdParam);
             }
@@ -195,18 +224,30 @@ function main(objBot, data) {
 
     //-------)>
 
-    function createCtx() {
+    function createCtx(type) {
         const result = Object.create(objBot.ctx);
 
         result.isGroup = msgIsGroup;
+        result.isReply = msgIsReply;
 
-        result.from = result.cid = msgChatId;
-        result.mid = msg.message_id;
+        switch(type) {
+            case C_BD_TYPE_MESSAGE:
+                result.data = createResponseBuilder();
+                result.createResponseBuilder = createResponseBuilder;
 
-        result.message = msg;
-        result.data = createFResponseBuilder();
+                result.from = result.cid = msgChatId;
+                result.mid = msg.message_id;
 
-        result.createFResponseBuilder = createFResponseBuilder;
+                result.message = msg;
+
+                break;
+
+            case C_BD_TYPE_INLINE_QUERY:
+                result.qid = inlineQuery.id;
+                result.inlineQuery = inlineQuery;
+
+                break;
+        }
 
         //---------------]>
 
@@ -214,7 +255,7 @@ function main(objBot, data) {
 
         //---------------]>
 
-        function createFResponseBuilder() {
+        function createResponseBuilder() {
             return () => new rResponseBuilder(result, botPCurrent);
         }
     }

@@ -1,16 +1,16 @@
 {
   "name": "telegram-bot-api-c",
   "main": "index.js",
-  "version": "6.6.5",
+  "version": "7.0.0",
   "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
   "keywords": [
         "node",
-        "telegram bot",
-        "telegram bot cli",
-        "telegram",
         "bot",
         "api",
         "cli",
+        "telegram",
+        "telegram bot",
+        "telegram-bot-api-c",
         "bottality"
   ],
   "authors": [

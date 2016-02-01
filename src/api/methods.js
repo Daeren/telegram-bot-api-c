@@ -10,6 +10,8 @@
 //-----------------------------------------------------
 
 const gMethods = [
+    "answerInlineQuery",
+
     "forwardMessage",
 
     "sendMessage",

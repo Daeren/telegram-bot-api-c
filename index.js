@@ -16,9 +16,7 @@ const rHttp             = require("http"),
       rStream           = require("stream"),
       rPath             = require("path");
 
-const rApiMethods       = require("./src/api/methods"),
-      rApiRequest       = require("./src/api/request");
-
+const rTgApi            = require("./src/api");
 const rSendApiMethods   = require("./src/send/methods");
 
 const rParseCmd         = require("./src/parseCmd"),
@@ -67,7 +65,7 @@ function main(token) {
     //---------)>
 
     function CMain() {
-        this.api        = genApiMethods(this);
+        this.api        = rTgApi.genMethodsForMe(this);
 
         this.keyboard   = rKeyboard;
         this.parseCmd   = rParseCmd;
@@ -93,7 +91,6 @@ function main(token) {
             return this;
         },
 
-          "setToken":     function(t) { token = t; return this; }, // <-- Depr.
         "engine":       function(t) { this.mdEngine = t; return this; },
         "promise":      function(t) { this.mdPromise = t; return this; },
 
@@ -105,7 +102,6 @@ function main(token) {
         "broadcast":    mthCMainBroadcast,
         "download":     mthCMainDownload,
 
-          "server":       function(params, callback) { return rServer.http(this, params, callback); }, // <-- Depr.
         "polling":      function(params, callback) { return rServer.polling(this, params, callback); },
         "http":         function(params, callback) { return rServer.http(this, params, callback); },
         "virtual":      function(callback) { return rServer.virtual(this, callback); }
@@ -729,6 +725,27 @@ function main(token) {
 
                 break;
 
+            case "answerInlineQuery":
+                body = genBodyField("text", "inline_query_id", data.inline_query_id);
+
+                t = data.cache_time;
+                if(t) {
+                    body += genBodyField("text", "cache_time", t);
+                }
+
+                if(data.is_personal) {
+                    body += genBodyField("text", "is_personal", "1");
+                }
+
+                t = data.next_offset;
+                if(t) {
+                    body += genBodyField("text", "next_offset", t);
+                }
+
+                body += genBodyField("json", "results", data.results);
+
+                break;
+
             case "getMe":
                 break;
 
@@ -738,25 +755,27 @@ function main(token) {
 
         //-------------------------]>
 
-        req = rApiRequest(token, method, function(error, body, response) {
-            if(callback) {
-                if(!error) {
-                    const statusCode = response.statusCode;
-
-                    if(statusCode >= 500) {
-                        error = new Error("response.statusCode: " + statusCode);
-                    }
-                    else if(statusCode === 401) {
-                        error = new Error("Invalid access token provided: " + token);
-                    }
-                }
-
-                if(error) {
-                    body = null;
-                }
-
-                callback(error, body, response);
+        req = rTgApi.request(token, method, function(error, body, response) {
+            if(typeof(callback) !== "function") {
+                return;
             }
+
+            if(!error) {
+                const statusCode = response.statusCode;
+
+                if(statusCode >= 500) {
+                    error = new Error("Server Error: " + statusCode);
+                }
+                else if(statusCode === 401) {
+                    error = new Error("Invalid access token provided: " + token);
+                }
+            }
+
+            if(error) {
+                body = null;
+            }
+
+            callback(error, body, response);
         });
 
         if(!body && !bodyBegin) {
@@ -1334,69 +1353,6 @@ function getNameByMime(contentType) {
     }
 
     return result || "";
-}
-
-//----------]>
-
-function genApiMethods(bot) {
-    let result = {};
-
-    //--------------]>
-
-    rApiMethods.forEach(setMethod);
-
-    //--------------]>
-
-    return result;
-
-    //--------------]>
-
-    function setMethod(method) {
-        result[method] = function(data, callback) {
-            if(arguments.length === 1 && typeof(data) === "function") {
-                callback = data;
-                data = undefined;
-            }
-
-            if(typeof(callback) === "undefined") {
-                return new bot.mdPromise(cbPromise);
-            }
-
-            cbPromise();
-
-            //-------------------------]>
-
-            function cbPromise(resolve, reject) {
-                callback = callback || function(error, results) {
-                    if(error) {
-                        reject(error);
-                    }
-                    else {
-                        resolve(results);
-                    }
-                };
-
-                bot.callJson(method, data, function(error, data) {
-                    error = error || genErrorByTgResponse(data) || null;
-
-                    if(!error) {
-                        data = data.result;
-                    }
-
-                    callback(error, data);
-                });
-            }
-        };
-    }
-
-    function genErrorByTgResponse(data) {
-        if(data && !data.ok) {
-            const error = new Error(data.description);
-            error.code = data.error_code;
-
-            return error;
-        }
-    }
 }
 
 //----------]>

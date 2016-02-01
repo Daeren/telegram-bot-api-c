@@ -9,7 +9,7 @@
 
 //-----------------------------------------------------
 
-const typesMap = (function(data) {
+const gTypesMap = (function(data) {
     const result = Object.create(null);
 
     for(let type in data) {
@@ -112,9 +112,21 @@ const typesMap = (function(data) {
             "boolean:force_reply selective"
         ],
 
+        "inlineQuery": [
+            "user:from",
+            "string:id query offset"
+        ],
+
+        "chosenInlineResult": [
+            "user:from",
+            "string:result_id query"
+        ],
+
         "update": [
             "integer:update_id",
-            "message"
+            "message",
+            "inline_query:inlineQuery",
+            "chosen_inline_result:chosenInlineResult"
         ]
     }
 );
@@ -232,7 +244,7 @@ function sanitize(type, data) {
             return data;
 
         default:
-            const tp = typesMap[type];
+            const tp = gTypesMap[type];
 
             if(tp) {
                 return tp(data);

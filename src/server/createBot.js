@@ -64,9 +64,10 @@ function main(bot, onMsg) {
 
     //-----)>
 
-    ctx.render = ctxRender;
-    ctx.send = ctxSend;
+    ctx.render  = ctxRender;
+    ctx.send    = ctxSend;
     ctx.forward = ctxForward;
+    ctx.answer  = ctxAnswer;
 
     //--------------]>
 
@@ -99,7 +100,7 @@ function main(bot, onMsg) {
 
     function ctxSend(callback) {
         const data = this.data;
-        this.data = this.createFResponseBuilder();
+        this.data = this.createResponseBuilder();
 
         return bot.send(this.cid, data, callback);
     }
@@ -112,6 +113,15 @@ function main(bot, onMsg) {
         };
 
         return arguments.length < 1 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
+    }
+
+    function ctxAnswer(results, callback) {
+        let data = {
+            "inline_query_id":  this.qid,
+            "results":          results
+        };
+
+        return arguments.length < 2 ? bot.api.answerInlineQuery(data) : bot.api.answerInlineQuery(data, callback);
     }
 
     //-----)>
