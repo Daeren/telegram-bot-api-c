@@ -186,7 +186,7 @@ const rBot = require("telegram-bot-api-c");
 const objBotFather    = rBot();
 const objSrvOptions   = {
     // For Self-signed certificate, you need to upload your public key certificate
-    // "selfSigned":  "fullPath/stream/string-key",
+    // "selfSigned":  "fullPath/stream/string-key",  // <-- If you use Auto-Webhook
 
     "certDir":  "/www/site",
 
@@ -209,7 +209,7 @@ const objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
 let objSrv        = objBotFather.http(objSrvOptions);
 
 objSrv
-    .bot(objMyBot, "/MyBot") // <-- Auto-Webhook
+    .bot(objMyBot, "/urlMyBot") // <-- Auto-Webhook
     .on("/start", cbCmdStart)
     .on("/stop", cbCmdStop);
 
@@ -323,6 +323,7 @@ objBot.http(cbMsg);
 // host: localhost
 // port: 1488
 // autoWebhook: false
+// ssl: false
 ```
 
 
