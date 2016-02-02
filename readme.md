@@ -8,7 +8,7 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 #### OneShot
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().text("Hi").send());
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
 ```
 
 ```js
@@ -26,7 +26,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
-* rb.data() -> rb.answer()
+* rb.data() => rb.answer()
 * [Response Builder Reply](#refServerResponse): +
 * [InlineQuery](#refInlineQuery): +
 * isReply: +
@@ -166,9 +166,9 @@ let objSrv = objBot
     .on("/stop", cbCmdStop);
 
 function cbMsg(bot) {
-    const msg = bot.isGroup && bot.isReply ? ">_>" : "Stop me: /stop";
+    const msg = bot.isGroup ? ">_>" : "Stop me: /stop";
     
-    bot.answer().text(msg).send();
+    bot.answer(bot.isReply).text(msg).send();
 }
 
 function cbCmdStop(bot, params) {
@@ -339,28 +339,22 @@ objBot.http(cbMsg);
 ```js
 objSrv
     .use(function(type, bot, next) {
-        //----[Send Reply | RBuilder: One element]----}>
+        const imgURL  = "https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg";
         
-        bot.
-            reply()
-            .text("=_=")
-            .photo("https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg")
-            .send();
+        const isReply = true,
+              params  = {};
+    
+        //----[Send Reply | RBuilder: Queue]----}>
+        
+        bot.answer(isReply).text("=_=").photo(imgURL).send();
         
         //----[Send | RBuilder: One element]----}>
         
-        bot
-            .answer()
-            .text("Hi")
-            .send();
+        bot.answer().text("Hi", params).send();
         
         //----[Send | RBuilder: Queue]----}>
         
-        bot
-            .answer()
-            .text("Hi")
-            .text("Hi 2")
-            .send();
+        bot.answer().text("Hi").text("Hi 2").send();
         
         //----[Send | HashTable: One element]----}>
         
@@ -369,6 +363,12 @@ objSrv
         //----[Send | HashTable: Queue]----}>
         
         bot.send([{"text": "Hi"}, {"text": "Hi 2"}]);
+        
+        //----[Send_ELEMENT]----}>
+        
+        bot.sendMessage("Hello").then(console.log);
+        bot.sendPhoto(imgURL, params);
+        bot.sendDocument(imgURL, (e, r) => console.log(e || r));
         
         //----[Forward]----}>
 
@@ -988,25 +988,36 @@ npm test
 
 #### Fields: bot (srv.on("*", bot => { })
 
-| Name              | Type       | Note                                                         |
-|-------------------|------------|--------------------------------------------------------------|
-|                   | -          |                                                              |
-| isGroup           | boolean    | bot.isGroup = bot.message.chat.type === "group"              |
-| isReply           | boolean    | bot.isReply = !!bot.message.reply_to_message                 |
-|                   | -          |                                                              |
-| qid               | string     | bot.qid = bot.inlineQuery.id                                 |
-| cid               | number     | bot.cid = bot.message.chat.id                                |
-| mid               | number     | bot.mid = bot.message.message_id                             |
-| from              | number     | bot.from = bot.message.chat.id                               |
-| to                | number     | bot.to = undefined                                           |
-|                   | -          |                                                              |
-| message           | object     | Incoming message                                             |
-| answer            | function   | Response Builder (except: inlineQuery); Uses: cid, mid       |
-|                   | -          |                                                              |
-| send              | function   | Uses: cid, data                                              |
-| forward           | function   | Uses: mid, from, to                                          |
-| render            | function   | Uses: cid, data                                              |
-| answer            | function   | Uses: qid                                                    |
+| Name              | Type                  | Note                                                   |
+|-------------------|-----------------------|--------------------------------------------------------|
+|                   | -                     |                                                        |
+| isGroup           | boolean               | bot.isGroup = bot.message.chat.type === "group"        |
+| isReply           | boolean               | bot.isReply = !!bot.message.reply_to_message           |
+|                   | -                     |                                                        |
+| qid               | string                | bot.qid = bot.inlineQuery.id                           |
+| cid               | number                | bot.cid = bot.message.chat.id                          |
+| mid               | number                | bot.mid = bot.message.message_id                       |
+| from              | number                | bot.from = bot.message.chat.id                         |
+| to                | number                | bot.to = undefined                                     |
+|                   | -                     |                                                        |
+| message           | object                | Incoming message                                       |
+|                   | -                     |                                                        |
+| answer            | function(isReply)     | Response Builder; Uses: cid, mid                       |
+| answer            | function()            | inlineQuery; Uses: qid                                 |
+|                   | -                     |                                                        |
+| forward           | function              | Uses: mid, from, to                                    |
+| render            | function              | Uses: cid                                              |
+| send              | function              | Uses: cid                                              |
+|                   | -                     |                                                        |
+| sendMessage       | function              |                                                        |
+| sendPhoto         | function              |                                                        |
+| sendAudio         | function              |                                                        |
+| sendDocument      | function              |                                                        |
+| sendSticker       | function              |                                                        |
+| sendVideo         | function              |                                                        |
+| sendVoice         | function              |                                                        |
+| sendLocation      | function              |                                                        |
+| sendChatAction    | function              |                                                        |
 
 
 #### Events: on

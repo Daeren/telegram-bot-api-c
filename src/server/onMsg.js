@@ -232,12 +232,11 @@ function main(srvBot, data) {
 
         switch(type) {
             case C_BD_TYPE_MESSAGE:
-                result.answer = () => new rResponseBuilder(result, botInstance);
-                result.reply = () => {
-                    const asw = result.answer();
-                    asw.isReply = true;
+                result.answer = (isReply) => {
+                    const answer = new rResponseBuilder(result, botInstance);
+                    answer.isReply = !!isReply;
 
-                    return asw;
+                    return answer;
                 };
 
                 result.from = result.cid = msgChatId;

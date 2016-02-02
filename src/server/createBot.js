@@ -15,6 +15,18 @@ const rEvents = require("events");
 
 const gMaxListeners = 100;
 
+const gMapSendMethods      = {
+    "text":         "sendMessage",
+    "photo":        "sendPhoto",
+    "audio":        "sendAudio",
+    "document":     "sendDocument",
+    "sticker":      "sendSticker",
+    "video":        "sendVideo",
+    "voice":        "sendVoice",
+    "location":     "sendLocation",
+    "action":       "sendChatAction"
+};
+
 //-----------------------------------------------------
 
 module.exports = main;
@@ -68,6 +80,35 @@ function main(bot, onMsg) {
     ctx.send    = ctxSend;
     ctx.forward = ctxForward;
     ctx.answer  = ctxAnswer;
+
+    //-----[Send methods]-----}>
+
+    for(let fieldName in gMapSendMethods) {
+        if(!gMapSendMethods.hasOwnProperty(fieldName)) {
+            continue;
+        }
+
+        const methodName = gMapSendMethods[fieldName];
+        const apiMethod = bot.api[methodName];
+
+        ctx[methodName] = function(input, params, callback) {
+            if(typeof(params) === "function") {
+                callback = params;
+                params = undefined;
+            }
+
+            //-----------]>
+
+            const data = params ? Object.create(params) : {};
+
+            data.chat_id = params && params.chat_id || this.cid;
+            data[fieldName] = input;
+
+            //-----------]>
+
+            return callback ?  apiMethod(data, callback) : apiMethod(data);
+        };
+    }
 
     //--------------]>
 

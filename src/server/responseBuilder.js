@@ -9,11 +9,11 @@
 
 //-----------------------------------------------------
 
-const rSendApiMethods = require("./../sendMethods");
+const rSendMethods = require("./../sendMethods");
 
 //-----------------------------------------------------
 
-const gElements = rSendApiMethods.keys;
+const gElements = rSendMethods.keys;
 const gModifiers = [
     "maxSize", "filename",
     "latitude", "longitude",
