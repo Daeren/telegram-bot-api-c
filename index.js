@@ -33,6 +33,9 @@ const gTgHostFile     = "api.telegram.org";
 main.keyboard = rKeyboard;
 main.parseCmd = rParseCmd;
 
+main.call = rTgApi.call;
+main.callJson = rTgApi.callJson;
+
 //-----------------------------------------------------
 
 module.exports = main;
