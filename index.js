@@ -1037,7 +1037,7 @@ function main(token) {
         let result  = {},
             isEnd   = false,
 
-            countUsersPerSec, dTime, startTime;
+            numUsersPerSec, dTime, startTime;
 
         //-----]>
 
@@ -1079,12 +1079,12 @@ function main(token) {
 
                 //---------]>
 
-                countUsersPerSec--;
+                numUsersPerSec--;
                 dTime = startTime - Date.now();
 
                 //---------]>
 
-                if(!countUsersPerSec && dTime < 1000) {
+                if(!numUsersPerSec && dTime < 1000) {
                     dTime = 1000 - dTime;
 
                     if(dTime <= 20) {
@@ -1115,7 +1115,7 @@ function main(token) {
         //-------------------------]>
 
         function init() {
-            countUsersPerSec = 30;
+            numUsersPerSec = 30;
             startTime = Date.now();
         }
     }
