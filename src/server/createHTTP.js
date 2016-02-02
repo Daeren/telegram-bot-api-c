@@ -65,9 +65,11 @@ function main(botFather, params, callback) {
     //-----------------]>
 
     const isHTTPS       = params.ssl !== false;
-    const srvBotDefault = rCreateBot(botFather, callback);
 
-    let srv, srvBots;
+    const srvBotDefault = rCreateBot(botFather, callback),
+          srvBots       = Object.create(null);
+
+    let srv;
 
     //----------)>
 
@@ -244,47 +246,40 @@ function main(botFather, params, callback) {
     //-----------------]>
 
     function addBot(bot, path, callback) {
-        srvBots = srvBots || Object.create(null);
-
         if(srvBots[path]) {
             throw new Error("Path '" + path + "' has already been used");
         }
 
         //-------------]>
 
-        const srvBot = srvBots[path] = rCreateBot(bot, callback);
-
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
                 const url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
                 const data = {"url": url, "certificate": params.selfSigned};
 
-                srvBot
-                    .bot
-                    .callJson("setWebhook", data, function(error, isOk) {
-                        if(isOk) {
-                            return;
-                        }
-
-                        console.log("[-] Webhook: %s", url);
-
-                        if(error) {
-                            if(error.message) {
-                                console.log(error.message);
-                            }
-
-                            console.log(error.stack);
-                        }
+                bot.callJson("setWebhook", data, function(error, isOk) {
+                    if(isOk) {
+                        return;
                     }
-                );
+
+                    console.log("[-] Webhook: %s", url);
+
+                    if(error) {
+                        if(error.message) {
+                            console.log(error.message);
+                        }
+
+                        console.log(error.stack);
+                    }
+                });
             }
             else {
-                console.log("[!] Warning | `autoWebhook` and `host` not specified, autoWebhook not working");
+                console.log("[!] Warning | `autoWebhook` and `host` not specified, AutoWebhook not working");
             }
         }
 
         //-------------]>
 
-        return srvBot;
+        return srvBots[path] = rCreateBot(bot, callback);
     }
 }

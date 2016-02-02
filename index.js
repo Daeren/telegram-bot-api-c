@@ -56,7 +56,7 @@ function main(token) {
     let gBoundaryKey, gBoundaryDiv, gBoundaryEnd,
 
         gBoundaryUDate,
-        gBoundaryUIntr  = 1000 * 60 * 5;
+        gBoundaryUIntr = 1000 * 60 * 5;
 
     //---------)>
 

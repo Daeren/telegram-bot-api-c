@@ -36,7 +36,7 @@ function main(bot, onMsg) {
     //---------]>
 
     result = {
-        "bot":          bot,
+        "instance":     bot,
         "ctx":          ctx,
 
         "plugin":       [],

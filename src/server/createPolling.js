@@ -28,14 +28,16 @@ function main(botFather, params, callback) {
         params = {};
     }
 
-    params.interval = (parseInt(params.interval, 10) || 2) * 1000;
-
     //----------------]>
 
-    const objBot = rCreateBot(botFather, callback);
+    const srvBot = rCreateBot(botFather, callback);
 
-    let isStopped = false,
-        tmPolling;
+    const pollingTmInterval = (parseInt(params.interval, 10) || 2) * 1000;
+
+    let tmPolling,
+
+        isStopped = false,
+        pollingParams = Object.create(params);
 
     //------)>
 
@@ -48,7 +50,7 @@ function main(botFather, params, callback) {
     //----------------]>
 
     return (function() {
-        const result = Object.create(objBot);
+        const result = Object.create(srvBot);
 
         result.start = tmStart;
         result.stop = tmStop;
@@ -59,9 +61,9 @@ function main(botFather, params, callback) {
     //----------------]>
 
     function load() {
-        botFather.callJson("getUpdates", params, function(error, data) {
-            if(objBot.cbLogger) {
-                objBot.cbLogger(error, data);
+        botFather.callJson("getUpdates", pollingParams, function(error, data) {
+            if(srvBot.cbLogger) {
+                srvBot.cbLogger(error, data);
             }
 
             if(error) {
@@ -99,23 +101,23 @@ function main(botFather, params, callback) {
         //------------]>
 
         function onMsg(data) {
-            params.offset = data.update_id + 1;
+            pollingParams.offset = data.update_id + 1;
 
             //--------]>
 
-            rOnMsg(objBot, data);
+            rOnMsg(srvBot, data);
         }
     }
 
     //----------]>
 
     function runTimer() {
-        if(isStopped) {
-            return;
+        if(!isStopped) {
+            tmPolling = setTimeout(load, pollingTmInterval);
         }
-
-        tmPolling = setTimeout(load, params.interval);
     }
+
+    //----)>
 
     function tmStart() {
         if(isStopped) {
@@ -123,13 +125,13 @@ function main(botFather, params, callback) {
             runTimer();
         }
 
-        return objBot;
+        return this;
     }
 
     function tmStop() {
         isStopped = true;
         clearTimeout(tmPolling);
 
-        return objBot;
+        return this;
     }
 }

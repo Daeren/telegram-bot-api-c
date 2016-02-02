@@ -28,18 +28,18 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(objBot, data) {
+function main(srvBot, data) {
     if(!data || typeof(data) !== "object") {
         return;
     }
 
     //--------]>
 
-    const botPCurrent = objBot.bot;
+    const botInstance = srvBot.instance;
 
     //--------]>
 
-    if(botPCurrent.enabled("onMsg.sanitize")) {
+    if(botInstance.enabled("onMsg.sanitize")) {
         data = rMsgSanitize(data); // <-- Prototype
     }
 
@@ -83,10 +83,10 @@ function main(objBot, data) {
           msgIsGroup        = !!(msgChat && msgChat.type === "group"),
           msgIsReply        = !!(msg && msg.reply_to_message);
 
-    const botPlugin         = objBot.plugin,
-          botFilters        = objBot.filters,
+    const botPlugin         = srvBot.plugin,
+          botFilters        = srvBot.filters,
 
-          ctxBot            = createCtx(bdataType);
+          reqCtxBot         = createReqCtx(bdataType);
 
     //------------]>
 
@@ -108,10 +108,10 @@ function main(objBot, data) {
             }
             else {
                 if(plCallback.length < 2) {
-                    onEnd(plCallback(ctxBot));
+                    onEnd(plCallback(reqCtxBot));
                 }
                 else {
-                    plCallback(ctxBot, onEnd);
+                    plCallback(reqCtxBot, onEnd);
                 }
             }
 
@@ -119,10 +119,10 @@ function main(objBot, data) {
         }
 
         if(plCallback.length < 3) {
-            onEnd(plCallback(evName, ctxBot));
+            onEnd(plCallback(evName, reqCtxBot));
         }
         else {
-            plCallback(evName, ctxBot, onEnd);
+            plCallback(evName, reqCtxBot, onEnd);
         }
 
         //---------]>
@@ -189,7 +189,7 @@ function main(objBot, data) {
                     }
 
                     if(rule) {
-                        botFilters.ev.emit(rule, ctxBot, reParams);
+                        botFilters.ev.emit(rule, reqCtxBot, reParams);
                         return;
                     }
                 }
@@ -201,8 +201,8 @@ function main(objBot, data) {
         }
 
         if(!evName || !(msgType && callEvent(evName, msg[msgType])) && !callEvent("*", cmdParam)) {
-            if(objBot.onMsg) {
-                setImmediate(objBot.onMsg, ctxBot, cmdParam);
+            if(srvBot.onMsg) {
+                setImmediate(srvBot.onMsg, reqCtxBot, cmdParam);
             }
         }
 
@@ -214,7 +214,7 @@ function main(objBot, data) {
             }
 
             if(botFilters.ev.listenerCount(type)) {
-                botFilters.ev.emit(type, ctxBot, params);
+                botFilters.ev.emit(type, reqCtxBot, params);
                 return true;
             }
 
@@ -224,8 +224,8 @@ function main(objBot, data) {
 
     //-------)>
 
-    function createCtx(type) {
-        const result = Object.create(objBot.ctx);
+    function createReqCtx(type) {
+        const result = Object.create(srvBot.ctx);
 
         result.isGroup = msgIsGroup;
         result.isReply = msgIsReply;
@@ -259,7 +259,7 @@ function main(objBot, data) {
         //---------------]>
 
         function createResponseBuilder() {
-            return () => new rResponseBuilder(result, botPCurrent);
+            return () => new rResponseBuilder(result, botInstance);
         }
     }
 }

@@ -30,12 +30,9 @@ module.exports = CMain;
 
 //-----------------------------------------------------
 
-function CMain(botReq, botPCurrent) {
-    // botPCurrent.(send) => || srvCtx => [srvBot.(ctx send)] || => reqCtx.(data cid)
-    // ^-| use
-
-    this.botReq         = botReq;
-    this.botPCurrent    = botPCurrent;
+function CMain(botReqCtx, botInstance) {
+    this.botReqCtx      = botReqCtx;
+    this.botInstance    = botInstance;
 
     this.queue          = null;
     this.lastElement    = null;
@@ -104,12 +101,12 @@ CMain.prototype.keyboard = function(data, params) {
     //--------]>
 
     data = arguments.length ? data : false;
-    data = this.botPCurrent.keyboard(data, params);
+    data = this.botInstance.keyboard(data, params);
 
     lastElement.reply_markup = data;
 
     if(data.selective) {
-        lastElement.reply_to_message_id = this.botReq.mid;
+        lastElement.reply_to_message_id = this.botReqCtx.mid;
     }
     else {
         delete lastElement.reply_to_message_id;
@@ -121,7 +118,7 @@ CMain.prototype.keyboard = function(data, params) {
 };
 
 CMain.prototype.render = function(data) {
-    const bot           = this.botPCurrent,
+    const bot           = this.botInstance,
           lastElement   = this.lastElement,
 
           text          = lastElement.text,
@@ -165,5 +162,5 @@ CMain.prototype.send = function(callback) {
 
     //--------]>
 
-    return this.botPCurrent.send(this.botReq.cid, lastElement, callback);
+    return this.botInstance.send(this.botReqCtx.cid, lastElement, callback);
 };
