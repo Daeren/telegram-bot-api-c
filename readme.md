@@ -33,7 +33,6 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 * [broadcast](#refBroadcast): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
-* [Send file as Buffer](#refSendFileAsBuffer): +
 * Analytics: [tgb-pl-botanio][4]
 
 
@@ -258,7 +257,7 @@ objBot
             .listen(3000, "localhost");
     });
     
-//----[For stress tests]----}>
+//----[Stress Tests]----}>
 
 objSrv.input(null, {
     "update_id": 0,
@@ -662,7 +661,7 @@ objBot
 
 
 <a name="refBroadcast"></a>
-#### Broadcast (Prototype)
+#### Broadcast (prototype)
 
 ```js
 const ids   = ["10", "1-0", "-20"], // <-- An infinite number of identifiers
@@ -786,7 +785,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 #### Unsafe URL 
 
 ```js
-objMyBot.enable("onMsg.sanitize"); // <-- Sanitize Incoming message (Prototype)
+objMyBot.enable("onMsg.sanitize"); // <-- Sanitize Incoming message (prototype)
 
 objBotFather
     .http(objSrvOptions)
