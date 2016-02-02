@@ -15,7 +15,7 @@ const rFs               = require("fs"),
 
 const rTgApi            = require("./src/api");
 
-const rSendApiMethods   = require("./src/send/methods");
+const rSendMethods      = require("./src/sendMethods");
 
 const rUtil             = require("./src/util"),
 
@@ -92,7 +92,7 @@ function main(token) {
 
     return new CMain();
 
-    //-----------[L1]----------}>
+    //-----------[Methods]----------}>
 
     function mthCMainRender(template, data) {
         if(!template) {
@@ -103,19 +103,23 @@ function main(token) {
             return template;
         }
 
-        if(this.mdEngine) {
-            return this.mdEngine.render(template, data);
+        //-------------]>
+
+        const mdEngine = this.mdEngine;
+
+        if(mdEngine) {
+            return mdEngine.render(template, data);
         }
 
         //-------------]>
 
         if(Array.isArray(data)) {
-            data.forEach(defRender);
+            data.forEach(defaultRender);
         }
         else if(typeof(data) === "object") {
             for(let name in data) {
                 if(hasOwnProperty.call(data, name)) {
-                    defRender(data[name], name);
+                    defaultRender(data[name], name);
                 }
             }
         }
@@ -126,7 +130,7 @@ function main(token) {
 
         //-------------]>
 
-        function defRender(e, i) {
+        function defaultRender(e, i) {
             template = template.replace("{" + i + "}", e);
         }
     }
@@ -187,15 +191,15 @@ function main(token) {
                 cmdData = d[cmdName];
                 cmdData = prepareDataForSendApi(id, cmdName, cmdData, d);
 
-                self.api[rSendApiMethods.map[cmdName]](cmdData, cb);
+                self.api[rSendMethods.map[cmdName]](cmdData, cb);
             }
 
             function getName(d) {
                 let type,
-                    len = rSendApiMethods.length;
+                    len = rSendMethods.length;
 
                 while(len--) {
-                    type = rSendApiMethods.keys[len];
+                    type = rSendMethods.keys[len];
 
                     if(hasOwnProperty.call(d, type)) {
                         return type;

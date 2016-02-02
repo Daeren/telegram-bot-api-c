@@ -9,7 +9,7 @@
 
 //-----------------------------------------------------
 
-const rSendApiMethods = require("./../send/methods");
+const rSendApiMethods = require("./../sendMethods");
 
 //-----------------------------------------------------
 
