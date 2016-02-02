@@ -233,10 +233,9 @@ function main(srvBot, data) {
         switch(type) {
             case C_BD_TYPE_MESSAGE:
                 result.answer = () => new rResponseBuilder(result, botInstance);
-
                 result.reply = () => {
                     const asw = result.answer();
-                    asw.replyMid = msg.message_id;
+                    asw.isReply = true;
 
                     return asw;
                 };

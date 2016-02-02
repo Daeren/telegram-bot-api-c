@@ -37,7 +37,7 @@ function CMain(botReqCtx, botInstance) {
     this.queue          = null;
     this.lastElement    = null;
 
-    this.replyMid       = null;
+    this.isReply        = false;
 }
 
 //-----[Elements]-----}>
@@ -66,8 +66,8 @@ gElements
 
             //-----)>
 
-            if(this.replyMid !== null) {
-                elem.reply_to_message_id = this.replyMid;
+            if(this.isReply) {
+                elem.reply_to_message_id = this.botReqCtx.mid;
             }
 
             //--------]>
