@@ -37,20 +37,25 @@ objBot
 
         tCheckBaseBotFields(bot);
 
+        //----------------------]>
+
+        let data;
+
         //-----[DEFAULT]-----}>
 
-        bot.data = ["H", "i"];
-        bot.render("Array | Text: {0} + {1}").then(console.log);
+        data = ["H", "i"];
+        bot.render("Array | Text: {0} + {1}", data).then(console.log);
 
-        bot.data = {"x": "H", "y": "i"};
-        bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
+        data = {"x": "H", "y": "i"};
+        bot.render("Hashtable | Text: {x} + {y}", data, (e, r) => console.log(e || r));
 
         //-----[EJS]-----}>
 
-        bot.data.input = {"x": "H", "y": "i"};
-        bot.data.reply_markup = bot.keyboard.hGb();
+        data = {};
+        data.input = {"x": "H", "y": "i"};
+        data.reply_markup = bot.keyboard.hGb();
 
-        bot.render("EJS | Text: <%= x %> + <%= y %>");
+        bot.render("EJS | Text: <%= x %> + <%= y %>", data);
     });
 
 //------]>
@@ -81,10 +86,12 @@ function response(who, bot, params) {
     console.log("|params: ", params);
     console.log("+-----------------------|");
 
-    bot.data.text = params && params.id ? "" : bot;
-    bot.data.reply_markup = bot.keyboard(bot.message.text);
+    let data = {};
 
-    bot.send().then(console.info, console.error);
+    data.text = params && params.id ? "" : bot;
+    data.reply_markup = bot.keyboard(bot.message.text);
+
+    bot.send(data).then(console.info, console.error);
 }
 
 //-------------]>
@@ -103,13 +110,15 @@ function tCheckBaseBotFields(bot) {
     expect(msg).to.have.property("date");
 
     expect(bot).to.have.property("isGroup").that.is.an("boolean");
+    expect(bot).to.have.property("isReply").that.is.an("boolean");
+
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
     expect(bot).to.have.property("from").that.equal(msg.chat.id);
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("function");
+    expect(bot).to.have.property("answer").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
     expect(bot).to.have.property("render").that.is.an("function");

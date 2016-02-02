@@ -40,7 +40,7 @@ gBot
         };
 
         bot
-            .data()
+            .answer()
             .text(gStringTable.texts.start)
             .render(input)
             .keyboard(gStringTable.buttons.currency, "resize")
@@ -60,8 +60,8 @@ gBot
         //----------]>
 
         function onEnd(response) {
-            const rb    = bot.data(),
-                  query = response.body.query;
+            const answer    = bot.answer(),
+                  query     = response.body.query;
 
             let rate = query.results ? query.results.rate : undefined;
             let text = "";
@@ -72,7 +72,7 @@ gBot
             rate = rate ? rate.filter(r => r.Name !== "N/A") : rate;
 
             if(!rate || !rate.length) {
-                rb.text(gStringTable.texts.notFound).send();
+                answer.text(gStringTable.texts.notFound).send();
                 return;
             }
 
@@ -88,6 +88,6 @@ gBot
 
             //------]>
 
-            rb.text(text).send();
+            answer.text(text).send();
         }
     });

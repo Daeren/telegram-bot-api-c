@@ -21,7 +21,11 @@ gBot
     .polling()
 
     .on("/start", function(bot) {
-        bot.data().text("Ok, let's go...").send();
+        bot
+            .answer()
+            .text("Ok, let's go...")
+            .send()
+            .then(console.info, console.error);
     })
 
     .on("inlineQuery", function(bot, query) {

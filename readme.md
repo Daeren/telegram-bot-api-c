@@ -26,6 +26,8 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* rb.data() -> rb.answer()
+* [Response Builder Reply](#refServerResponse): +
 * [InlineQuery](#refInlineQuery): +
 * isReply: +
 * [broadcast](#refBroadcast): +

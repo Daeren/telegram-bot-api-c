@@ -26,7 +26,7 @@ const objSrv    = objBot
     .virtual(bot => {
         console.log(bot);
 
-        bot.data().text("Not found!").send();
+        bot.answer().text("Not found!").send();
     })
     //.on(/./, console.log)
     .on("sticker", bot => {

@@ -97,20 +97,20 @@ function cbMsg(bot, cmd) {
     bot.api
         .getMe()
         .then(() => {
-            return bot.data().chatAction("typing").send();
+            return bot.answer().chatAction("typing").send();
         })
         .then(() => {
-            return bot.data().text("Use: /start").send();
+            return bot.answer().text("Use: /start").send();
         })
         .then(() => {
-            return bot.data().photo("https://www.google.ru/images/logos/ps_logo2.png").send();
+            return bot.answer().photo("https://www.google.ru/images/logos/ps_logo2.png").send();
         })
         .then(() => {
             bot.to = msgText;
             return bot.forward();
         })
         .then(() => {
-            return bot.data().text("Forward: ok").send();
+            return bot.answer().text("Forward: ok").send();
         })
         .then(console.log, console.error);
 }
@@ -122,7 +122,7 @@ function cbCmdStart(bot, params) {
 
     //----------]>
 
-    bot.data().text("Hello").send().then(console.log, console.error);
+    bot.answer().text("Hello").send().then(console.log, console.error);
 }
 
 function cbCmdStop(bot, params) {
@@ -131,7 +131,7 @@ function cbCmdStop(bot, params) {
     //----------]>
 
     bot
-        .data()
+        .answer()
         .text(params)
         .photo(__dirname + "/MiElPotato.jpg").caption("#2EASY")
         .send();
@@ -153,13 +153,15 @@ function tCheckBaseBotFields(bot) {
     expect(msg).to.have.property("date");
 
     expect(bot).to.have.property("isGroup").that.is.an("boolean");
+    expect(bot).to.have.property("isReply").that.is.an("boolean");
+
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
     expect(bot).to.have.property("from").that.equal(msg.chat.id);
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("function");
+    expect(bot).to.have.property("answer").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
     expect(bot).to.have.property("render").that.is.an("function");

@@ -89,7 +89,7 @@ function cbMsg(bot, cmd) {
     //----------]>
 
     let commands = {
-        "help": x => bot.data().text(x).send()
+        "help": x => bot.answer().text(x).send()
     };
 
     let cmdFunc,
@@ -101,7 +101,7 @@ function cbMsg(bot, cmd) {
 
     //--------------]>
 
-    bot.data().text("Hell Word!").send();
+    bot.answer().text("Hell Word!").send();
 }
 
 function cbCmdStart(bot, params) {
@@ -109,7 +109,7 @@ function cbCmdStart(bot, params) {
 
     //----------]>
 
-    bot.data().text("CMD: /start").send();
+    bot.answer().text("CMD: /start").send();
 }
 
 //-------------]>
@@ -127,13 +127,16 @@ function tCheckBaseBotFields(bot) {
     expect(msg).to.have.property("chat").that.is.an("object");
     expect(msg).to.have.property("date");
 
+    expect(bot).to.have.property("isGroup").that.is.an("boolean");
+    expect(bot).to.have.property("isReply").that.is.an("boolean");
+
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
     expect(bot).to.have.property("from").that.equal(msg.chat.id);
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("function");
+    expect(bot).to.have.property("answer").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
 }

@@ -61,10 +61,6 @@ expect(objSrv).to.have.property("stop").that.is.an("function");
 
 objSrv
     .use(function(type, bot, next) {
-
-
-        return;
-
         expect(type).to.be.a("string");
         expect(next).to.be.a("function");
 
@@ -226,6 +222,8 @@ function tCheckBaseBotFields(bot) {
     expect(msg).to.have.property("date");
 
     expect(bot).to.have.property("isGroup").that.is.an("boolean");
+    expect(bot).to.have.property("isReply").that.is.an("boolean");
+
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
     expect(bot).to.have.property("from").that.equal(msg.chat.id);
