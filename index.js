@@ -51,6 +51,7 @@ function main(token) {
 
     function CMain() {
         this.mdPromise  = Promise;
+
         this.kvCfgStore = Object.create(null);
 
         this.keyboard   = rKeyboard;

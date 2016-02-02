@@ -870,24 +870,30 @@ npm test
 
 #### Module 
 
-| Attribute         | Type                          | Note                                                                      |
-|-------------------|-------------------------------|---------------------------------------------------------------------------|
-|                   | -                             |                                                                           |
-| keyboard          | function(buttons[, params])   | return: object; buttons: string/array; params: "resize once selective"    |
-| parseCmd          | function(text[, strict])      | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore |
+| Method            | Arguments                                                           | Note                                                                      |
+|-------------------|---------------------------------------------------------------------|---------------------------------------------------------------------------|
+|                   | -                                                                   |                                                                           |
+| keyboard          | buttons[, params]                                                   | return: object; buttons: string/array; params: "resize once selective"    |
+| parseCmd          | text[, strict]                                                      | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore |
+|                   | -                                                                   |                                                                           |
+| call              | token, method[, data][, callback(error, buffer, response)]          |                                                                           |
+| callJson          | token, method[, data][, callback(error, json, response)]            |                                                                           |
 
 
-#### Instance 
+#### Instance
 
 | Attribute         | Type           | Note                                 |
 |-------------------|----------------|--------------------------------------|
 |                   | -              |                                      |
 | api               | object         | See [Telegram Bot API][3]            |
-| keyboard          | function       | return: object                       |
+|                   | -              |                                      |
+| keyboard          | function       |                                      |
+| parseCmd          | function       |                                      |
 
 
 | Method            | Arguments                                                             | Return                            |
 |-------------------|-----------------------------------------------------------------------|-----------------------------------|
+|                   | -                                                                     |                                   |
 |                   | -                                                                     |                                   |
 | enable            | key                                                                   | this                              |
 | disable           | key                                                                   | this                              |
@@ -909,8 +915,6 @@ npm test
 | http              | [options][, callback(bot, cmd)]                                       | object                            |
 | polling           | [options][, callback(bot, cmd)]                                       | object                            |
 | virtual           | [callback(bot, cmd)]                                                  | object                            |
-|                   | -                                                                     |                                   |
-| parseCmd          | text[, strict]                                                        |                                   |
 
 
 #### Methods: send / Response Builder
@@ -919,12 +923,12 @@ npm test
 |---------------|---------------------------------------|-------------------------------------------------------------------|
 |               | -                                     |                                                                   |
 | text          | string, json                          |                                                                   |
-| photo         | string, stream                        | Ext: jpg, jpeg, gif, tif, png, bmp                                |
-| audio         | string, stream                        | Ext: mp3                                                          |
-| document      | string, stream                        |                                                                   |
-| sticker       | string, stream                        | Ext: webp[, jpg, jpeg, gif, tif, png, bmp]                        |
-| video         | string, stream                        | Ext: mp4                                                          |
-| voice         | string, stream                        | Ext: ogg                                                          |
+| photo         | string, stream, buffer                | Ext: jpg, jpeg, gif, tif, png, bmp                                |
+| audio         | string, stream, buffer                | Ext: mp3                                                          |
+| document      | string, stream, buffer                |                                                                   |
+| sticker       | string, stream, buffer                | Ext: webp [, jpg, jpeg, gif, tif, png, bmp]                       |
+| video         | string, stream, buffer                | Ext: mp4                                                          |
+| voice         | string, stream, buffer                | Ext: ogg                                                          |
 | location      | string, json                          | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
 | chatAction    | string                                |                                                                   |
 
