@@ -16,6 +16,10 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 ```
 
 ```js
+require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text": "Hi"});
+```
+
+```js
 > tg-api TOKEN sendMessage --chat_id=0 --text="Hi"
 ```
 

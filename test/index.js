@@ -55,6 +55,41 @@ describe("Module: bot", function() {
             expect(rBot).to.have.property("parseCmd").that.is.an("function");
         });
 
+        it("call", function() {
+            expect(rBot).to.have.property("call").that.is.an("function");
+        });
+
+        it("callJson", function() {
+            expect(rBot).to.have.property("callJson").that.is.an("function");
+        });
+
+    });
+
+    it("call(getMe) | callback", function(done) {
+        rBot
+            .call(token, "getMe", function(error, result, response) {
+                checkError(error);
+
+                expect(result).to.be.an.instanceof(Buffer);
+                expect(response).to.be.a("object");
+
+                done();
+            });
+    });
+
+    it("callJson(getMe) | callback", function(done) {
+        rBot
+            .callJson(token, "getMe", function(error, result, response) {
+                checkError(error);
+
+                expect(result).to.be.a("object");
+                expect(response).to.be.a("object");
+
+                expect(result).to.have.property("ok").to.equal(true);
+                expect(result).to.have.property("result").to.be.a("object");
+
+                done();
+            });
     });
 
 });
@@ -479,8 +514,8 @@ describe("Instance: bot", function() {
                     expect(result).to.be.a("object");
                     expect(response).to.be.a("object");
 
-                    expect(result).to.have.property("ok");
-                    expect(result).to.have.property("result");
+                    expect(result).to.have.property("ok").to.equal(true);
+                    expect(result).to.have.property("result").to.be.a("object");
 
                     done();
                 });
@@ -494,8 +529,8 @@ describe("Instance: bot", function() {
                     expect(result).to.be.a("object");
                     expect(response).to.be.a("object");
 
-                    expect(result).to.have.property("ok");
-                    expect(result).to.have.property("result");
+                    expect(result).to.have.property("ok").to.equal(true);
+                    expect(result).to.have.property("result").to.be.a("object");
 
                     done();
                 });
@@ -510,8 +545,8 @@ describe("Instance: bot", function() {
 
                     expect(result).to.be.a("object");
 
-                    expect(result).to.have.property("ok");
-                    expect(result).to.have.property("result");
+                    expect(result).to.have.property("ok").to.equal(true);
+                    expect(result).to.have.property("result").to.be.a("object");
 
                     done();
                 });
