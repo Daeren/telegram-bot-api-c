@@ -75,9 +75,7 @@ function main(bot, onMsg) {
 
     //--------------]>
 
-    function ctxRender(template, callback) {
-        let data = this.data;
-
+    function ctxRender(template, data, callback) {
         if(hasOwnProperty.call(data, "input")) {
             data = data.input;
         }
@@ -86,22 +84,17 @@ function main(bot, onMsg) {
 
         //------]>
 
-        data = Object.create(this.data);
+        data = data ? Object.create(data) : {};
 
         data.chat_id = this.cid;
         data.text = template;
-
-        this.data = {};
 
         //-------------]>
 
         return arguments.length < 2 ? bot.api.sendMessage(data) : bot.api.sendMessage(data, callback);
     }
 
-    function ctxSend(callback) {
-        const data = this.data;
-        this.data = this.createResponseBuilder();
-
+    function ctxSend(data, callback) {
         return bot.send(this.cid, data, callback);
     }
 

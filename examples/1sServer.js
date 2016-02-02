@@ -61,6 +61,10 @@ expect(objSrv).to.have.property("stop").that.is.an("function");
 
 objSrv
     .use(function(type, bot, next) {
+
+
+        return;
+
         expect(type).to.be.a("string");
         expect(next).to.be.a("function");
 
@@ -199,7 +203,7 @@ function response(who, bot, params) {
     console.log("+-----------------------|");
 
     bot
-        .data()
+        .answer()
         .text(params && params.id ? "" : bot)
         .keyboard(bot.message.text)
         .send().then(console.info, console.error);
@@ -228,7 +232,7 @@ function tCheckBaseBotFields(bot) {
 
     //----------]>
 
-    expect(bot).to.have.property("data").that.is.an("function");
+    expect(bot).to.have.property("answer").that.is.an("function");
     expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
     expect(bot).to.have.property("render").that.is.an("function");

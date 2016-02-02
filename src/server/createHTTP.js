@@ -280,6 +280,6 @@ function main(botFather, params, callback) {
 
         //-------------]>
 
-        return srvBots[path] = rCreateBot(bot, callback);
+        return (srvBots[path] = rCreateBot(bot, callback));
     }
 }

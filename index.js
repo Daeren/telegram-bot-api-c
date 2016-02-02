@@ -476,6 +476,9 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
                                 result[cmdName] = cmdData;
 
                                 break;
+
+                            default:
+                                break;
                         }
                     }
             }

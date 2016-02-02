@@ -8,7 +8,7 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 #### OneShot
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.data().text("Hi").send());
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().text("Hi").send());
 ```
 
 ```js
@@ -167,13 +167,13 @@ let objSrv = objBot
 function cbMsg(bot) {
     const msg = bot.isGroup && bot.isReply ? ">_>" : "Stop me: /stop";
     
-    bot.data().text(msg).send();
+    bot.answer().text(msg).send();
 }
 
 function cbCmdStop(bot, params) {
     objSrv.stop();
     
-    bot.data().text(params).send();
+    bot.answer().text(params).send();
 }
 ```
 
@@ -237,7 +237,7 @@ function cbCmdStop(bot, params) { }
 const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 const objSrv = objBot
     .virtual(bot => {
-        bot.data().text("Not found!").send();
+        bot.answer().text("Not found!").send();
     })
     .on("photo", console.log);
 
@@ -338,30 +338,36 @@ objBot.http(cbMsg);
 ```js
 objSrv
     .use(function(type, bot, next) {
+        //----[Send Reply | RBuilder: One element]----}>
+        
+        bot.
+            reply()
+            .text("=_=")
+            .photo("https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg")
+            .send();
+        
         //----[Send | RBuilder: One element]----}>
         
         bot
-        .data()
-        .text("Hi")
-        .send();
+            .answer()
+            .text("Hi")
+            .send();
         
         //----[Send | RBuilder: Queue]----}>
         
         bot
-        .data()
-        .text("Hi")
-        .text("Hi 2")
-        .send();
+            .answer()
+            .text("Hi")
+            .text("Hi 2")
+            .send();
         
         //----[Send | HashTable: One element]----}>
         
-        bot.data.text = "Hi";
-        bot.send();
+        bot.send({"text": "Hi"});
 
         //----[Send | HashTable: Queue]----}>
         
-        bot.data = [{"text": "Hi"}, {"text": "Hi 2"}];
-        bot.send();
+        bot.send([{"text": "Hi"}, {"text": "Hi 2"}]);
         
         //----[Forward]----}>
 
@@ -384,7 +390,7 @@ objSrv
         };
         
         bot
-            .data() // <-- Builder + Queue
+            .answer() // <-- Builder + Queue
 
             .chatAction("typing") // <-- Element
 
@@ -416,7 +422,7 @@ objSrv
         };
 
         bot
-            .data()
+            .answer()
             .text("Hi")
             .keyboard(customKb)
             .send((e, r) => console.log(e || r));  // <-- Return: hashTable | result
@@ -433,14 +439,14 @@ objSrv
         };
 
         bot
-            .data()
+            .answer()
             .text(template)
             .keyboard(buttons, "resize")
             .render(input) // <-- text + keyboard
             .send();
             
         bot
-            .data()
+            .answer()
             .text("Msg: {0} + {1}")
             .render(["H", "i"]) // <-- text
             .keyboard([["X: {0}", "Y: {1}"]])
@@ -555,20 +561,23 @@ objBot.render("R: <%= value %>", {"value": 13});
 //--------------]> 
 
 objBot.polling(bot => {
+    let data;
+    
     //-----[DEFAULT]-----}>
 
-    bot.data = ["H", "i"];
-    bot.render("Array | Text: {0} + {1}").then(console.log);
+    data = ["H", "i"];
+    bot.render("Array | Text: {0} + {1}", data).then(console.log);
 
-    bot.data = {"x": "H", "y": "i"};
-    bot.render("Hashtable | Text: {x} + {y}", (e, r) => console.log(e || r));
+    data = {"x": "H", "y": "i"};
+    bot.render("Hashtable | Text: {x} + {y}", data, (e, r) => console.log(e || r));
 
     //-----[EJS]-----}>
 
-    bot.data.input = {"x": "H", "y": "i"};
-    bot.data.reply_markup = bot.keyboard.hGb();
+    data = {};
+    data.input = {"x": "H", "y": "i"};
+    data.reply_markup = bot.keyboard.hGb();
 
-    bot.render("EJS | Text: <%= x %> + <%= y %>");
+    bot.render("EJS | Text: <%= x %> + <%= y %>", data);
 });
 ```
 
@@ -584,12 +593,14 @@ rBot.keyboard.numpad(true); // <-- Once
 rBot.keyboard.numpad(false, true); // <-- Selective
 
 function cbMsg(bot) {
-    bot.data.text = "Hell Word!";
-    bot.data.reply_markup = bot.keyboard() === bot.keyboard.hide();
-    bot.data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
-    bot.data.reply_markup = bot.keyboard.hOx();
+    let data = {};
     
-    bot.send();
+    data.text = "Hell Word!";
+    data.reply_markup = bot.keyboard() === bot.keyboard.hide();
+    data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
+    data.reply_markup = bot.keyboard.hOx();
+    
+    bot.send(data);
 }
 
 
@@ -687,7 +698,6 @@ gBot
     .polling()
     .on("inlineQuery", function(bot, query) {
         const idx = Date.now().toString(32) + Math.random().toString(24);
-
         const results = [
             {
                 "type":         "article",
@@ -719,7 +729,7 @@ gBot
             .answer(results)
             .then(console.info, console.error);
     });
-	
+
 //------------]>
 
 bot
@@ -795,7 +805,7 @@ const imgBuffer = require("fs").readFileSync(__dirname + "/MiElPotato.jpg");
 objSrv
     .use(function(type, bot, next) {
         bot
-            .data()
+            .answer()
             .photo(imgBuffer)
             .filename("MiElPotato.jpg") // <-- It is important
             .filename("/path/MiElPotato.jpg") // <-- Same as above
@@ -977,25 +987,25 @@ npm test
 
 #### Fields: bot (srv.on("*", bot => { })
 
-| Name              | Type       | Note                                             |
-|-------------------|------------|--------------------------------------------------|
-|                   | -          |                                                  |
-| isGroup           | boolean    | bot.isGroup = bot.message.chat.type === "group"  |
-| isReply           | boolean    | bot.isReply = !!bot.message.reply_to_message     |
-|                   | -          |                                                  |
-| qid               | string     | bot.qid = bot.inlineQuery.id                     |
-| cid               | number     | bot.cid = bot.message.chat.id                    |
-| mid               | number     | bot.mid = bot.message.message_id                 |
-| from              | number     | bot.from = bot.message.chat.id                   |
-| to                | number     | bot.to = undefined                               |
-|                   | -          |                                                  |
-| message           | object     | Incoming message                                 |
-| data              | function   | Response Builder; Uses: cid, mid                 |
-|                   | -          |                                                  |
-| send              | function   | Uses: cid, data                                  |
-| forward           | function   | Uses: mid, from, to                              |
-| render            | function   | Uses: cid, data                                  |
-| answer            | function   | Uses: qid                                  		|
+| Name              | Type       | Note                                                         |
+|-------------------|------------|--------------------------------------------------------------|
+|                   | -          |                                                              |
+| isGroup           | boolean    | bot.isGroup = bot.message.chat.type === "group"              |
+| isReply           | boolean    | bot.isReply = !!bot.message.reply_to_message                 |
+|                   | -          |                                                              |
+| qid               | string     | bot.qid = bot.inlineQuery.id                                 |
+| cid               | number     | bot.cid = bot.message.chat.id                                |
+| mid               | number     | bot.mid = bot.message.message_id                             |
+| from              | number     | bot.from = bot.message.chat.id                               |
+| to                | number     | bot.to = undefined                                           |
+|                   | -          |                                                              |
+| message           | object     | Incoming message                                             |
+| answer            | function   | Response Builder (except: inlineQuery); Uses: cid, mid       |
+|                   | -          |                                                              |
+| send              | function   | Uses: cid, data                                              |
+| forward           | function   | Uses: mid, from, to                                          |
+| render            | function   | Uses: cid, data                                              |
+| answer            | function   | Uses: qid                                                    |
 
 
 #### Events: on

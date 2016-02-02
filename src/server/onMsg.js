@@ -232,8 +232,14 @@ function main(srvBot, data) {
 
         switch(type) {
             case C_BD_TYPE_MESSAGE:
-                result.data = createResponseBuilder();
-                result.createResponseBuilder = createResponseBuilder;
+                result.answer = () => new rResponseBuilder(result, botInstance);
+
+                result.reply = () => {
+                    const asw = result.answer();
+                    asw.replyMid = msg.message_id;
+
+                    return asw;
+                };
 
                 result.from = result.cid = msgChatId;
                 result.mid = msg.message_id;
@@ -255,12 +261,6 @@ function main(srvBot, data) {
         //---------------]>
 
         return result;
-
-        //---------------]>
-
-        function createResponseBuilder() {
-            return () => new rResponseBuilder(result, botInstance);
-        }
     }
 }
 
@@ -281,6 +281,9 @@ function getEventNameByTypeMsg(type) {
 
         case "migrate_to_chat_id":      return "migrateToChatId";
         case "migrate_from_chat_id":    return "migrateFromChatId";
+
+        default:
+            break;
     }
 
     return type;
