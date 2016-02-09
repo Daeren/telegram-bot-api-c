@@ -140,7 +140,7 @@ function main(bot, onMsg) {
     }
 
     function ctxForward(callback) {
-        let data = {
+        const data = {
             "chat_id":      this.to,
             "from_chat_id": this.from,
             "message_id":   this.mid
@@ -150,10 +150,18 @@ function main(bot, onMsg) {
     }
 
     function ctxAnswer(results, callback) {
-        let data = {
-            "inline_query_id":  this.qid,
-            "results":          results
-        };
+        let data;
+
+        if(Array.isArray(results)) {
+            data = {
+                "inline_query_id":  this.qid,
+                "results":          results
+            };
+        }
+        else {
+            data = Object.create(results);
+            data.inline_query_id = this.qid;
+        }
 
         return arguments.length < 2 ? bot.api.answerInlineQuery(data) : bot.api.answerInlineQuery(data, callback);
     }

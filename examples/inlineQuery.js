@@ -31,7 +31,7 @@ gBot
     .on("inlineQuery", function(bot, query) {
         const idx = Date.now().toString(32) + Math.random().toString(24);
 
-        const results = [
+        let results = [
             {
                 "type":         "article",
                 "title":        "Title #1",
@@ -57,6 +57,13 @@ gBot
             }
         ]
             .map((t, i) => { t.id = idx + i; return t; });
+
+        /*
+        results = {
+            "inline_query_id":  bot.qid,
+            "results":          results
+        };
+        */
 
         bot
             .answer(results)

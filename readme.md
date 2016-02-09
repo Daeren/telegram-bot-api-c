@@ -726,6 +726,13 @@ gBot
         ]
             .map((t, i) => { t.id = idx + i; return t; });
 
+        /*
+        results = {
+            "inline_query_id":  bot.qid,
+            "results":          results
+        };
+        */
+		
         bot
             .answer(results)
             .then(console.info, console.error);
