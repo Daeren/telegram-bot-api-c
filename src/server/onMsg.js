@@ -95,37 +95,57 @@ function main(srvBot, data) {
     //------------]>
 
     function onIterPlugin(next, plugin) {
-        const plType        = plugin[0],
-              plCallback    = plugin[1];
+        const plType            = plugin[0],
+              plCallback        = plugin[1];
+
+        const isPlGenerator     = plCallback.constructor.name === "GeneratorFunction",
+              isPlWithFilter    = typeof(plType) !== "undefined",
+              isPlSync          = isPlGenerator ? false : plCallback.length < (isPlWithFilter ? 2 : 3);
 
         let isEnd = false;
 
-        //---------]>
+        let result;
 
-        if(typeof(plType) !== "undefined") {
+        //----------]>
+
+        if(isPlWithFilter) {
             if(evName !== plType) {
                 onEnd();
-            }
-            else {
-                if(plCallback.length < 2) {
-                    onEnd(plCallback(reqCtxBot));
-                }
-                else {
-                    plCallback(reqCtxBot, onEnd);
-                }
+                return;
             }
 
-            return;
-        }
-
-        if(plCallback.length < 3) {
-            onEnd(plCallback(evName, reqCtxBot));
+            result = isPlGenerator || isPlSync ? plCallback(reqCtxBot) : plCallback(reqCtxBot, onEnd);
         }
         else {
-            plCallback(evName, reqCtxBot, onEnd);
+            result = isPlGenerator || isPlSync ? plCallback(evName, reqCtxBot) : plCallback(evName, reqCtxBot, onEnd);
+        }
+
+        callGenerator();
+
+        if(isPlSync) {
+            onEnd(result);
         }
 
         //---------]>
+
+        function callGenerator() {
+            if(!isPlGenerator) {
+                return false;
+            }
+
+            executeGenerator(result, function(error, result) {
+                if(!error) {
+                    onEnd(result);
+                    return;
+                }
+
+                if(!callEvent("error", error)) {
+                    setImmediate(() => { throw error });
+                }
+            });
+
+            return true;
+        }
 
         function onEnd(state) {
             if(isEnd) {
@@ -141,7 +161,7 @@ function main(srvBot, data) {
     function onEndPlugin(state) {
         switch(evName) {
             case "inlineQuery":
-                callEvent(evName, inlineQuery.query);
+                callEventWithState(evName, inlineQuery.query);
                 break;
 
             case "text":
@@ -157,7 +177,7 @@ function main(srvBot, data) {
 
                 //-----[CMD]----}>
 
-                if(cmdParam && (callEvent(cmdParam.cmd, cmdParam) || callEvent("/", cmdParam))) {
+                if(cmdParam && (callEventWithState(cmdParam.cmd, cmdParam) || callEventWithState("/", cmdParam))) {
                     return;
                 }
 
@@ -200,25 +220,36 @@ function main(srvBot, data) {
                 break;
         }
 
-        if(!evName || !(msgType && callEvent(evName, msg[msgType])) && !callEvent("*", cmdParam)) {
-            if(srvBot.onMsg) {
-                setImmediate(srvBot.onMsg, reqCtxBot, cmdParam);
+        if(!evName || !(msgType && callEventWithState(evName, msg[msgType])) && !callEventWithState("*", cmdParam)) {
+            const onMsg = srvBot.onMsg;
+
+            if(onMsg && !callGenerator(onMsg, cmdParam)) {
+                setImmediate(onMsg, reqCtxBot, cmdParam);
             }
         }
 
         //-------]>
 
-        function callEvent(type, params) {
-            if(state) {
-                type += ":" + state;
-            }
+        function callGenerator(func, params) {
+            if(func && func.constructor.name === "GeneratorFunction") {
+                executeGenerator(func(reqCtxBot, params), function(error) {
+                    if(error && !callEvent("error", error)) {
+                        setImmediate(() => { throw error });
+                    }
+                });
 
-            if(botFilters.ev.listenerCount(type)) {
-                botFilters.ev.emit(type, reqCtxBot, params);
                 return true;
             }
 
             return false;
+        }
+
+        function callEventWithState(type, params) {
+            if(state) {
+                type += ":" + state;
+            }
+
+            callEvent(type, params);
         }
     }
 
@@ -259,6 +290,15 @@ function main(srvBot, data) {
         //---------------]>
 
         return result;
+    }
+
+    function callEvent(type, params) {
+        if(botFilters.ev.listenerCount(type)) {
+            botFilters.ev.emit(type, reqCtxBot, params);
+            return true;
+        }
+
+        return false;
     }
 }
 
@@ -316,6 +356,35 @@ function getTypeMsg(m) {
         hasOwnProperty.call(m, t = "migrate_from_chat_id")
     ) {
         return t;
+    }
+}
+
+//---------]>
+
+function executeGenerator(generator, callback) {
+    (function execute(input) {
+        let next;
+
+        try {
+            next = generator.next(input);
+        } catch(e) {
+            callback(e);
+        }
+
+        if(!next.done) {
+            next.value.then(r => execute(r), onGenError);
+        }
+        else {
+            callback(null, next.value);
+        }
+    })();
+
+    function onGenError(error) {
+        try {
+            generator.throw(error);
+        } catch(e) {
+            callback(e);
+        }
     }
 }
 

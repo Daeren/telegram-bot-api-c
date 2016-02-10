@@ -60,7 +60,6 @@ gBot
 
         /*
         results = {
-            "inline_query_id":  bot.qid,
             "results":          results
         };
         */

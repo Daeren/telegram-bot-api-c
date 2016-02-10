@@ -26,6 +26,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* [JS Generators (yield + promise)](#refJSGenerators): +
 * rb.data() => rb.answer()
 * [Response Builder Reply](#refServerResponse): +
 * [InlineQuery](#refInlineQuery): +
@@ -43,11 +44,12 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 * [HTTP](#refHTTP)
 * [Virtual](#refVirtual)
 * [mServer](#refMServer)
-* [Nginx+Node.js](#refExampleNginxNodejs)
+* [Nginx + Node.js](#refExampleNginxNodejs)
 * [Server Response](#refServerResponse)
 * [Response Builder](#refResponseBuilder)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
+* [JS Generators](#refJSGenerators)
 * [Render](#refRender)
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
@@ -547,6 +549,51 @@ objSrv
 
 
 
+<a name="refJSGenerators"></a>
+#### JS Generators 
+
+```js
+gBot
+    .polling(function* (bot) {
+        const result = yield send(bot);
+        console.info(result);
+
+        //------]>
+
+        //x / 0;
+        yield error();
+    })
+    .use(function* (type, bot) {
+        yield auth("D", "13");
+    })
+    .use("text", function* (bot) {
+        yield save();
+
+        if(bot.message.text === "key") {
+            return "eventYield";
+        }
+    })
+
+    .on("text:eventYield", function(bot, data) {
+        console.log("eventYield:", data);
+    })
+    .on("error", function(bot, error) { // <-- Only for JS Generators
+        console.error(error);
+    });
+	
+//----------------]>
+
+function auth(login, password) {
+    return new Promise(x => setTimeout(x, 1000));
+}
+
+function send(bot) {
+    return bot.sendMessage("Ok, let's go...");
+}
+```
+
+
+
 <a name="refRender"></a>
 #### Render 
 
@@ -728,7 +775,6 @@ gBot
 
         /*
         results = {
-            "inline_query_id":  bot.qid,
             "results":          results
         };
         */
