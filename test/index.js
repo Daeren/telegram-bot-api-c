@@ -811,7 +811,8 @@ describe("Instance: bot", function() {
             }, function(error, data) {
                 checkBaseFields(error, data);
 
-                expect(data).to.have.property("audio").that.is.an("object");
+                // https://core.telegram.org/bots/api#sendaudio
+                expect(data).to.have.property("voice").that.is.an("object");
 
                 done();
             });

@@ -801,7 +801,21 @@ function callAPI(token, method, data, callback) {
             }
         }
         else if(typeof(file) === "object" && file.headers) { // <-- LoadByUrl
-            fileName = data.filename || file.req && file.req.path || rUtil.getFilenameByMime(file.headers["content-type"]);
+            fileName = data.filename;
+
+            if(!fileName) {
+                const reqPath = file.req.path;
+
+                let pr  = rPath.parse(reqPath),
+                    ext = rPath.extname(rUtil.getFilenameByMime(file.headers["content-type"]));
+
+                if(ext.length > 1) {
+                    fileName = pr.name + ext;
+                }
+                else {
+                    fileName = reqPath;
+                }
+            }
         }
         else { // <-- FileStream / Buffer
             fileName = data.filename || file.path || "file";
