@@ -800,17 +800,17 @@ function callAPI(token, method, data, callback) {
                 fileId = fileName;
             }
         }
-        else if(typeof(file) === "object" && file.headers) { // <-- LoadByUrl
+        else if(typeof(file) === "object" && file.headers) { // <-- byUrl
             fileName = data.filename;
 
             if(!fileName) {
-                const reqPath = file.req.path;
+                const reqPath   = file.req.path,
+                      reqCt     = file.headers["content-type"];
 
-                let pr  = rPath.parse(reqPath),
-                    ext = rPath.extname(rUtil.getFilenameByMime(file.headers["content-type"]));
+                const ext       = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
 
                 if(ext.length > 1) {
-                    fileName = pr.name + ext;
+                    fileName = rPath.parse(reqPath).name + ext;
                 }
                 else {
                     fileName = reqPath;
