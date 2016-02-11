@@ -139,7 +139,7 @@ function main(srvBot, data) {
                     return;
                 }
 
-                if(!callEvent("error", error)) {
+                if(!callEventError(error)) {
                     setImmediate(() => { throw error });
                 }
             });
@@ -233,7 +233,7 @@ function main(srvBot, data) {
         function callGenerator(func, params) {
             if(func && func.constructor.name === "GeneratorFunction") {
                 executeGenerator(func(reqCtxBot, params), function(error) {
-                    if(error && !callEvent("error", error)) {
+                    if(error && !callEventError(error)) {
                         setImmediate(() => { throw error });
                     }
                 });
@@ -292,9 +292,20 @@ function main(srvBot, data) {
         return result;
     }
 
+    //----[Events: helpers]----}>
+
     function callEvent(type, params) {
         if(botFilters.ev.listenerCount(type)) {
             botFilters.ev.emit(type, reqCtxBot, params);
+            return true;
+        }
+
+        return false;
+    }
+
+    function callEventError(error) {
+        if(botFilters.ev.listenerCount("error")) {
+            botFilters.ev.emit("error", error);
             return true;
         }
 

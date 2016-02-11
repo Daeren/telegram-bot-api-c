@@ -558,8 +558,6 @@ gBot
         const result = yield send(bot);
         console.info(result);
 
-        //------]>
-
         //x / 0;
         yield error();
     })
@@ -577,7 +575,7 @@ gBot
     .on("text:eventYield", function(bot, data) {
         console.log("eventYield:", data);
     })
-    .on("error", function(bot, error) { // <-- Only for JS Generators
+    .on("error", function(error) { // <-- Only for JS Generators
         console.error(error);
     });
 	
