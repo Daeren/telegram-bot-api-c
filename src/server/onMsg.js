@@ -140,7 +140,7 @@ function main(srvBot, data) {
                 }
 
                 if(!callEventError(error)) {
-                    setImmediate(() => { throw error });
+                    setImmediate(() => { throw error; });
                 }
             });
 
@@ -235,7 +235,7 @@ function main(srvBot, data) {
             if(func && func.constructor.name === "GeneratorFunction") {
                 executeGenerator(func(reqCtxBot, params), function(error) {
                     if(error && !callEventError(error)) {
-                        setImmediate(() => { throw error });
+                        setImmediate(() => { throw error; });
                     }
                 });
 
