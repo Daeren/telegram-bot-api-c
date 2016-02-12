@@ -56,7 +56,7 @@ function main(token, method, callback) {
 
         //---------]>
 
-        response.on("data", function responseData(chunk) {
+        response.on("data", function onResponseData(chunk) {
             if(!firstChunk) {
                 firstChunk = chunk;
             }
@@ -66,7 +66,7 @@ function main(token, method, callback) {
             }
         });
 
-        response.on("end", function responseEnd() {
+        response.on("end", function onResponseEnd() {
             callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
         });
     }

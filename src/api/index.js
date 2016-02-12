@@ -692,7 +692,7 @@ function callAPI(token, method, data, callback) {
     //-------------------------]>
 
     req = rRequest(token, method, function(error, body, response) {
-        if(typeof(callback) !== "function") {
+        if(!callback) {
             return;
         }
 

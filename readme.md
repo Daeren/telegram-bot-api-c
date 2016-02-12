@@ -30,7 +30,6 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 * rb.data() => rb.answer()
 * [Response Builder Reply](#refServerResponse): +
 * [InlineQuery](#refInlineQuery): +
-* isReply: +
 * [broadcast](#refBroadcast): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
@@ -499,8 +498,9 @@ objSrv
     .use(function(type, bot, next) {
         console.log("Async | Type: %s", type);
 
-        if(bot.message.text === "next")
+        if(bot.message.text === "next") {
             next();
+        }
     })
     .use("text", function(bot /*, next*/) { // Filter by `type`
         console.log("F:Sync | Type: text");
@@ -776,7 +776,7 @@ gBot
             "results":          results
         };
         */
-		
+
         bot
             .answer(results)
             .then(console.info, console.error);

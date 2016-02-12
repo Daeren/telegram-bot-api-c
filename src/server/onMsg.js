@@ -162,6 +162,7 @@ function main(srvBot, data) {
         switch(evName) {
             case "inlineQuery":
                 callEventWithState(evName, inlineQuery.query);
+
                 break;
 
             case "text":
@@ -249,7 +250,7 @@ function main(srvBot, data) {
                 type += ":" + state;
             }
 
-            callEvent(type, params);
+            return callEvent(type, params);
         }
     }
 
@@ -332,10 +333,8 @@ function getEventNameByTypeMsg(type) {
         case "migrate_from_chat_id":    return "migrateFromChatId";
 
         default:
-            break;
+            return type;
     }
-
-    return type;
 }
 
 function getTypeMsg(m) {
