@@ -739,6 +739,19 @@ describe("Instance: bot", function() {
             });
         });
 
+        it("sendMessage(file-stream) | callback", function(done) {
+            api.sendMessage({
+                "chat_id":      chatId,
+                "text":        require("fs").createReadStream(__dirname + "/msg.json")
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("text").that.is.an("string");
+
+                done();
+            });
+        });
+
         it("forwardMessage | callback", function(done) {
             api.forwardMessage({
                 "chat_id":      chatId,

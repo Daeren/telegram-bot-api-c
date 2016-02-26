@@ -26,11 +26,11 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* Rewritten: callAPI: +
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * rb.data() => rb.answer()
 * [Response Builder Reply](#refServerResponse): +
 * [InlineQuery](#refInlineQuery): +
-* [broadcast](#refBroadcast): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * [Response Builder](#refResponseBuilder): +
 * Analytics: [tgb-pl-botanio][4]
@@ -988,7 +988,7 @@ npm test
 | Name          | Type                                  | Note                                                              |
 |---------------|---------------------------------------|-------------------------------------------------------------------|
 |               | -                                     |                                                                   |
-| text          | string, json                          |                                                                   |
+| text          | string, stream, buffer                |                                                                   |
 | photo         | string, stream, buffer                | Ext: jpg, jpeg, gif, tif, png, bmp                                |
 | audio         | string, stream, buffer                | Ext: mp3                                                          |
 | document      | string, stream, buffer                |                                                                   |

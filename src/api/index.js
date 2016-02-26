@@ -13,7 +13,8 @@ const rFs               = require("fs"),
       rPath             = require("path");
 
 const rRequest          = require("./request"),
-      rMethods          = require("./methods");
+      rMethods          = require("./methods"),
+      rProto            = require("./proto");
 
 const rUtil             = require("./../util");
 
@@ -27,7 +28,7 @@ const gReIsFilePath   = /[\\\/\.]/;
 
 const gBoundaryUInterval = 1000 * 60 * 5;
 
-let gBoundaryKey, gBoundaryDiv, gBoundaryEnd, gBoundaryUDate;
+let gBoundaryKey, gBoundaryDiv, gBoundaryEnd, gBoundaryUDate, gCRLFBoundaryDiv, gCRLFBoundaryEnd;
 
 //-----------------------]>
 
@@ -47,69 +48,19 @@ module.exports = {
 //-----------------------------------------------------
 
 function updateBoundary() {
-    gBoundaryUDate  = Date.now();
+    gBoundaryUDate      = Date.now();
 
-    gBoundaryKey    = Math.random().toString(16) + Math.random().toString(32).toUpperCase() + gBoundaryUDate.toString();
-    gBoundaryDiv    = "--" + gBoundaryKey + gCRLF;
-    gBoundaryEnd    = "--" + gBoundaryKey + "--" + gCRLF;
-}
+    gBoundaryKey        = Math.random().toString(16) + Math.random().toString(32).toUpperCase() + gBoundaryUDate.toString();
+    gBoundaryDiv        = "--" + gBoundaryKey + gCRLF;
+    gBoundaryEnd        = "--" + gBoundaryKey + "--" + gCRLF;
 
-function genBodyField(type, field, value) {
-    switch(type) {
-        case "end":
-            return gCRLF + gBoundaryEnd;
-
-        case "json":
-            if(typeof(value) !== "string") {
-                value = JSON.stringify(value);
-            }
-
-            value = "Content-Disposition: form-data; name=\"" + field + "\"\r\nContent-Type: application/json\r\n\r\n" + value;
-
-            break;
-
-        case "text":
-            value = "Content-Disposition: form-data; name=\"" + field + "\"\r\n\r\n" + value;
-            break;
-
-        case "photo":
-            value = "Content-Disposition: form-data; name=\"photo\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        case "audio":
-            value = "Content-Disposition: form-data; name=\"audio\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        case "document":
-            value = "Content-Disposition: form-data; name=\"document\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        case "sticker":
-            value = "Content-Disposition: form-data; name=\"sticker\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        case "video":
-            value = "Content-Disposition: form-data; name=\"video\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        case "voice":
-            value = "Content-Disposition: form-data; name=\"voice\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        case "certificate":
-            value = "Content-Disposition: form-data; name=\"certificate\"; filename=\"" + field + "\"\r\nContent-Type: application/octet-stream\r\n\r\n";
-            break;
-
-        default:
-            throw new Error("Type not found!");
-    }
-
-    return value ? (gCRLF + gBoundaryDiv + value) : "";
+    gCRLFBoundaryDiv    = gCRLF + gBoundaryDiv;
+    gCRLFBoundaryEnd    = gCRLF + gBoundaryEnd;
 }
 
 //---------]>
 
-function getReadStreamByUrl(token, url, type, method, data, callback) {
+function getReadStreamByUrl(url, data, callback) {
     /*jshint -W069 */
 
     if(!(/^https?:\/\//).test(url)) {
@@ -134,9 +85,11 @@ function getReadStreamByUrl(token, url, type, method, data, callback) {
         rUtil.createReadStreamByUrl(url, onResponse);
     }
 
+    //-----)>
+
     function onResponse(error, response) {
         if(error) {
-            onEnd(error);
+            callback(error);
             return;
         }
 
@@ -146,7 +99,7 @@ function getReadStreamByUrl(token, url, type, method, data, callback) {
 
         if(statusCode < 200 || statusCode > 399) {
             response.destroy();
-            onEnd();
+            callback(new Error("statusCode: " + statusCode));
 
             return;
         }
@@ -156,7 +109,7 @@ function getReadStreamByUrl(token, url, type, method, data, callback) {
         const headers         = response.headers;
 
         const location        = headers["location"],
-            contentLength   = headers["content-length"];
+              contentLength   = headers["content-length"];
 
         //-----[Redirect]-----}>
 
@@ -164,6 +117,7 @@ function getReadStreamByUrl(token, url, type, method, data, callback) {
             redirectCount--;
             url = location;
 
+            response.destroy();
             createStream();
 
             return;
@@ -189,26 +143,7 @@ function getReadStreamByUrl(token, url, type, method, data, callback) {
 
         //------------]>
 
-        onEnd(error, response);
-    }
-
-    function onEnd(error, response) {
-        if(error) {
-            if(callback) {
-                callback(error);
-            }
-
-            return;
-        }
-
-        //-------]>
-
-        const result = Object.create(data);
-        result[type] = response;
-
-        //-------]>
-
-        callAPI(token, method, result, callback);
+        callback(error, response);
     }
 }
 
@@ -219,479 +154,14 @@ function callAPI(token, method, data, callback) {
         throw new Error("Forbidden. Check the Access Token: " + token + " [" + method + "]");
     }
 
-    //-------------------------]>
-
-    let t, result;
-
-    let req,
-        body, bodyBegin, bodyEnd,
-        file, fileName, fileId;
-
-    //---------]>
-
     if(typeof(data) === "function") {
         callback = data;
         data = null;
     }
 
-    if(Date.now() - gBoundaryUDate >= gBoundaryUInterval) {
-        updateBoundary();
-    }
-
     //-------------------------]>
 
-    switch(method) {
-        case "forwardMessage":
-            body = genBodyField("text", "chat_id", data.chat_id);
-            body += genBodyField("text", "from_chat_id", data.from_chat_id);
-            body += genBodyField("text", "message_id", data.message_id);
-
-            break;
-
-        case "sendMessage":
-            body = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.text;
-            if(typeof(t) !== "undefined") {
-                if(t && typeof(t) === "object") {
-                    t = JSON.stringify(t);
-                }
-
-                body += genBodyField("text", "text", t);
-            }
-
-            t = data.parse_mode;
-            if(typeof(t) !== "undefined") {
-                body += genBodyField("text", "parse_mode", t);
-            }
-
-            if(data.disable_web_page_preview) {
-                body += genBodyField("text", "disable_web_page_preview", "1");
-            }
-
-            t = data.reply_to_message_id;
-            if(t) {
-                body += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                body += genBodyField("json", "reply_markup", t);
-            }
-
-            break;
-
-        case "sendPhoto":
-            if(fileProcessing("photo")) {
-                return;
-            }
-
-            //-------------------]>
-
-            result = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.caption;
-            if(t) {
-                result += genBodyField("text", "caption", t);
-            }
-
-            t = data.reply_to_message_id;
-            if(t) {
-                result += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                result += genBodyField("json", "reply_markup", t);
-            }
-
-            //-------------------]>
-
-            if(fileId) {
-                result += genBodyField("text", "photo", fileId);
-
-                body = result;
-            } else {
-                result += genBodyField("photo", fileName);
-
-                bodyBegin = result;
-            }
-
-            break;
-
-        case "sendAudio":
-            if(fileProcessing("audio")) {
-                return;
-            }
-
-            //-------------------]>
-
-            result = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.duration;
-            if(t) {
-                result += genBodyField("text", "duration", t);
-            }
-
-            t = data.performer;
-            if(t) {
-                result += genBodyField("text", "performer", t);
-            }
-
-            t = data.title;
-            if(t) {
-                result += genBodyField("text", "title", t);
-            }
-
-            t = data.reply_to_message_id;
-            if(t) {
-                result += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                result += genBodyField("json", "reply_markup", t);
-            }
-
-            //-------------------]>
-
-            if(fileId) {
-                result += genBodyField("text", "audio", fileId);
-
-                body = result;
-            } else {
-                result += genBodyField("audio", fileName);
-
-                bodyBegin = result;
-            }
-
-            break;
-
-        case "sendDocument":
-            if(fileProcessing("document")) {
-                return;
-            }
-
-            //-------------------]>
-
-            result = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.reply_to_message_id;
-            if(t) {
-                result += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                result += genBodyField("json", "reply_markup", t);
-            }
-
-            //-------------------]>
-
-            if(fileId) {
-                result += genBodyField("text", "document", fileId);
-
-                body = result;
-            } else {
-                result += genBodyField("document", fileName);
-
-                bodyBegin = result;
-            }
-
-            break;
-
-        case "sendSticker":
-            if(fileProcessing("sticker")) {
-                return;
-            }
-
-            //-------------------]>
-
-            result = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.reply_to_message_id;
-            if(t) {
-                result += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                result += genBodyField("json", "reply_markup", t);
-            }
-
-            //-------------------]>
-
-            if(fileId) {
-                result += genBodyField("text", "sticker", fileId);
-
-                body = result;
-            } else {
-                result += genBodyField("sticker", fileName);
-
-                bodyBegin = result;
-            }
-
-            break;
-
-        case "sendVideo":
-            if(fileProcessing("video")) {
-                return;
-            }
-
-            //-------------------]>
-
-            result = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.duration;
-            if(t) {
-                result += genBodyField("text", "duration", t);
-            }
-
-            t = data.caption;
-            if(t) {
-                result += genBodyField("text", "caption", t);
-            }
-
-            t = data.reply_to_message_id;
-            if(t) {
-                result += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                result += genBodyField("json", "reply_markup", t);
-            }
-
-            //-------------------]>
-
-            if(fileId) {
-                result += genBodyField("text", "video", fileId);
-
-                body = result;
-            } else {
-                result += genBodyField("video", fileName);
-
-                bodyBegin = result;
-            }
-
-            break;
-
-        case "sendVoice":
-            if(fileProcessing("voice")) {
-                return;
-            }
-
-            //-------------------]>
-
-            result = genBodyField("text", "chat_id", data.chat_id);
-
-            t = data.duration;
-            if(t) {
-                result += genBodyField("text", "duration", t);
-            }
-
-            t = data.reply_to_message_id;
-            if(t) {
-                result += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                result += genBodyField("json", "reply_markup", t);
-            }
-
-            //-------------------]>
-
-            if(fileId) {
-                result += genBodyField("text", "voice", fileId);
-
-                body = result;
-            } else {
-                result += genBodyField("voice", fileName);
-
-                bodyBegin = result;
-            }
-
-            break;
-
-        case "sendLocation":
-            body = genBodyField("text", "chat_id", data.chat_id);
-            body += genBodyField("text", "latitude", data.latitude);
-            body += genBodyField("text", "longitude", data.longitude);
-
-            t = data.reply_to_message_id;
-            if(t) {
-                body += genBodyField("text", "reply_to_message_id", t);
-            }
-
-            t = data.reply_markup;
-            if(t) {
-                body += genBodyField("json", "reply_markup", t);
-            }
-
-            break;
-
-        case "sendChatAction":
-            body = genBodyField("text", "chat_id", data.chat_id);
-            body += genBodyField("text", "action", data.action);
-
-            break;
-
-        case "getUserProfilePhotos":
-            body = genBodyField("text", "user_id", data.user_id);
-
-            t = data.offset;
-            if(t) {
-                body += genBodyField("text", "offset", t);
-            }
-
-            t = data.limit;
-            if(t) {
-                body += genBodyField("text", "limit", t);
-            }
-
-            break;
-
-        case "getUpdates":
-            if(!data) {
-                break;
-            }
-
-            //------]>
-
-            result = "";
-
-            t = data.offset;
-            if(t) {
-                result += genBodyField("text", "offset", t);
-            }
-
-            t = data.limit;
-            if(t) {
-                result += genBodyField("text", "limit", t);
-            }
-
-            t = data.timeout;
-            if(t) {
-                result += genBodyField("text", "timeout", t);
-            }
-
-            if(result) {
-                body = result;
-            }
-
-            break;
-
-        case "getFile":
-            if(!data) {
-                break;
-            }
-
-            //------]>
-
-            t = data.file_id;
-            if(t) {
-                body = genBodyField("text", "file_id", t);
-            }
-
-            break;
-
-        case "setWebhook":
-            if(!data) {
-                break;
-            }
-
-            //------]>
-
-            let certLikeStrKey;
-
-            file = data.certificate;
-
-            //---)>
-
-            if(file) {
-                if(typeof(file) === "string") {
-                    file = file.trim();
-
-                    if(file[0] !== "." && file[0] !== "/" && file[1] !== ":") {
-                        if(file[0] !== "-") {
-                            file = "-----BEGIN RSA PUBLIC KEY-----\r\n" + file + "\r\n-----END RSA PUBLIC KEY-----";
-                        }
-
-                        certLikeStrKey = file;
-                        file = undefined;
-                    }
-
-                    fileName = data.name || file;
-                } else {
-                    fileName = data.name || "file.key";
-                }
-            }
-
-            //---)>
-
-            if((t = data.url) && typeof(t) === "string") {
-                result = "https://" + gTgHostWebhook + "/bot" + token + "/setWebhook?url=";
-
-                if(!(/^https:\/\//i).test(t)) {
-                    result += "https://";
-                }
-
-                t = result + t;
-                result = undefined;
-            }
-
-            result = genBodyField("text", "url", t || "");
-
-            if(fileName) {
-                result += genBodyField("certificate", fileName);
-            }
-
-            if(certLikeStrKey) {
-                result += certLikeStrKey;
-            }
-
-            //---)>
-
-            if(file) {
-                bodyBegin = result;
-            } else {
-                body = result;
-            }
-
-            break;
-
-        case "answerInlineQuery":
-            body = genBodyField("text", "inline_query_id", data.inline_query_id);
-
-            t = data.cache_time;
-            if(t) {
-                body += genBodyField("text", "cache_time", t);
-            }
-
-            if(data.is_personal) {
-                body += genBodyField("text", "is_personal", "1");
-            }
-
-            t = data.next_offset;
-            if(t) {
-                body += genBodyField("text", "next_offset", t);
-            }
-
-            body += genBodyField("json", "results", data.results);
-
-            break;
-
-        case "getMe":
-            break;
-
-        default:
-            throw new Error("API method not found!");
-    }
-
-    //-------------------------]>
-
-    req = rRequest(token, method, function(error, body, response) {
+    const req = rRequest(token, method, function(error, body, response) {
         if(!callback) {
             return;
         }
@@ -714,122 +184,227 @@ function callAPI(token, method, data, callback) {
         callback(error, body, response);
     });
 
-    if(!body && !bodyBegin) {
-        req.end();
-        return;
-    }
-
-    //-------------)>
-
-    req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
-
-    //-------------)>
-
-    if(body) {
-        body += genBodyField("end");
-        req.end(body);
-
-        return;
-    }
-
-    //----[File: init]----}>
-
-    bodyEnd = genBodyField("end");
-
-    req.write(bodyBegin);
-
-    //----[File: buffer]----}>
-
-    if(Buffer.isBuffer(file)) {
-        req.write(file);
-        req.end(bodyEnd);
-
-        return;
-    }
-
-    //----[File: stream]----}>
-
-    if(!file) {
-        req.end(bodyEnd);
-        return;
-    }
-
-    if(typeof(file) === "string") {
-        file = rFs.createReadStream(file);
-
-        file.on("open", function() {
-            file.pipe(req, gPipeOptions);
-        });
-    }
-    else {
-        if(file.closed) {
-            req.end(bodyEnd);
-            return;
-        }
-
-        file.pipe(req, gPipeOptions);
-    }
-
-    file
-        .on("error", function() {
-            req.end(bodyEnd);
-        })
-        .on("end", function() {
-            req.end(bodyEnd);
-        });
+    let isStream;
 
     //-------------------------]>
 
-    function fileProcessing(type) {
-        file = data[type];
+    if(data && rProto.hasOwnProperty(method)) {
+        const reqMParams = rProto[method];
 
-        //--------]>
+        let isWritten = false;
 
-        if(!file) {
-            return false;
+        //-------]>
+
+        for(let i = 0, len = reqMParams.length; i < len; i++) {
+            const p     = reqMParams[i];
+
+            const type  = p[0],
+                  field = p[1];
+
+            const value = data[field];
+
+            //-------]>
+
+            if(typeof(value) !== "undefined") {
+                if(!isWritten) {
+                    isWritten = true;
+
+                    if(Date.now() - gBoundaryUDate >= gBoundaryUInterval) {
+                        updateBoundary();
+                    }
+
+                    req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
+                }
+
+                req.write(gCRLFBoundaryDiv);
+                req.write("Content-Disposition: form-data; name=\"");
+                req.write(field);
+
+                //-----]>
+
+                if(!writeField(type, value) && !writeData(type, value)) {
+                    throw new Error("Type not found!");
+                }
+            }
         }
 
-        if(typeof(file) === "string") {
-            if(getReadStreamByUrl(token, file, type, method, data, callback)) { // <-- Delegate task
-                return true;
-            }
+        //-------]>
 
-            fileName = data.filename || file;
-
-            if(!gReIsFilePath.test(fileName)) {
-                fileId = fileName;
-            }
+        if(isWritten && !isStream) {
+            req.write(gCRLFBoundaryEnd);
         }
-        else if(typeof(file) === "object" && file.headers) { // <-- byUrl
-            fileName = data.filename;
+    }
 
-            if(!fileName) {
-                const reqPath   = file.req.path,
-                      reqCt     = file.headers["content-type"];
+    if(!isStream) {
+        req.end();
+    }
 
-                const ext       = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
+    //---------------]>
 
-                if(ext.length > 1) {
-                    fileName = rPath.parse(reqPath).name + ext;
+    function writeField(type, value) {
+        switch(type) {
+            case "boolean":
+                value = value ? "1" : "0";
+
+                req.write("\"\r\n\r\n");
+
+                break;
+
+            case "string":
+                value = typeof(value) === "string" ? value : (Buffer.isBuffer(value) ? value : (value + ""));
+
+                req.write("\"\r\n\r\n");
+
+                break;
+
+            case "json":
+                if(typeof(value) !== "string" && !Buffer.isBuffer(value)) {
+                    value = JSON.stringify(value);
+                }
+
+                req.write("\"\r\nContent-Type: application/json\r\n\r\n");
+
+                break;
+
+            default:
+                return false;
+        }
+
+        //------]>
+
+        req.write(value);
+
+        //------]>
+
+        return true;
+    }
+
+    function writeData(type, value) {
+        const isBuffer = Buffer.isBuffer(value);
+
+        switch(type) {
+            case "message":
+                req.write("\"\r\n\r\n");
+
+                if(isBuffer || typeof(value) === "string") {
+                    req.write(value);
+                }
+                else if(value && typeof(value) === "object") {
+                    isStream = true;
+                    bindStreamEvents(value).pipe(req, gPipeOptions);
                 }
                 else {
-                    fileName = reqPath;
+                    req.write(value + "");
                 }
+
+                break;
+
+            case "photo":
+            case "audio":
+            case "document":
+            case "sticker":
+            case "video":
+            case "voice":
+            case "certificate":
+                let filename = data.filename;
+
+                //-------]>
+
+                if(isBuffer) {
+                }
+                else if(typeof(value) === "string") {
+                    if(getReadStreamByUrl(value, data, writeFileStream)) {
+                        isStream = true;
+                    }
+                    else if(gReIsFilePath.test(value)) {
+                        if(!filename) {
+                            filename = value;
+                        }
+
+                        isStream = true;
+
+                        writeFileStream(null, rFs.createReadStream(value));
+                    }
+                    else {
+                        req.write("\"\r\n\r\n");
+                        req.write(value);
+                    }
+
+                    break;
+                }
+                else if(value && typeof(value) === "object") {
+                    isStream = true;
+
+                    if(value.headers) {
+                        if(!filename) {
+                            const reqPath   = value.req.path,
+                                  reqCt     = value.headers["content-type"];
+
+                            const ext       = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
+
+                            if(ext.length > 1) {
+                                filename = rPath.parse(reqPath).name + ext;
+                            }
+                            else {
+                                filename = reqPath;
+                            }
+                        }
+                    }
+                    else {
+                        filename = value.path || "file";
+                    }
+                }
+
+                filename = rPath.basename(filename);
+
+                //-------]>
+
+                req.write("\"; filename=\"");
+                req.write(filename);
+                req.write("\"\r\nContent-Type: application/octet-stream\r\n\r\n");
+
+                if(isStream) {
+                    bindStreamEvents(value).pipe(req, gPipeOptions);
+                }
+                else if(isBuffer) {
+                    req.write(value);
+                }
+
+                break;
+
+            default:
+                return false;
+        }
+
+        return true;
+
+        //---------]>
+
+        function writeFileStream(error, input) {
+            if(error || !input) {
+                req.write("\"\r\n\r\n");
+                req.write(gCRLFBoundaryEnd);
+                req.end();
+
+                return;
             }
+
+            writeData(type, error ? "" : input);
         }
-        else { // <-- FileStream / Buffer
-            fileName = data.filename || file.path || "file";
-        }
+    }
 
-        //--------]>
+    function bindStreamEvents(s) {
+        s
+            .on("error", function(error) {
+                req.write(gCRLFBoundaryEnd);
+                req.end();
+            })
+            .on("end", function() {
+                req.write(gCRLFBoundaryEnd);
+                req.end();
+            });
 
-        if(fileName) {
-            fileName = rPath.basename(fileName);
-        }
-
-        //--------]>
-
-        return false;
+        return s;
     }
 }
 

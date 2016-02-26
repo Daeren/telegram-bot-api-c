@@ -25,6 +25,8 @@ module.exports = {
 function createReadStreamByUrl(url, callback) {
     const urlObj = rUrl.parse(url);
 
+    //-------]>
+
     if(!urlObj.protocol || !(/^http/).test(urlObj.protocol)) {
         callback(new Error("Use the links only with HTTP/HTTPS protocol"));
         return;
