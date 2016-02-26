@@ -27,7 +27,7 @@ const gReIsFilePath   = /[\\\/\.]/;
 
 const gBoundaryUInterval = 1000 * 60 * 5;
 
-let gBoundaryKey, gBoundaryDiv, gBoundaryEnd, gBoundaryUDate, gCRLFBoundaryDiv, gCRLFBoundaryEnd;
+let gBoundaryKey, gBoundaryDiv, gBoundaryEnd, gBoundaryUDate, gHeaderContentType, gCRLFBoundaryDiv, gCRLFBoundaryEnd;
 
 //-----------------------]>
 
@@ -55,6 +55,8 @@ function updateBoundary() {
 
     gCRLFBoundaryDiv    = gCRLF + gBoundaryDiv;
     gCRLFBoundaryEnd    = gCRLF + gBoundaryEnd;
+
+    gHeaderContentType = "multipart/form-data; boundary=\"" + gBoundaryKey + "\"";
 }
 
 //---------]>
@@ -89,6 +91,7 @@ function getReadStreamByUrl(url, data, callback) {
     function onResponse(error, response) {
         if(error) {
             callback(error);
+
             return;
         }
 
@@ -162,6 +165,8 @@ function callAPI(token, method, data, callback) {
 
     //-------------------------]>
 
+    const reqMParams = rProto[method];
+
     const req = rRequest(token, method, function(error, body, response) {
         if(!callback) {
             return;
@@ -176,6 +181,9 @@ function callAPI(token, method, data, callback) {
             else if(statusCode === 401) {
                 error = new Error("Invalid access token provided: " + token);
             }
+            else if(!body) {
+                error = new Error("body: empty");
+            }
         }
 
         if(error) {
@@ -189,9 +197,7 @@ function callAPI(token, method, data, callback) {
 
     //-------------------------]>
 
-    if(data && rProto.hasOwnProperty(method)) {
-        const reqMParams = rProto[method];
-
+    if(data && reqMParams) {
         let isWritten = false;
 
         //-------]>
@@ -217,7 +223,7 @@ function callAPI(token, method, data, callback) {
                     updateBoundary();
                 }
 
-                req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
+                req.setHeader("Content-Type", gHeaderContentType);
             }
 
             //-------]>
@@ -426,15 +432,10 @@ function callAPIJson(token, method, data, callback) {
 
     function cbCallAPI(error, result, response) {
         if(!error) {
-            if(result) {
-                try {
-                    result = JSON.parse(result);
-                } catch(e) {
-                    error = e;
-                }
-            }
-            else {
-                error = new Error("result: empty");
+            try {
+                result = JSON.parse(result);
+            } catch(e) {
+                error = e;
             }
         }
 
