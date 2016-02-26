@@ -20,7 +20,6 @@ const rUtil             = require("./../util");
 
 //-----------------------------------------------------
 
-const gTgHostWebhook  = "api.telegram.org";
 const gCRLF           = "\r\n";
 
 const gPipeOptions    = {"end": false};
@@ -159,6 +158,8 @@ function callAPI(token, method, data, callback) {
         data = null;
     }
 
+    method = method.toLowerCase();
+
     //-------------------------]>
 
     const req = rRequest(token, method, function(error, body, response) {
@@ -205,26 +206,28 @@ function callAPI(token, method, data, callback) {
 
             //-------]>
 
-            if(typeof(value) !== "undefined") {
-                if(!isWritten) {
-                    isWritten = true;
+            if(typeof(value) === "undefined") {
+                continue;
+            }
 
-                    if(Date.now() - gBoundaryUDate >= gBoundaryUInterval) {
-                        updateBoundary();
-                    }
+            if(!isWritten) {
+                isWritten = true;
 
-                    req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
+                if(Date.now() - gBoundaryUDate >= gBoundaryUInterval) {
+                    updateBoundary();
                 }
 
-                req.write(gCRLFBoundaryDiv);
-                req.write("Content-Disposition: form-data; name=\"");
-                req.write(field);
+                req.setHeader("Content-Type", "multipart/form-data; boundary=\"" + gBoundaryKey + "\"");
+            }
 
-                //-----]>
+            //-------]>
 
-                if(!writeField(type, value) && !writeData(type, value)) {
-                    throw new Error("Type not found!");
-                }
+            req.write(gCRLFBoundaryDiv);
+            req.write("Content-Disposition: form-data; name=\"");
+            req.write(field);
+
+            if(!writeField(type, value) && !writeData(type, value)) {
+                throw new Error("Type not found!");
             }
         }
 
@@ -280,7 +283,7 @@ function callAPI(token, method, data, callback) {
     }
 
     function writeData(type, value) {
-        const isBuffer = Buffer.isBuffer(value);
+        const isBuffer = value && Buffer.isBuffer(value);
 
         switch(type) {
             case "message":
@@ -305,6 +308,7 @@ function callAPI(token, method, data, callback) {
             case "sticker":
             case "video":
             case "voice":
+
             case "certificate":
                 let filename = data.filename;
 

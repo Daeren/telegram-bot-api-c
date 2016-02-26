@@ -9,7 +9,7 @@
 
 //-----------------------------------------------------
 
-module.exports = {
+const gProtoTable = {
     "forwardMessage": [
         ["string", "chat_id"],
         ["string", "from_chat_id"],
@@ -119,3 +119,19 @@ module.exports = {
         ["json", "results"]
     ]
 };
+
+//-----------------------------------------------------
+
+for(let name in gProtoTable) {
+    if(!gProtoTable.hasOwnProperty(name)) {
+        continue;
+    }
+
+    gProtoTable[name.toLowerCase()] = gProtoTable[name];
+
+    delete gProtoTable[name];
+}
+
+//-----------------------------------------------------
+
+module.exports = gProtoTable;

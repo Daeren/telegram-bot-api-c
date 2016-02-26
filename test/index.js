@@ -909,11 +909,25 @@ describe("Instance: bot", function() {
 
         //-----)>
 
-        it("setWebhook | promise", function(done) {
+        it("setWebhook (set) | promise", function(done) {
+            api
+                .setWebhook({"url": "https://db.gg/null"})
+                .then(function(isOk) {
+                    expect(isOk).to.be.a("boolean").to.equal(true);
+
+                    done();
+                }, function(error) {
+                    checkError(error, done);
+                });
+        });
+
+        //-----)>
+
+        it("setWebhook (delete) | promise", function(done) {
             api
                 .setWebhook()
                 .then(function(isOk) {
-                    expect(isOk).to.be.a("boolean");
+                    expect(isOk).to.be.a("boolean").to.equal(true);
 
                     done();
                 }, function(error) {
