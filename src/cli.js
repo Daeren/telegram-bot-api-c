@@ -30,15 +30,17 @@ if(!gParams) {
 
     let chunks = [];
 
+    //----)>
+
     const onEnd = function() {
-        if(!chunks.length) {
-            return;
+        gParams = null;
+
+        if(chunks.length) {
+            gParams = Buffer.concat(chunks);
+            gParams = JSON.parse(gParams);
+
+            chunks = [];
         }
-
-        gParams = Buffer.concat(chunks);
-        gParams = JSON.parse(gParams);
-
-        chunks = [];
 
         call();
     };

@@ -909,8 +909,7 @@ api.sendDocument({
 ...
 
 > tg-api X sendMessage
-> {"chat_id": 0, "t
-> ext": "Hi"}
+> {"chat_id": 0, "text": "Hi"}
 > <enter> [\r\n]
 
 (result)
