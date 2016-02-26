@@ -26,20 +26,24 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
-* All methods in the Bot API are case-insensitive
-* Rewritten: callAPI
-
-
+```
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * rb.data() => rb.answer()
 * [InlineQuery](#refInlineQuery): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * Analytics: [tgb-pl-botanio][4]
+```
 
+```
+* All methods in the Bot API are case-insensitive
+* Rewritten: callAPI
+```
 
+```
 * message: buffer, stream, text
 * photo|audio|voice|video|document|sticker: buffer, stream, file_id, path, url
 * certificate: buffer, stream, path, url
+```
 
 #### Index
 

@@ -206,7 +206,7 @@ function callAPI(token, method, data, callback) {
 
             //-------]>
 
-            if(typeof(value) === "undefined") {
+            if(typeof(value) === "undefined" || value === null) {
                 continue;
             }
 
