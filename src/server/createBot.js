@@ -84,10 +84,6 @@ function main(bot, onMsg) {
     //-----[Send methods]-----}>
 
     for(let fieldName in gMapSendMethods) {
-        if(!gMapSendMethods.hasOwnProperty(fieldName)) {
-            continue;
-        }
-
         const methodName = gMapSendMethods[fieldName];
         const apiMethod = bot.api[methodName];
 
@@ -102,7 +98,33 @@ function main(bot, onMsg) {
             const data = params ? Object.create(params) : {};
 
             data.chat_id = params && params.chat_id || this.cid;
-            data[fieldName] = input;
+
+            //---)>
+
+            switch(fieldName) {
+                case "location":
+                    if(!input) {
+                        break;
+                    }
+
+                    if(typeof(input) === "string") {
+                        input = input.split(/\s+/);
+                    }
+                    else if(typeof(input) === "object") {
+                        data.latitude = input.latitude;
+                        data.longitude = input.longitude;
+                    }
+
+                    if(Array.isArray(input)) {
+                        data.latitude = input[0];
+                        data.longitude = input[1];
+                    }
+
+                    break;
+
+                default:
+                    data[fieldName] = input;
+            }
 
             //-----------]>
 
