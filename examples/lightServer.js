@@ -38,7 +38,7 @@ const objSrvOptions     = {
 
 objBot
     .api
-    .setWebhook({"url": "site.xx/botX"})
+    .setWebhook({"url": "https://site.xx/botX"})
 
     .then(isOk => {
         expect(isOk).to.be.a("boolean");

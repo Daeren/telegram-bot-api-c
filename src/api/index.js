@@ -89,20 +89,17 @@ function getReadStreamByUrl(url, data, callback) {
     //-----)>
 
     function onResponse(error, response) {
-        if(error) {
-            callback(error);
+        if(!error) {
+            const statusCode = response.statusCode;
 
-            return;
+            if(statusCode < 200 || statusCode > 399) {
+                response.destroy();
+                error = new Error("statusCode: " + statusCode);
+            }
         }
 
-        //--------------]>
-
-        const statusCode = response.statusCode;
-
-        if(statusCode < 200 || statusCode > 399) {
-            response.destroy();
-            callback(new Error("statusCode: " + statusCode));
-
+        if(error) {
+            callback(error);
             return;
         }
 
@@ -117,6 +114,7 @@ function getReadStreamByUrl(url, data, callback) {
 
         if(location && redirectCount) {
             redirectCount--;
+
             url = location;
 
             response.destroy();
@@ -131,19 +129,17 @@ function getReadStreamByUrl(url, data, callback) {
             if(!contentLength) {
                 error = new Error("Unknown size");
             }
-            else {
-                if(contentLength > data.maxSize) {
-                    error = new Error("maxSize");
-                }
-            }
-
-            if(error) {
-                response.destroy();
-                response = undefined;
+            else if(contentLength > data.maxSize) {
+                error = new Error("maxSize");
             }
         }
 
         //------------]>
+
+        if(error) {
+            response.destroy();
+            response = null;
+        }
 
         callback(error, response);
     }
@@ -386,6 +382,8 @@ function callAPI(token, method, data, callback) {
                 return false;
         }
 
+        //---------]>
+
         return true;
 
         //---------]>
@@ -395,26 +393,28 @@ function callAPI(token, method, data, callback) {
                 req.write("\"\r\n\r\n");
                 req.write(gCRLFBoundaryEnd);
                 req.end();
-
-                return;
             }
-
-            writeData(type, error ? "" : input);
+            else {
+                writeData(type, input);
+            }
         }
     }
 
     function bindStreamEvents(s) {
         s
-            .on("error", function(error) {
-                req.write(gCRLFBoundaryEnd);
-                req.end();
-            })
-            .on("end", function() {
-                req.write(gCRLFBoundaryEnd);
-                req.end();
-            });
+            .on("error", onEnd)
+            .on("end", onEnd);
+
+        //------]>
 
         return s;
+
+        //------]>
+
+        function onEnd() {
+            req.write(gCRLFBoundaryEnd);
+            req.end();
+        }
     }
 }
 

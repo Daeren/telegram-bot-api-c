@@ -199,7 +199,7 @@ const rBot = require("telegram-bot-api-c");
 const objBotFather    = rBot();
 const objSrvOptions   = {
     // For Self-signed certificate, you need to upload your public key certificate
-    // "selfSigned":  "fullPath/stream/string-key",  // <-- If you use Auto-Webhook
+    // "selfSigned":  "fullPath/stream/buffer",  // <-- If you use Auto-Webhook
 
     "certDir":  "/www/site",
 
@@ -227,7 +227,7 @@ objSrv
     .on("/stop", cbCmdStop);
 
 objSrv
-    .bot(objOtherBot, "/OtherBot", cbOtherBot);
+    .bot(objOtherBot, "/urlOtherBot", cbOtherBot);
     
 //------------------]>
 
@@ -254,7 +254,7 @@ const objSrv = objBot
 
 objBot
     .api
-    .setWebhook({"url": "site.xx/dev-bot"})
+    .setWebhook({"url": "https://site.xx/dev-bot"})
     .then(isOk => {
         const rExpress      = require("express"),
               rBodyParser   = require("body-parser");
@@ -301,7 +301,7 @@ const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 objBot
     .api
-    .setWebhook({"url": "site.xx/myBot"})
+    .setWebhook({"url": "https://site.xx/myBot"})
     .then(isOk => {
         if(!isOk)
             throw new Error("Oops...problems with webhook...");
@@ -377,6 +377,7 @@ objSrv
         bot.sendMessage("Hello").then(console.log);
         bot.sendPhoto(imgURL, params);
         bot.sendDocument(imgURL, (e, r) => console.log(e || r));
+        bot.sendLocation([60, 60]);
         
         //----[Forward]----}>
 
@@ -405,13 +406,13 @@ objSrv
 
             .text("https://google.com", params) // <-- Element
             //.parseMode("markdown") <-- params.parse_mode
-            .disableWebPagePreview() // <-- Modifier: for last element
-            .keyboard([["X"], ["Y"]]) // <-- Modifier: for last element
+            .disableWebPagePreview() // <-- Modifier (for the last element)
+            .keyboard([["X"], ["Y"]]) // <-- Modifier
 
             .chatAction("upload_photo")
             
             .photo("https://www.google.ru/images/logos/ps_logo2.png", params)
-            .caption("#2EASY") // <-- Modifier: for last element
+            .caption("#2EASY") // <-- Modifier
             .keyboard("old")
             .keyboard("new", "selective") // <-- Uses: bot.mid (selective)
 
@@ -693,20 +694,20 @@ function cbMsg(bot) {
 #### Download
 
 ```js
-objBot.download("file_id", "dir");
-objBot.download("file_id", "dir", "name.mp3");
+objBot.download("file_id", "dir", /*callback*/);
+objBot.download("file_id", "dir", "name.mp3", /*callback*/);
 
 
 objBot
     .download("file_id")
     .then(function(info) {
-        info.stream.pipe(require("fs").createWriteStream("O:/" + info.name));
+        info.stream.pipe(require("fs").createWriteStream("./" + info.name));
     });
 
 
 objBot
     .download("file_id", function(error, info) {
-        info.stream.pipe(require("fs").createWriteStream("O:/t.x"));
+        info.stream.pipe(require("fs").createWriteStream("./myFile"));
     });
 ```
 
@@ -1060,7 +1061,7 @@ npm test
 | message           | object                | Incoming message                                       |
 |                   | -                     |                                                        |
 | answer            | function(isReply)     | Response Builder; Uses: cid, mid                       |
-| answer            | function()            | inlineQuery; Uses: qid                                 |
+| answer            | function(result)      | inlineQuery; Uses: qid                                 |
 |                   | -                     |                                                        |
 | forward           | function              | Uses: mid, from, to                                    |
 | render            | function              | Uses: cid                                              |

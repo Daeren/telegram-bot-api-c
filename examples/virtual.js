@@ -44,7 +44,7 @@ const objSrv    = objBot
 
 objBot
     .api
-    .setWebhook({"url": "site.xx/dev-bot"})
+    .setWebhook({"url": "https://site.xx/dev-bot"})
     .then(isOk => {
         if(!isOk) {
             throw new Error("Oops...problems with webhook...");

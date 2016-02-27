@@ -84,8 +84,16 @@ function main(bot, onMsg) {
     //-----[Send methods]-----}>
 
     for(let fieldName in gMapSendMethods) {
+        if(!gMapSendMethods.hasOwnProperty(fieldName)) {
+            continue;
+        }
+
+        //-----------]>
+
         const methodName = gMapSendMethods[fieldName];
         const apiMethod = bot.api[methodName];
+
+        //-----------]>
 
         ctx[methodName] = function(input, params, callback) {
             if(typeof(params) === "function") {
@@ -110,14 +118,14 @@ function main(bot, onMsg) {
                     if(typeof(input) === "string") {
                         input = input.split(/\s+/);
                     }
-                    else if(typeof(input) === "object") {
-                        data.latitude = input.latitude;
-                        data.longitude = input.longitude;
-                    }
 
                     if(Array.isArray(input)) {
                         data.latitude = input[0];
                         data.longitude = input[1];
+                    }
+                    else if(typeof(input) === "object") {
+                        data.latitude = input.latitude;
+                        data.longitude = input.longitude;
                     }
 
                     break;
