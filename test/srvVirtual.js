@@ -205,13 +205,13 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: text | mix)", function(done) {
-        let server = objBot.virtual(function(bot) {
+        let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
         });
 
         server.logger(cbLogger);
 
-        server.on("*", function(bot) {
+        server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
 
@@ -224,13 +224,13 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: regex)", function(done) {
-        let server = objBot.virtual(function(bot) {
+        let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
         });
 
         server.logger(cbLogger);
 
-        server.on("*", function(bot) {
+        server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
 
@@ -251,17 +251,17 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: regex | map)", function(done) {
-        let server = objBot.virtual(function(bot) {
+        let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
         });
 
         server.logger(cbLogger);
 
-        server.on("*", function(bot) {
+        server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
 
-        server.on("text", function(bot) {
+        server.on("text", function() {
             throw new Error("The message passed through the event | #3");
         });
 
