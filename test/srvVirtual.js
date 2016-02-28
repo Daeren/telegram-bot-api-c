@@ -72,7 +72,7 @@ describe("srv.virtual", function() {
     it("Instance", function() {
         let servers = [
             objBot.virtual(),
-            objBot.virtual(function(bot) { })
+            objBot.virtual(function() { })
         ];
 
         servers.forEach(function(srv) {
@@ -186,13 +186,13 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: text)", function(done) {
-        let server = objBot.virtual(function(bot) {
+        let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
         });
 
         server.logger(cbLogger);
 
-        server.on("*", function(bot) {
+        server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
 
@@ -234,7 +234,7 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #2");
         });
 
-        server.on("text", function(bot) {
+        server.on("text", function() {
             throw new Error("The message passed through the event | #3");
         });
 
@@ -295,7 +295,7 @@ describe("srv.virtual", function() {
 
         //------]>
 
-        function onText(bot) {
+        function onText() {
             throw new Error("Call-off events");
         }
     });
