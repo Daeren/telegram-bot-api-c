@@ -148,20 +148,31 @@ function getReadStreamByUrl(url, data, callback) {
 //------------------]>
 
 function callAPI(token, method, data, callback) {
-    if(!token || typeof(token) !== "string") {
-        throw new Error("Forbidden. Check the Access Token: " + token + " [" + method + "]");
-    }
-
-    if(typeof(data) === "function") {
-        callback = data;
-        data = null;
-    }
-
     method = method.toLowerCase();
 
     //-------------------------]>
 
-    const reqMParams = rProto[method];
+    const typeOfData = typeof(data),
+          reqMParams = rProto[method];
+
+    let isStream,
+        dataIsMap;
+
+    //-------------------------]>
+
+    if(!token || typeof(token) !== "string") {
+        throw new Error("Forbidden. Check the Access Token: " + token + " [" + method + "]");
+    }
+
+    if(typeOfData === "function") {
+        callback = data;
+        data = null;
+    }
+    else if(reqMParams && data && data instanceof Map) {
+        dataIsMap = true;
+    }
+
+    //-------------------------]>
 
     const req = rRequest(token, method, function(error, body, response) {
         if(!callback) {
@@ -189,11 +200,9 @@ function callAPI(token, method, data, callback) {
         callback(error, body, response);
     });
 
-    let isStream;
-
     //-------------------------]>
 
-    if(data && reqMParams) {
+    if(reqMParams && data) {
         let isWritten = false;
 
         //-------]>
@@ -204,7 +213,7 @@ function callAPI(token, method, data, callback) {
             const type  = p[0],
                   field = p[1];
 
-            const value = data[field];
+            const value = dataIsMap ? data.get(field) : data[field];
 
             //-------]>
 

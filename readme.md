@@ -26,6 +26,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * rb.data() => rb.answer()
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * [InlineQuery](#refInlineQuery): +
@@ -33,7 +34,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 * Analytics: [tgb-pl-botanio][4]
 
 ```
-- All methods in the Bot API are case-insensitive (method: .call)
+- All methods in the Bot API are case-insensitive (method: .call, .callJson)
 - Rewritten: callAPI
 ```
 
@@ -245,7 +246,7 @@ function cbCmdStop(bot, params) { }
 ```js
 const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 const objSrv = objBot
-    .virtual(bot => {
+    .virtual(function(bot) {
         bot.answer().text("Not found!").send();
     })
     .on("photo", console.log);
@@ -1129,8 +1130,9 @@ MIT
 [2]: https://telegram.me/io666
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
+[10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=666
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=13
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg

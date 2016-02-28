@@ -24,7 +24,7 @@ const token         = process.env.TELEGRAM_BOT_TOKEN,
       chatId        = process.env.TELEGRAM_CHAT_ID,
       msgId         = process.env.TELEGRAM_MSG_ID;
 
-const gBotFather    = rBot(token);
+const objBot        = rBot(token);
 
 //-----------------------------------------------------
 
@@ -43,7 +43,7 @@ describe("broadcast", function() {
         const ids   = [chatId, "-", chatId],
               data  = {"text": "Hi"};
 
-        gBotFather.broadcast(ids, data, function(error, lastIndex) {
+        objBot.broadcast(ids, data, function(error, lastIndex) {
             expect(error).to.be.an.instanceof(Error);
             expect(lastIndex).to.equal(1);
 
@@ -55,7 +55,7 @@ describe("broadcast", function() {
         const ids   = [chatId, "-", chatId],
               data  = {"text": "Hi"};
 
-        const bProc = gBotFather.broadcast(ids, data, function(error, lastIndex) {
+        const bProc = objBot.broadcast(ids, data, function(error, lastIndex) {
             expect(error).to.be.null;
             expect(lastIndex).to.equal(0);
 
@@ -69,7 +69,7 @@ describe("broadcast", function() {
         const ids   = [chatId, chatId, chatId],
               data  = {"text": "Hi"};
 
-        gBotFather.broadcast(ids, data, function(error, lastIndex) {
+        objBot.broadcast(ids, data, function(error, lastIndex) {
             expect(error).to.be.null;
             expect(lastIndex).to.equal(2);
 

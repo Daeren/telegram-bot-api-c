@@ -26,14 +26,14 @@ const token         = process.env.TELEGRAM_BOT_TOKEN,
       chatId        = process.env.TELEGRAM_CHAT_ID,
       msgId         = process.env.TELEGRAM_MSG_ID;
 
-const gBotFather    = rBot(token);
+const objBot        = rBot(token);
 
 const gBotReq       = {
     "cid": chatId,
     "mid": msgId
 };
 
-const gCreateRB = function() { return new CResponseBuilder(gBotReq, gBotFather); };
+const gCreateRB = function() { return new CResponseBuilder(gBotReq, objBot); };
 
 const gElements = [
     "text", "photo", "audio", "document", "sticker", "video", "voice", "location", "chatAction"
@@ -142,7 +142,7 @@ describe("CResponseBuilder", function() {
 
             //----------]>
 
-            expect(lastElement.reply_markup).to.deep.equal(gBotFather.keyboard("1 2 3"));
+            expect(lastElement.reply_markup).to.deep.equal(objBot.keyboard("1 2 3"));
 
             //----------]>
 
@@ -180,7 +180,7 @@ describe("CResponseBuilder", function() {
             //----------]>
 
             expect(lastElement).to.be.a("object");
-            expect(lastElement.reply_markup).to.deep.equal(gBotFather.keyboard());
+            expect(lastElement.reply_markup).to.deep.equal(objBot.keyboard());
 
             //----------]>
 
