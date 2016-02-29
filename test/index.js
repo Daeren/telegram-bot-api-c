@@ -660,62 +660,6 @@ describe("Instance: bot", function() {
             });
         });
 
-        //-----------------]>
-
-        it("polling", function(done) {
-            const options  = {
-                "limit":    100,
-                "timeout":  0,
-                "interval": 10
-            };
-
-            let srv;
-
-            //---------]>
-
-            srv = objBot.polling();
-
-            expect(srv).to.be.a("object").and.not.equal(null);
-            expect(srv).to.have.property("start").that.is.an("function");
-            expect(srv).to.have.property("stop").that.is.an("function");
-
-            srv.stop();
-
-            //---------]>
-
-            srv = objBot.polling(options);
-
-            expect(srv).to.be.a("object").and.not.equal(null);
-            expect(srv).to.have.property("start").that.is.an("function");
-            expect(srv).to.have.property("stop").that.is.an("function");
-
-            srv.stop();
-
-            //---------]>
-
-            srv = objBot.polling(function() {});
-
-            expect(srv).to.be.a("object").and.not.equal(null);
-            expect(srv).to.have.property("start").that.is.an("function");
-            expect(srv).to.have.property("stop").that.is.an("function");
-
-            srv.stop();
-
-            //---------]>
-
-            srv = objBot.polling(options, function() {});
-
-            expect(srv).to.be.a("object").and.not.equal(null);
-            expect(srv).to.have.property("start").that.is.an("function");
-            expect(srv).to.have.property("stop").that.is.an("function");
-
-            srv.stop();
-
-            //---------]>
-
-            done();
-        });
-
     });
 
     //-----------------]>
