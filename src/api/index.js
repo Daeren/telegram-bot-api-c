@@ -273,13 +273,9 @@ function callAPI(token, method, data, callback) {
 
             case "json":
                 if(typeof(value) !== "string" && !Buffer.isBuffer(value)) {
-                    value = JSON.stringify(value);
+                    value = JSON.stringify(value) || "";
                 }
-				
-                if(!value) {
-                    return true;
-                }
-				
+
                 req.write("\"\r\nContent-Type: application/json\r\n\r\n");
 
                 break;
