@@ -54,9 +54,14 @@ function main(token, method, callback) {
     function cbRequest(response) {
         let firstChunk, chunks;
 
-        //---------]>
+        //--------]>
 
-        response.on("data", function onResponseData(chunk) {
+        response.on("data", onResponseData);
+        response.on("end", onResponseEnd);
+
+        //--------]>
+
+        function onResponseData(chunk) {
             if(!firstChunk) {
                 firstChunk = chunk;
             }
@@ -64,10 +69,10 @@ function main(token, method, callback) {
                 chunks = chunks || [firstChunk];
                 chunks.push(chunk);
             }
-        });
+        }
 
-        response.on("end", function onResponseEnd() {
+        function onResponseEnd() {
             callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
-        });
+        }
     }
 }

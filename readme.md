@@ -27,11 +27,11 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 [Telegram Bot API][3]
 
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
-* rb.data() => rb.answer()
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * [InlineQuery](#refInlineQuery): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * Analytics: [tgb-pl-botanio][4]
+* rb.data() => rb.answer()
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -183,7 +183,7 @@ function cbMsg(bot) {
 function cbCmdStop(bot, params) {
     objSrv.stop();
     
-    bot.answer().text(params).send();
+    bot.answer().text(JSON.stringify(params)).send();
 }
 ```
 

@@ -69,7 +69,7 @@ describe("Module: bot", function() {
     it("call(getMe) | callback", function(done) {
         rBot
             .call(token, "getMe", function(error, result, response) {
-                checkError(error);
+                checkWithoutError(error);
 
                 expect(result).to.be.an.instanceof(Buffer);
                 expect(response).to.be.a("object").and.not.equal(null);
@@ -81,7 +81,7 @@ describe("Module: bot", function() {
     it("callJson(getMe) | callback", function(done) {
         rBot
             .callJson(token, "getMe", function(error, result, response) {
-                checkError(error);
+                checkWithoutError(error);
 
                 expect(result).to.be.a("object").and.not.equal(null);
                 expect(response).to.be.a("object").and.not.equal(null);
@@ -443,7 +443,7 @@ describe("Instance: bot", function() {
         it("call(getMe-2args) | callback", function(done) {
             objBot
                 .call("getMe", function(error, result, response) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(result).to.be.an.instanceof(Buffer);
                     expect(response).to.be.a("object").and.not.equal(null);
@@ -455,7 +455,7 @@ describe("Instance: bot", function() {
         it("call(getMe-data:null) | callback", function(done) {
             objBot
                 .call("getMe", null, function(error, result, response) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(result).to.be.an.instanceof(Buffer);
                     expect(response).to.be.a("object").and.not.equal(null);
@@ -469,7 +469,7 @@ describe("Instance: bot", function() {
                 .call("getFile", {
                     "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
                 }, function(error, result, response) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(result).to.be.an.instanceof(Buffer);
                     expect(response).to.be.a("object").and.not.equal(null);
@@ -478,14 +478,14 @@ describe("Instance: bot", function() {
                 });
         });
 
-        it("call(getFile-empty) | callback", function(done) {
+        it("call(getFile-file_id:zero) | callback", function(done) {
             objBot
                 .call("getFile", {
                     "file_id": "0"
                 }, function(error, result, response) {
-                    checkError(error);
+                    checkWithError(error);
 
-                    expect(result).to.be.an.instanceof(Buffer);
+                    expect(result).to.be.null;
                     expect(response).to.be.a("object").and.not.equal(null);
 
                     done();
@@ -510,7 +510,7 @@ describe("Instance: bot", function() {
         it("callJson(getMe-2args) | callback", function(done) {
             objBot
                 .callJson("getMe", function(error, result, response) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(result).to.be.a("object").and.not.equal(null);
                     expect(response).to.be.a("object").and.not.equal(null);
@@ -525,7 +525,7 @@ describe("Instance: bot", function() {
         it("callJson(getMe-data:null) | callback", function(done) {
             objBot
                 .callJson("getMe", null, function(error, result, response) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(result).to.be.a("object").and.not.equal(null);
                     expect(response).to.be.a("object").and.not.equal(null);
@@ -542,7 +542,7 @@ describe("Instance: bot", function() {
                 .callJson("getFile", {
                     "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
                 }, function(error, result) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(result).to.be.a("object").and.not.equal(null);
 
@@ -558,7 +558,7 @@ describe("Instance: bot", function() {
         it("download(stream) | callback", function(done) {
             objBot
                 .download("BQADAgADEwADb9HwBoAUlahFM8WGAg", function(error, info) {
-                    checkError(error);
+                    checkWithoutError(error);
 
                     expect(info).to.be.a("object").and.not.equal(null);
 
@@ -584,7 +584,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    checkError(error, done);
+                    checkWithoutError(error, done);
                 });
         });
 
@@ -611,7 +611,7 @@ describe("Instance: bot", function() {
 
             request
                 .on("error", function(error) {
-                    checkError(error, done);
+                    checkWithoutError(error, done);
                 })
                 .on("response", function(response) {
                     let data = {"photo": response};
@@ -643,7 +643,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    checkError(error, done);
+                    checkWithoutError(error, done);
                 });
         });
 
@@ -860,7 +860,7 @@ describe("Instance: bot", function() {
                 "chat_id":      chatId,
                 "action":       "typing"
             }, function(error, isOk) {
-                checkError(error);
+                checkWithoutError(error);
                 expect(isOk).to.be.a("boolean");
 
                 done();
@@ -877,7 +877,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    checkError(error, done);
+                    checkWithoutError(error, done);
                 });
         });
 
@@ -891,7 +891,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    checkError(error, done);
+                    checkWithoutError(error, done);
                 });
         });
 
@@ -901,7 +901,7 @@ describe("Instance: bot", function() {
             api.getUserProfilePhotos({
                 "user_id":      chatId
             }, function(error, data) {
-                checkError(error);
+                checkWithoutError(error);
 
                 expect(data).to.have.property("photos").that.is.an("array");
 
@@ -911,7 +911,7 @@ describe("Instance: bot", function() {
 
         it("getUpdates | callback", function(done) {
             api.getUpdates(function(error, data) {
-                checkError(error);
+                checkWithoutError(error);
                 expect(data).to.be.a("array");
 
                 done();
@@ -924,7 +924,7 @@ describe("Instance: bot", function() {
             api.getFile({
                 "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
             }, function(error, data) {
-                checkError(error);
+                checkWithoutError(error);
                 expect(data).to.be.a("object").and.not.equal(null);
 
                 expect(data).to.have.property("file_id");
@@ -937,7 +937,7 @@ describe("Instance: bot", function() {
 
         it("getMe | callback", function(done) {
             api.getMe(function(error, data) {
-                checkError(error);
+                checkWithoutError(error);
                 expect(data).to.be.a("object").and.not.equal(null);
 
                 expect(data).to.have.property("id").that.is.an("number");
@@ -960,7 +960,7 @@ describe("Instance: bot", function() {
 
                     done();
                 }, function(error) {
-                    checkError(error, done);
+                    checkWithoutError(error, done);
                 });
         });
 
@@ -982,11 +982,19 @@ function checkSendLocation(error, data) {
 
 //-----------]>
 
-function checkError(error, done) {
-    if(error) {
+function checkWithError(error, done) {
+    if(done) {
+        setTimeout(function() {
+            expect(error).to.be.an.instanceof(Error);
+            done();
+        }, 0);
+    }
+    else {
         expect(error).to.be.an.instanceof(Error);
     }
+}
 
+function checkWithoutError(error, done) {
     if(done) {
         setTimeout(function() {
             expect(error).to.be.null;
@@ -1001,7 +1009,8 @@ function checkError(error, done) {
 //-----------]>
 
 function checkBaseFields(error, data) {
-    checkError(error);
+    checkWithoutError(error);
+
     expect(data).to.be.a("object").and.not.equal(null);
 
     expect(data).to.have.property("message_id");

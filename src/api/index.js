@@ -20,14 +20,18 @@ const rUtil             = require("./../util");
 
 //-----------------------------------------------------
 
-const gCRLF           = "\r\n";
+const gCRLF                 = "\r\n";
 
-const gPipeOptions    = {"end": false};
-const gReIsFilePath   = /[\\\/\.]/;
+const gPipeOptions          = {"end": false};
+const gReIsFilePath         = /[\\\/\.]/;
 
-const gBoundaryUInterval = 1000 * 60 * 5;
+const gMaxFileSize          = 50 * 1024 * 1024;
 
-let gBoundaryKey, gBoundaryDiv, gBoundaryEnd, gBoundaryUDate, gHeaderContentType, gCRLFBoundaryDiv, gCRLFBoundaryEnd;
+const gBoundaryUInterval    = 1000 * 60 * 5;
+
+let gBoundaryKey, gBoundaryUDate, gHeaderContentType,
+    gBoundaryDiv, gBoundaryEnd,
+    gCRLFBoundaryDiv, gCRLFBoundaryEnd;
 
 //-----------------------]>
 
@@ -125,12 +129,11 @@ function getReadStreamByUrl(url, data, callback) {
 
         //-----[Filters]-----}>
 
-        if(data.maxSize) {
-            if(!contentLength) {
-                error = new Error("Unknown size");
-            }
-            else if(contentLength > data.maxSize) {
-                error = new Error("maxSize");
+        if(contentLength) {
+            let paramsMaxSize = Math.min(Math.max(parseInt(data.maxSize, 10) || gMaxFileSize, gMaxFileSize), gMaxFileSize);
+
+            if(contentLength > paramsMaxSize) {
+                error = new Error("maxSize: " + paramsMaxSize);
             }
         }
 
@@ -145,7 +148,7 @@ function getReadStreamByUrl(url, data, callback) {
     }
 }
 
-//------------------]>
+//--------[PublicMethods]--------}>
 
 function callAPI(token, method, data, callback) {
     method = method.toLowerCase();
@@ -188,8 +191,11 @@ function callAPI(token, method, data, callback) {
             else if(statusCode === 401) {
                 error = new Error("Invalid access token provided: " + token);
             }
+            else if(statusCode !== 200) {
+                error = new Error(body ? body.toString() : ("Status code:" + statusCode));
+            }
             else if(!body) {
-                error = new Error("body: empty");
+                error = new Error("Body: empty");
             }
         }
 
@@ -200,7 +206,7 @@ function callAPI(token, method, data, callback) {
         callback(error, body, response);
     });
 
-    //-------------------------]>
+    //----------------]>
 
     if(reqMParams && data) {
         let isWritten = false;
@@ -253,7 +259,7 @@ function callAPI(token, method, data, callback) {
         req.end();
     }
 
-    //---------------]>
+    //-------------------------]>
 
     function writeField(type, value) {
         switch(type) {
@@ -398,7 +404,10 @@ function callAPI(token, method, data, callback) {
         //---------]>
 
         function writeFileStream(error, input) {
-            if(error || !input) {
+            if(error) {
+                req.destroy(error);
+            }
+            else if(!input) {
                 req.write("\"\r\n\r\n");
                 req.write(gCRLFBoundaryEnd);
                 req.end();
@@ -420,7 +429,12 @@ function callAPI(token, method, data, callback) {
 
         //------]>
 
-        function onEnd() {
+        function onEnd(error) {
+            if(error) {
+                req.destroy(error);
+                return;
+            }
+
             req.write(gCRLFBoundaryEnd);
             req.end();
         }
@@ -441,10 +455,11 @@ function callAPIJson(token, method, data, callback) {
 
     function cbCallAPI(error, result, response) {
         if(!error) {
-            try {
+            if(response.headers["content-type"] === "application/json") {
                 result = JSON.parse(result);
-            } catch(e) {
-                error = e;
+            }
+            else {
+                error = new Error("Expected JSON.\r\n\r\nBody:\r\n" + result.toString());
             }
         }
 
