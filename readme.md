@@ -26,13 +26,12 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
-* KeepAlive (the execution speed of requests increased by ~50%): +
+* KeepAlive (+50% to the speed of requests): +
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * [InlineQuery](#refInlineQuery): +
 * [Virtual (StressTest / Express)](#refVirtual): +
 * Analytics: [tgb-pl-botanio][4]
-* rb.data() => rb.answer()
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -696,8 +695,8 @@ function cbMsg(bot) {
 #### Download
 
 ```js
-objBot.download("file_id", "dir", /*callback*/);
-objBot.download("file_id", "dir", "name.mp3", /*callback*/);
+objBot.download("file_id", "dir"/*, callback*/);
+objBot.download("file_id", "dir", "name.mp3"/*, callback*/);
 
 
 objBot
@@ -1046,7 +1045,7 @@ npm test
 | off           | [type][, callback]                    | this                                      |
 
 
-#### Fields: bot (srv.on("*", bot => { })
+#### Fields: bot (srv.on("*", bot => 0)
 
 | Name              | Type                  | Note                                                   |
 |-------------------|-----------------------|--------------------------------------------------------|
