@@ -26,6 +26,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* KeepAlive (the execution speed of requests increased by ~50%): +
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * [InlineQuery](#refInlineQuery): +

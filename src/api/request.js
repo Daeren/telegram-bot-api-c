@@ -13,13 +13,17 @@ const rHttps = require("https");
 
 //-----------------------------------------------------
 
+const gKeepAliveAgent  = new rHttps.Agent({"keepAlive": true});
+
 const gReqOptions   = {
     "path":         null,
 
     "host":         "api.telegram.org",
     "port":         443,
 
-    "method":       "POST"
+    "method":       "POST",
+
+    "agent":        gKeepAliveAgent
 };
 
 //-----------------------------------------------------

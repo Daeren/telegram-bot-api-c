@@ -130,7 +130,7 @@ function getReadStreamByUrl(url, data, callback) {
         //-----[Filters]-----}>
 
         if(contentLength) {
-            let paramsMaxSize = Math.min(Math.max(parseInt(data.maxSize, 10) || gMaxFileSize, gMaxFileSize), gMaxFileSize);
+            const paramsMaxSize = Math.min(Math.max(parseInt(data.maxSize, 10) || gMaxFileSize, gMaxFileSize), gMaxFileSize);
 
             if(contentLength > paramsMaxSize) {
                 error = new Error("maxSize: " + paramsMaxSize);
