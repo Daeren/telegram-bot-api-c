@@ -432,11 +432,11 @@ function callAPI(token, method, data, callback) {
         function onEnd(error) {
             if(error) {
                 req.destroy(error);
-                return;
             }
-
-            req.write(gCRLFBoundaryEnd);
-            req.end();
+            else {
+                req.write(gCRLFBoundaryEnd);
+                req.end();
+            }
         }
     }
 }

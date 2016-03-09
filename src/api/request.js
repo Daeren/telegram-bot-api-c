@@ -56,8 +56,9 @@ function main(token, method, callback) {
 
         //--------]>
 
-        response.on("data", onResponseData);
-        response.on("end", onResponseEnd);
+        response
+            .on("data", onResponseData)
+            .on("end", onResponseEnd);
 
         //--------]>
 
