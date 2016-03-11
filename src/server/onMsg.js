@@ -178,7 +178,7 @@ function main(srvBot, data) {
 
                 //-----[CMD]----}>
 
-                if(cmdParam && (callEventWithState(cmdParam.cmd, cmdParam) || callEventWithState("/", cmdParam))) {
+                if(cmdParam && (callEventWithState(cmdParam.cmd, cmdParam) || callEventWithState("/", cmdParam) || callEvent(cmdParam.cmd, cmdParam) || callEvent("/", cmdParam))) {
                     return;
                 }
 
