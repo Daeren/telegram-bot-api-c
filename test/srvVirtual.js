@@ -450,6 +450,39 @@ describe("srv.virtual", function() {
         server.input(null, inputSrvMessageCmd);
     });
 
+    it("Instance (event: cmd | goto)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.use(function(type, bot) {
+            return type === "text" && bot.message.text === "/ hello" ? "goto" : "";
+        });
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/:goto", function(bot, params) {
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(params);
+
+            done();
+        });
+
+        server.on("text", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("text:goto", function() {
+            throw new Error("The message passed through the event | #4");
+        });
+
+        //------]>
+
+        server.input(null, inputSrvMessageCmd);
+    });
+
 });
 
 //-------------]>
