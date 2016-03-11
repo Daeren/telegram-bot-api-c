@@ -72,7 +72,7 @@ describe("Module: bot", function() {
                 checkWithoutError(error);
 
                 expect(result).to.be.an.instanceof(Buffer);
-                expect(response).to.be.a("object").and.not.equal(null);
+                expect(response).to.be.an("object").and.not.equal(null);
 
                 done();
             });
@@ -83,11 +83,11 @@ describe("Module: bot", function() {
             .callJson(token, "getMe", function(error, result, response) {
                 checkWithoutError(error);
 
-                expect(result).to.be.a("object").and.not.equal(null);
-                expect(response).to.be.a("object").and.not.equal(null);
+                expect(result).to.be.an("object").and.not.equal(null);
+                expect(response).to.be.an("object").and.not.equal(null);
 
                 expect(result).to.have.property("ok").to.equal(true);
-                expect(result).to.have.property("result").to.be.a("object").and.not.equal(null);
+                expect(result).to.have.property("result").to.be.an("object").and.not.equal(null);
 
                 done();
             });
@@ -103,7 +103,7 @@ describe("Instance: bot", function() {
     //-----------------]>
 
     it("Instance", function() {
-        expect(objBot).to.be.a("object").and.not.equal(null);
+        expect(objBot).to.be.an("object").and.not.equal(null);
     });
 
     //-----------------]>
@@ -135,7 +135,7 @@ describe("Instance: bot", function() {
                 "setWebhook"
             ];
 
-            expect(api).to.be.a("object").and.not.equal(null);
+            expect(api).to.be.an("object").and.not.equal(null);
 
             for(let method of apiMethods) {
                 expect(api).to.have.property(method);
@@ -249,7 +249,7 @@ describe("Instance: bot", function() {
 
             buttons = keyboard("X Y Z");
 
-            expect(buttons).to.be.a("object").and.not.equal(null);
+            expect(buttons).to.be.an("object").and.not.equal(null);
 
             expect(buttons).to.have.property("keyboard").that.is.an("array");
 
@@ -257,7 +257,7 @@ describe("Instance: bot", function() {
 
             buttons = keyboard([["X"]], "resize once selective");
 
-            expect(buttons).to.be.a("object").and.not.equal(null);
+            expect(buttons).to.be.an("object").and.not.equal(null);
 
             expect(buttons).to.have.property("keyboard").that.is.an("array");
             expect(buttons).to.have.property("resize_keyboard");
@@ -277,6 +277,7 @@ describe("Instance: bot", function() {
         });
 
         //------)>
+
 
         describe("parseCmd | normal-strict", function() {
             const cmdSelf = "/12345678901234567890123456789012",
@@ -301,7 +302,7 @@ describe("Instance: bot", function() {
                 it(cmd, function(cmd, cmdType) {
                     let t = parseCmd(cmd, true);
 
-                    expect(t).to.be.a("object").and.not.equal(null);
+                    expect(t).to.be.an("object").and.not.equal(null);
 
                     expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
@@ -327,13 +328,67 @@ describe("Instance: bot", function() {
                 it(cmd, function(cmd, cmdType) {
                     let t = parseCmd(cmd, true);
 
-                    expect(t).to.be.a("object").and.not.equal(null);
+                    expect(t).to.be.an("object").and.not.equal(null);
 
                     expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
                     expect(t).to.have.property("text").that.is.equal("/" + cmdText);
                     expect(t).to.have.property("cmd").that.is.equal(cmdSelf);
                 }.bind(this, cmd, cmdType));
+
+                cmdType = "private";
+            }
+
+            //--------[Empty]-------}>
+
+            cmdType = "common";
+            normalCmds = [
+                "/ /[text]",
+
+                "/@bot /[text]",
+                "@bot / /[text]"
+            ];
+
+            //-----]>
+
+            for(let cmd of normalCmds) {
+                it(cmd, function(cmdType) {
+                    let t = parseCmd(cmd, true);
+
+                    expect(t).to.be.an("object").and.not.equal(null);
+
+                    expect(t).to.have.property("type").that.is.equal(cmdType);
+                    expect(t).to.have.property("name").that.is.equal("");
+                    expect(t).to.have.property("text").that.is.equal("/" + cmdText);
+                    expect(t).to.have.property("cmd").that.is.equal("/");
+                }.bind(this, cmdType));
+
+                cmdType = "private";
+            }
+
+            //----------)>
+
+            cmdType = "common";
+            normalCmds = [
+                "/ [text]",
+
+                "/@bot [text]",
+                "@bot / [text]"
+            ];
+
+            //-----]>
+
+            for(let cmd of normalCmds) {
+                it(cmd, function(cmdType) {
+                    let t = parseCmd(cmd, true);
+
+                    expect(t).to.be.an("object").and.not.equal(null);
+
+                    expect(t).to.have.property("type").that.is.equal(cmdType);
+                    expect(t).to.have.property("name").that.is.equal("");
+                    expect(t).to.have.property("text").that.is.equal(cmdText);
+                    expect(t).to.have.property("cmd").that.is.equal("/");
+                }.bind(this, cmdType));
 
                 cmdType = "private";
             }
@@ -382,7 +437,7 @@ describe("Instance: bot", function() {
                 it(cmd, function(cmd, cmdType) {
                     let t = parseCmd(cmd);
 
-                    expect(t).to.be.a("object").and.not.equal(null);
+                    expect(t).to.be.an("object").and.not.equal(null);
 
                     expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
@@ -406,7 +461,7 @@ describe("Instance: bot", function() {
                 it(cmd, function(cmd, cmdType) {
                     let t = parseCmd(cmd);
 
-                    expect(t).to.be.a("object").and.not.equal(null);
+                    expect(t).to.be.an("object").and.not.equal(null);
 
                     expect(t).to.have.property("type").that.is.equal(cmdType);
                     expect(t).to.have.property("name").that.is.equal(cmdName);
@@ -420,8 +475,7 @@ describe("Instance: bot", function() {
 
         describe("parseCmd | fake", function() {
             const fakeCmds = [
-                "@bot [text]","@bot / [text]",
-                "/", "/ [text]",
+                "@bot [text]",
                 "@ [text]", "@ / [text]", " / [text]"
             ];
 
@@ -446,7 +500,7 @@ describe("Instance: bot", function() {
                     checkWithoutError(error);
 
                     expect(result).to.be.an.instanceof(Buffer);
-                    expect(response).to.be.a("object").and.not.equal(null);
+                    expect(response).to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -458,7 +512,7 @@ describe("Instance: bot", function() {
                     checkWithoutError(error);
 
                     expect(result).to.be.an.instanceof(Buffer);
-                    expect(response).to.be.a("object").and.not.equal(null);
+                    expect(response).to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -472,7 +526,7 @@ describe("Instance: bot", function() {
                     checkWithoutError(error);
 
                     expect(result).to.be.an.instanceof(Buffer);
-                    expect(response).to.be.a("object").and.not.equal(null);
+                    expect(response).to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -486,7 +540,7 @@ describe("Instance: bot", function() {
                     checkWithError(error);
 
                     expect(result).to.be.null;
-                    expect(response).to.be.a("object").and.not.equal(null);
+                    expect(response).to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -512,11 +566,11 @@ describe("Instance: bot", function() {
                 .callJson("getMe", function(error, result, response) {
                     checkWithoutError(error);
 
-                    expect(result).to.be.a("object").and.not.equal(null);
-                    expect(response).to.be.a("object").and.not.equal(null);
+                    expect(result).to.be.an("object").and.not.equal(null);
+                    expect(response).to.be.an("object").and.not.equal(null);
 
                     expect(result).to.have.property("ok").to.equal(true);
-                    expect(result).to.have.property("result").to.be.a("object").and.not.equal(null);
+                    expect(result).to.have.property("result").to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -527,11 +581,11 @@ describe("Instance: bot", function() {
                 .callJson("getMe", null, function(error, result, response) {
                     checkWithoutError(error);
 
-                    expect(result).to.be.a("object").and.not.equal(null);
-                    expect(response).to.be.a("object").and.not.equal(null);
+                    expect(result).to.be.an("object").and.not.equal(null);
+                    expect(response).to.be.an("object").and.not.equal(null);
 
                     expect(result).to.have.property("ok").to.equal(true);
-                    expect(result).to.have.property("result").to.be.a("object").and.not.equal(null);
+                    expect(result).to.have.property("result").to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -544,10 +598,10 @@ describe("Instance: bot", function() {
                 }, function(error, result) {
                     checkWithoutError(error);
 
-                    expect(result).to.be.a("object").and.not.equal(null);
+                    expect(result).to.be.an("object").and.not.equal(null);
 
                     expect(result).to.have.property("ok").to.equal(true);
-                    expect(result).to.have.property("result").to.be.a("object").and.not.equal(null);
+                    expect(result).to.have.property("result").to.be.an("object").and.not.equal(null);
 
                     done();
                 });
@@ -560,7 +614,7 @@ describe("Instance: bot", function() {
                 .download("BQADAgADEwADb9HwBoAUlahFM8WGAg", function(error, info) {
                     checkWithoutError(error);
 
-                    expect(info).to.be.a("object").and.not.equal(null);
+                    expect(info).to.be.an("object").and.not.equal(null);
 
                     expect(info).to.have.property("id");
                     expect(info).to.have.property("file");
@@ -575,7 +629,7 @@ describe("Instance: bot", function() {
             objBot
                 .download("BQADAgADEwADb9HwBoAUlahFM8WGAg")
                 .then(function(info) {
-                    expect(info).to.be.a("object").and.not.equal(null);
+                    expect(info).to.be.an("object").and.not.equal(null);
 
                     expect(info).to.have.property("id");
                     expect(info).to.have.property("file");
@@ -636,7 +690,7 @@ describe("Instance: bot", function() {
             objBot
                 .send(chatId, data)
                 .then(function(result) {
-                    expect(result).to.be.a("object").and.not.equal(null);
+                    expect(result).to.be.an("object").and.not.equal(null);
 
                     expect(result).to.have.property("chatAction").that.is.an("array");
                     expect(result).to.have.property("text").that.is.an("array");
@@ -925,7 +979,7 @@ describe("Instance: bot", function() {
                 "file_id": "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
             }, function(error, data) {
                 checkWithoutError(error);
-                expect(data).to.be.a("object").and.not.equal(null);
+                expect(data).to.be.an("object").and.not.equal(null);
 
                 expect(data).to.have.property("file_id");
 
@@ -938,7 +992,7 @@ describe("Instance: bot", function() {
         it("getMe | callback", function(done) {
             api.getMe(function(error, data) {
                 checkWithoutError(error);
-                expect(data).to.be.a("object").and.not.equal(null);
+                expect(data).to.be.an("object").and.not.equal(null);
 
                 expect(data).to.have.property("id").that.is.an("number");
                 expect(data).to.have.property("first_name").that.is.an("string");
@@ -952,7 +1006,7 @@ describe("Instance: bot", function() {
             api
                 .getMe()
                 .then(function(data) {
-                    expect(data).to.be.a("object").and.not.equal(null);
+                    expect(data).to.be.an("object").and.not.equal(null);
 
                     expect(data).to.have.property("id").that.is.an("number");
                     expect(data).to.have.property("first_name").that.is.an("string");
@@ -1011,7 +1065,7 @@ function checkWithoutError(error, done) {
 function checkBaseFields(error, data) {
     checkWithoutError(error);
 
-    expect(data).to.be.a("object").and.not.equal(null);
+    expect(data).to.be.an("object").and.not.equal(null);
 
     expect(data).to.have.property("message_id");
     expect(data).to.have.property("from").that.is.an("object");

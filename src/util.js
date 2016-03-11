@@ -15,6 +15,11 @@ const rHttp             = require("http"),
 
 //-----------------------------------------------------
 
+const gHttpKeepAliveAgent   = new rHttp.Agent({"keepAlive": true}),
+      gHttpsKeepAliveAgent  = new rHttps.Agent({"keepAlive": true});
+
+//-----------------------------------------------------
+
 module.exports = {
     "createReadStreamByUrl":    createReadStreamByUrl,
     "getFilenameByMime":        getFilenameByMime
@@ -36,11 +41,13 @@ function createReadStreamByUrl(url, callback) {
 
     const isHTTPS = urlObj.protocol === "https:";
     const options = {
-        "host": urlObj.hostname,
-        "port": urlObj.port,
-        "path": urlObj.path,
+        "host":         urlObj.hostname,
+        "port":         urlObj.port,
+        "path":         urlObj.path,
 
-        "headers": {
+        "agent":        isHTTPS ? gHttpsKeepAliveAgent : gHttpKeepAliveAgent,
+
+        "headers":      {
             "User-Agent":   "TgBApic",
             "Referer":      url
         }

@@ -50,6 +50,30 @@ const inputSrvMessage = {
     }
 };
 
+const inputSrvMessageCmd = {
+    "update_id": 13,
+
+    "message": {
+        "message_id": msgId,
+
+        "from": {
+            "id": chatId,
+            "first_name": "D",
+            "username": ""
+        },
+
+        "chat": {
+            "id": chatId,
+            "first_name": "D",
+            "username": "",
+            "type": "private"
+        },
+
+        "date": Date.now(),
+        "text": "/ hello"
+    }
+};
+
 //-----------------------------------------------------
 
 expect(token).to.exist;
@@ -88,6 +112,8 @@ describe("srv.virtual", function() {
             expect(srv).to.have.property("off").that.is.a("function");
         })
     });
+
+    //----------]>
 
     it("Instance (base [function])", function(done) {
         let server = objBot.virtual(function(bot) {
@@ -185,6 +211,8 @@ describe("srv.virtual", function() {
             return new Promise(x => x(13));
         }
     });
+
+    //----------]>
 
     it("Instance (event: text)", function(done) {
         let server = objBot.virtual(function() {
@@ -321,6 +349,107 @@ describe("srv.virtual", function() {
         }
     });
 
+    it("Instance (event: text | goto | sync)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.use(function(type, bot) {
+            return type === "text" && bot.message.text === "Hello" ? "goto" : "";
+        });
+
+        server.logger(cbLogger);
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("text", onText);
+        server.on("text:goto", onTextGoto);
+
+        //------]>
+
+        server.input(null, inputSrvMessage);
+
+        //------]>
+
+        function onText() {
+            throw new Error("The message passed through the event | #4");
+        }
+
+        function onTextGoto(bot) {
+            tCheckBaseBotFields(bot);
+            done();
+        }
+    });
+
+    it("Instance (event: text | goto | async)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.use(function(type, bot, next) {
+            next(type === "text" && bot.message.text === "Hello" ? "goto" : "");
+        });
+
+        server.logger(cbLogger);
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("text", onText);
+        server.on("text:goto", onTextGoto);
+
+        //------]>
+
+        server.input(null, inputSrvMessage);
+
+        //------]>
+
+        function onText() {
+            throw new Error("The message passed through the event | #4");
+        }
+
+        function onTextGoto(bot) {
+            tCheckBaseBotFields(bot);
+            done();
+        }
+    });
+
+    it("Instance (event: cmd)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/", function(bot, params) {
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(params);
+
+            done();
+        });
+
+        server.on("text", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        //------]>
+
+        server.input(null, inputSrvMessageCmd);
+    });
+
 });
 
 //-------------]>
@@ -385,4 +514,13 @@ function tCheckBaseBotFields(bot) {
         .forEach(function(e) {
             expect(bot[e]).to.be.a("function");
         });
+}
+
+function tCheckBaseCmdFields(params, isPrivate) {
+    expect(params).to.be.a("object").and.not.equal(null);
+
+    expect(params).to.have.property("type").that.is.equal(isPrivate ? "private" : "common");
+    expect(params).to.have.property("name").that.is.equal("");
+    expect(params).to.have.property("text").that.is.equal("hello");
+    expect(params).to.have.property("cmd").that.is.equal("/");
 }

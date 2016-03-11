@@ -22,32 +22,30 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(text, strict) {
-    if(typeof(text) !== "string" || text.length <= 1 || text[0] !== "/" && text[0] !== "@") {
+    if(!text || typeof(text) !== "string") {
         return null;
     }
 
     //---------]>
 
-    let t,
+    const firstChar = text[0];
 
-        type = "common",
-        name, cmdText, cmd;
+    let foundCmdParams,
+        type, name, cmdText, cmd;
 
     //---------]>
 
-    switch(text[0]) {
+    switch(firstChar) {
         case "/":
-            t = text.match(gReFindCmd);
+            foundCmdParams = text.match(gReFindCmd);
 
-            if(!t) {
-                break;
-            }
+            if(foundCmdParams) {
+                cmd = foundCmdParams[1];
+                cmdText = foundCmdParams[2];
 
-            cmd = t[1];
-            cmdText = t[2];
-
-            if(cmd) {
-                type = "private";
+                if(cmd) {
+                    type = "private";
+                }
             }
 
             break;
@@ -62,35 +60,31 @@ function main(text, strict) {
             break;
 
         default:
-            break;
-    }
-
-    if(!t) {
-        t = text.split(gReSplitCmd, 2);
-
-        cmd = t[0];
-        cmdText = t[1];
-
-        if(!cmd || cmd[0] !== "/" || cmd === "/") {
             return null;
+    }
+
+    if(text !== "/") {
+        if(!foundCmdParams) {
+            foundCmdParams = text.split(gReSplitCmd, 2);
+
+            cmd = foundCmdParams[0];
+            cmdText = foundCmdParams[1];
+
+            if(!cmd || cmd[0] !== "/") {
+                return null;
+            }
         }
-    }
 
-    name = cmd.substr(1);
-
-    //---------]>
-
-    if(strict && (name.length > 32 || !gReValidCmd.test(name))) {
-        return null;
+        name = cmd === "/" ? "" : cmd.substr(1);
     }
 
     //---------]>
 
-    return {
-        "type": type,
-        "name": name,
+    return strict && name && (name.length > 32 || !gReValidCmd.test(name)) ? null : {
+        "type": type || "common",
+        "name": name || "",
         "text": cmdText || "",
 
-        "cmd":  cmd
+        "cmd":  cmd || text
     };
 }
