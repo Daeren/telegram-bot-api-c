@@ -9,14 +9,12 @@
 
 //-----------------------------------------------------
 
-const rParseCmd         = require("./../parseCmd");
-
-const rMsgSanitize      = require("./msgSanitize"),
+const rParseCmd         = require("./../parseCmd"),
       rResponseBuilder  = require("./responseBuilder");
 
 //-----------------------------------------------------
 
-const gReReplaceBotName = /^@\S+\s+/;
+const gReReplaceBotName = /^@\w{5,32}\s*/;
 
 const C_BD_TYPE_UNKNOWN      = 0,
       C_BD_TYPE_MESSAGE      = 1,
@@ -36,12 +34,6 @@ function main(srvBot, data) {
     //--------]>
 
     const botInstance = srvBot.instance;
-
-    //--------]>
-
-    if(botInstance.enabled("onMsg.sanitize")) {
-        data = rMsgSanitize(data); // <-- Prototype
-    }
 
     //--------]>
 
@@ -80,13 +72,23 @@ function main(srvBot, data) {
 
     const msgChatId         = msgChat ? msgChat.id : 0,
 
-          msgIsGroup        = !!(msgChat && msgChat.type === "group"),
+          msgIsGroup        = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
           msgIsReply        = !!(msg && msg.reply_to_message);
 
     const botPlugin         = srvBot.plugin,
           botFilters        = srvBot.filters,
 
           reqCtxBot         = createReqCtx(bdataType);
+
+    //-----[Filter: botName]----}>
+
+    if(evName === "text" && msgIsGroup && msg.text[0] === "@" && !msg.reply_to_message && botInstance.disabled("onMsg.skipFilterBotName")) {
+        const t = msg.text = msg.text.replace(gReReplaceBotName, "");
+
+        if(!t) {
+            return;
+        }
+    }
 
     //------------]>
 
@@ -166,17 +168,11 @@ function main(srvBot, data) {
                 break;
 
             case "text":
-                let msgText = msg.text;
-
-                cmdParam = rParseCmd(msgText);
-
-                //-----[Filter: botName]----}>
-
-                if(msgIsGroup && msgChatId < 0 && msgText[0] === "@" && !msg.reply_to_message) {
-                    msg.text = msgText = msgText.replace(gReReplaceBotName, "");
-                }
+                const msgText = msg.text;
 
                 //-----[CMD]----}>
+
+                cmdParam = rParseCmd(msgText);
 
                 if(cmdParam) {
                     break;

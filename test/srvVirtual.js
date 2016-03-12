@@ -50,6 +50,30 @@ const inputSrvMessage = {
     }
 };
 
+const inputSrvMessageWithBotName = {
+    "update_id": 13,
+
+    "message": {
+        "message_id": msgId,
+
+        "from": {
+            "id": chatId,
+            "first_name": "D",
+            "username": ""
+        },
+
+        "chat": {
+            "id": -1,
+            "first_name": "D",
+            "username": "",
+            "type": "group"
+        },
+
+        "date": Date.now(),
+        "text": "@test5 Hello"
+    }
+};
+
 const inputSrvMessageCmd = {
     "update_id": 13,
 
@@ -276,6 +300,34 @@ describe("srv.virtual", function() {
     });
 
     //-----)>
+
+    it("Instance (event: text | filterBotName)", function(done) {
+        objBot
+            .virtual(function(bot) {
+                tCheckBaseBotFields(bot);
+
+                expect(bot.message.text).to.be.a("string").and.equal("Hello");
+
+                done();
+            })
+            .use("text", function(bot) {
+                expect(bot.message.text).to.be.a("string").and.equal("Hello");
+            })
+            .use("text", function(bot, next) {
+                expect(bot.message.text).to.be.a("string").and.equal("Hello");
+
+                next();
+            })
+            .use(function(type, bot) {
+                expect(bot.message.text).to.be.a("string").and.equal("Hello");
+            })
+            .use(function(type, bot, next) {
+                expect(bot.message.text).to.be.a("string").and.equal("Hello");
+
+                next();
+            })
+            .input(null, inputSrvMessageWithBotName);
+    });
 
     it("Instance (event: text)", function(done) {
         let server = objBot.virtual(function() {

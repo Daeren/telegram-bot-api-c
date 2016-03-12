@@ -64,7 +64,6 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 * [Broadcast](#refBroadcast)
 * [InlineQuery](#refInlineQuery)
 * [Errors](#refErrors)
-* [Unsafe URL](#refUnsafeURL)
 * [CLI](#refCLI)
 * [Test](#refTest)
 
@@ -840,20 +839,6 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 ```
 
 
-
-<a name="refUnsafeURL"></a>
-#### Unsafe URL 
-
-```js
-objMyBot.enable("onMsg.sanitize"); // <-- Sanitize Incoming message (prototype)
-
-objBotFather
-    .http(objSrvOptions)
-    .bot(objMyBot, "/MyBot")
-    .on("*", console.log);
-```
-
-
 <a name="refSendFileAsBuffer"></a>
 #### Send file as Buffer 
 
@@ -1050,7 +1035,7 @@ npm test
 | Name              | Type                  | Note                                                   |
 |-------------------|-----------------------|--------------------------------------------------------|
 |                   | -                     |                                                        |
-| isGroup           | boolean               | bot.isGroup = bot.message.chat.type === "group"        |
+| isGroup           | boolean               | bot.isGroup = bot.message.chat.type === [super]group   |
 | isReply           | boolean               | bot.isReply = !!bot.message.reply_to_message           |
 |                   | -                     |                                                        |
 | qid               | string                | bot.qid = bot.inlineQuery.id                           |
