@@ -178,8 +178,8 @@ function main(srvBot, data) {
 
                 //-----[CMD]----}>
 
-                if(cmdParam && (callEventWithState(cmdParam.cmd, cmdParam) || callEventWithState("/", cmdParam) || callEvent(cmdParam.cmd, cmdParam) || callEvent("/", cmdParam))) {
-                    return;
+                if(cmdParam) {
+                    break;
                 }
 
                 //-----[RE]----}>
@@ -221,19 +221,32 @@ function main(srvBot, data) {
                 break;
         }
 
-        if(!evName || !(msgType && callEventWithState(evName, msg[msgType])) && !callEventWithState("*", cmdParam)) {
-            const onMsg = srvBot.onMsg;
-
-            if(onMsg && !callGenerator(onMsg, cmdParam)) {
-                setImmediate(onMsg, reqCtxBot, cmdParam);
-            }
+        if(cmdParam) {
+            callEventWithState(cmdParam.cmd, cmdParam) || callEventWithState("/", cmdParam) || state && callEvent("/", cmdParam, state) || callDefaultOnMsg();
+        }
+        else if(!evName) {
+            callDefaultOnMsg();
+        }
+        else {
+            const data = msgType ? msg[msgType] : null;
+            evName && callEventWithState(evName, data) || callEventWithState("*", data) || state && callEvent("*", data, state) || callDefaultOnMsg();
         }
 
         //-------]>
 
-        function callGenerator(func, params) {
+        function callDefaultOnMsg() {
+            const onMsg = srvBot.onMsg;
+
+            if(onMsg && !callGenerator(onMsg)) {
+                setImmediate(onMsg, reqCtxBot, cmdParam, state);
+            }
+        }
+
+        function callGenerator(func) {
             if(func && func.constructor.name === "GeneratorFunction") {
-                executeGenerator(func(reqCtxBot, params), function(error) {
+                func = func(reqCtxBot, cmdParam, state);
+
+                executeGenerator(func, function(error) {
                     if(error && !callEventError(error)) {
                         setImmediate(() => { throw error; });
                     }
@@ -295,9 +308,9 @@ function main(srvBot, data) {
 
     //----[Events: helpers]----}>
 
-    function callEvent(type, params) {
+    function callEvent(type, params, state) {
         if(botFilters.ev.listenerCount(type)) {
-            botFilters.ev.emit(type, reqCtxBot, params);
+            botFilters.ev.emit(type, reqCtxBot, params, state);
             return true;
         }
 

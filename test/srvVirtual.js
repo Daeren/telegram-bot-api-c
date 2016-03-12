@@ -70,7 +70,7 @@ const inputSrvMessageCmd = {
         },
 
         "date": Date.now(),
-        "text": "/ hello"
+        "text": "/test hello"
     }
 };
 
@@ -214,52 +214,6 @@ describe("srv.virtual", function() {
 
     //----------]>
 
-    it("Instance (event: text)", function(done) {
-        let server = objBot.virtual(function() {
-            throw new Error("The message passed through the event | #1");
-        });
-
-        server.logger(cbLogger);
-
-        server.on("*", function() {
-            throw new Error("The message passed through the event | #2");
-        });
-
-        server.on("/", function() {
-            throw new Error("The message passed through the event | #3");
-        });
-
-        server.on("text", function(bot) {
-            tCheckBaseBotFields(bot);
-            done();
-        });
-
-        server.input(null, inputSrvMessage);
-    });
-
-    it("Instance (event: text | mix)", function(done) {
-        let server = objBot.virtual(function() {
-            throw new Error("The message passed through the event | #1");
-        });
-
-        server.logger(cbLogger);
-
-        server.on("*", function() {
-            throw new Error("The message passed through the event | #2");
-        });
-
-        server.on("/", function() {
-            throw new Error("The message passed through the event | #3");
-        });
-
-        server.on("photo text audio", function(bot) {
-            tCheckBaseBotFields(bot);
-            done();
-        });
-
-        server.input(null, inputSrvMessage);
-    });
-
     it("Instance (event: regex)", function(done) {
         let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
@@ -314,6 +268,54 @@ describe("srv.virtual", function() {
             expect(params).to.be.an("object");
             expect(params.myText).to.be.a("string").and.equal(bot.message.text);
 
+            tCheckBaseBotFields(bot);
+            done();
+        });
+
+        server.input(null, inputSrvMessage);
+    });
+
+    //-----)>
+
+    it("Instance (event: text)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.logger(cbLogger);
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("text", function(bot) {
+            tCheckBaseBotFields(bot);
+            done();
+        });
+
+        server.input(null, inputSrvMessage);
+    });
+
+    it("Instance (event: text | mix)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.logger(cbLogger);
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("photo text audio", function(bot) {
             tCheckBaseBotFields(bot);
             done();
         });
@@ -425,6 +427,8 @@ describe("srv.virtual", function() {
         }
     });
 
+    //-----)>
+
     it("Instance (event: cmd)", function(done) {
         let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
@@ -450,18 +454,58 @@ describe("srv.virtual", function() {
         server.input(null, inputSrvMessageCmd);
     });
 
-    it("Instance (event: cmd | goto)", function(done) {
+    it("Instance (event: cmd | goto | normal)", function(done) {
         let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.use(function(type, bot) {
-            return type === "text" && bot.message.text === "/ hello" ? "goto" : "";
+        server.use("text", function(bot, next) {
+            next("goto");
+        });
+
+
+        server.on("/test:goto", function(bot, params) {
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(params);
+
+            done();
+        });
+
+        server.on("/:goto", function() {
+            throw new Error("The message passed through the event | #6");
+        });
+
+        server.on("/", function() {
+            throw new Error("The message passed through the event | #5");
+        });
+
+
+        server.on("text:goto", function() {
+            throw new Error("The message passed through the event | #4");
+        });
+
+        server.on("text", function() {
+            throw new Error("The message passed through the event | #3");
         });
 
         server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
+
+        //------]>
+
+        server.input(null, inputSrvMessageCmd);
+    });
+
+    it("Instance (event: cmd | goto | base)", function(done) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.use(function(type, bot) {
+            return type === "text" && bot.message.text === "/test hello" ? "goto" : "";
+        });
+
 
         server.on("/:goto", function(bot, params) {
             tCheckBaseBotFields(bot);
@@ -470,12 +514,21 @@ describe("srv.virtual", function() {
             done();
         });
 
+        server.on("/", function() {
+            throw new Error("The message passed through the event | #5");
+        });
+
+
+        server.on("text:goto", function() {
+            throw new Error("The message passed through the event | #4");
+        });
+
         server.on("text", function() {
             throw new Error("The message passed through the event | #3");
         });
 
-        server.on("text:goto", function() {
-            throw new Error("The message passed through the event | #4");
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
         });
 
         //------]>
@@ -483,32 +536,118 @@ describe("srv.virtual", function() {
         server.input(null, inputSrvMessageCmd);
     });
 
-    it("Instance (event: cmd | goto | without)", function(done) {
+    it("Instance (event: cmd | goto | base-without)", function(done) {
         let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.use(function(type, bot) {
-            return type === "text" && bot.message.text === "/ hello" ? "goto" : "";
+        server.use("text", function() {
+            return "goto";
         });
 
-        server.on("*", function() {
-            throw new Error("The message passed through the event | #2");
-        });
 
-        server.on("/", function(bot, params) {
+        server.on("/", function(bot, params, state) {
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(params);
 
+            expect(state).to.be.a("string").and.equal("goto");
+
             done();
+        });
+
+
+        server.on("text:goto", function() {
+            throw new Error("The message passed through the event | #4");
         });
 
         server.on("text", function() {
             throw new Error("The message passed through the event | #3");
         });
 
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        //------]>
+
+        server.input(null, inputSrvMessageCmd);
+    });
+
+    it("Instance (event: cmd | goto | default)", function(done) {
+        let server = objBot.virtual(function(bot, cmd, state) {
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(cmd);
+
+            expect(state).to.be.a("string").and.equal("goto");
+
+            done();
+        });
+
+        server.use("text", function() {
+            return "goto";
+        });
+
+
+        server.on("/x:goto", function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.on("/x", function() {
+            throw new Error("The message passed through the event | #5");
+        });
+
+
         server.on("text:goto", function() {
             throw new Error("The message passed through the event | #4");
+        });
+
+        server.on("text", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
+        });
+
+        //------]>
+
+        server.input(null, inputSrvMessageCmd);
+    });
+
+    it("Instance (event: cmd | goto | default-generator)", function(done) {
+        let server = objBot.virtual(function* (bot, cmd, state) {
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(cmd);
+
+            expect(state).to.be.a("string").and.equal("goto");
+
+            done();
+        });
+
+        server.use("text", function* () {
+            return "goto";
+        });
+
+
+        server.on("/x:goto", function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.on("/x", function() {
+            throw new Error("The message passed through the event | #5");
+        });
+
+
+        server.on("text:goto", function() {
+            throw new Error("The message passed through the event | #4");
+        });
+
+        server.on("text", function() {
+            throw new Error("The message passed through the event | #3");
+        });
+
+        server.on("*", function() {
+            throw new Error("The message passed through the event | #2");
         });
 
         //------]>
@@ -586,7 +725,7 @@ function tCheckBaseCmdFields(params, isPrivate) {
     expect(params).to.be.a("object").and.not.equal(null);
 
     expect(params).to.have.property("type").that.is.equal(isPrivate ? "private" : "common");
-    expect(params).to.have.property("name").that.is.equal("");
+    expect(params).to.have.property("name").that.is.equal("test");
     expect(params).to.have.property("text").that.is.equal("hello");
-    expect(params).to.have.property("cmd").that.is.equal("/");
+    expect(params).to.have.property("cmd").that.is.equal("/test");
 }

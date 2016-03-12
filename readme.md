@@ -71,6 +71,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 
 ![architecture][image-architecture]
+![serverMsg][image-serverMsg]
 
 
 
@@ -88,14 +89,13 @@ let srv = objBot.polling();
 //----)>
 
 srv
-    .on("*", onNotFound)
-    
     .on("/start", onCmdStart)
     .on("/", onCmdNotFound)
 
     .on("enterChat", onEnterChat)
     .on("text", onText)
     .on("photo document", onPhotoOrDoc)
+    .on("*", onNotFound)
 
     .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
     .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp)
@@ -115,8 +115,8 @@ srv
  @bot /start [text] -> private
 */
 
-function onNotFound(bot, cmd) { }
-function onCmdNotFound(bot, params) { }
+function onNotFound(bot, cmd, state) { }
+function onCmdNotFound(bot, params, state) { }
 
 function onCmdStart(bot, params) { }
 function onTextRegExp(bot, params) { }
@@ -587,7 +587,7 @@ gBot
     .on("error", function(error) { // <-- Only for JS Generators
         console.error(error);
     });
-	
+
 //----------------]>
 
 function auth(login, password) {
@@ -1110,11 +1110,10 @@ npm test
 | contact           | bot, data                             |                                           |
 | location          | bot, data                             |                                           |
 |                   | -                                     |                                           |
-| /[name]           | data, params                          | CMD                                       |
-|                   | -                                     |                                           |
 | (regexp)          | data, params                          |                                           |
 |                   | -                                     |                                           |
-| *                 | bot, cmd                              |                                           |
+| /[name]           | data, params, state                   | CMD                                       |
+| *                 | bot, cmd, state                       |                                           |
 
 
 ## License
@@ -1133,6 +1132,7 @@ MIT
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 
 [image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=6
+[image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=1
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
