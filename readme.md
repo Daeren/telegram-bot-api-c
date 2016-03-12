@@ -1116,7 +1116,7 @@ MIT
 [4]: https://npmjs.com/package/tgb-pl-botanio
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=6
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=1
 [image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=1
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
