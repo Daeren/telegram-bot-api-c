@@ -83,7 +83,7 @@ const objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 //----[Server]----}>
 
-let srv = objBot.polling();
+let srv = objBot.polling(onDefault);
 
 //----)>
 
@@ -114,7 +114,9 @@ srv
  @bot /start [text] -> private
 */
 
-function onNotFound(bot, cmd, state) { }
+function onDefault(bot, cmd, state) { }
+
+function onNotFound(bot, data, state) { }
 function onCmdNotFound(bot, params, state) { }
 
 function onCmdStart(bot, params) { }
