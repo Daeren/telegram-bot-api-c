@@ -30,14 +30,14 @@ function main(botFather, params, callback) {
 
     //----------------]>
 
-    const srvBot = rCreateBot(botFather, callback);
+    const srvBot        = rCreateBot(botFather, callback);
 
-    const pollingTmInterval = (parseInt(params.interval, 10) || 2) * 1000;
+    const tmInterval    = (parseInt(params.interval, 10) || 2) * 1000;
 
     let tmPolling,
 
-        isStopped = false,
-        pollingParams = Object.create(params);
+        isStopped       = false,
+        pollingParams   = Object.create(params);
 
     //------)>
 
@@ -55,7 +55,27 @@ function main(botFather, params, callback) {
         result.start = tmStart;
         result.stop = tmStop;
 
+        //--------]>
+
         return result;
+
+        //--------]>
+
+        function tmStart() {
+            if(isStopped) {
+                isStopped = false;
+                runTimer();
+            }
+
+            return result;
+        }
+
+        function tmStop() {
+            isStopped = true;
+            clearTimeout(tmPolling);
+
+            return result;
+        }
     })();
 
     //----------------]>
@@ -75,6 +95,12 @@ function main(botFather, params, callback) {
 
             onLoadSuccess(data);
         });
+    }
+
+    function runTimer() {
+        if(!isStopped) {
+            tmPolling = setTimeout(load, tmInterval);
+        }
     }
 
     //-------)>
@@ -107,31 +133,5 @@ function main(botFather, params, callback) {
 
             rOnMsg(srvBot, data);
         }
-    }
-
-    //----------]>
-
-    function runTimer() {
-        if(!isStopped) {
-            tmPolling = setTimeout(load, pollingTmInterval);
-        }
-    }
-
-    //----)>
-
-    function tmStart() {
-        if(isStopped) {
-            isStopped = false;
-            runTimer();
-        }
-
-        return this;
-    }
-
-    function tmStop() {
-        isStopped = true;
-        clearTimeout(tmPolling);
-
-        return this;
     }
 }

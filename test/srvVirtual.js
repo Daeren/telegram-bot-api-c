@@ -134,7 +134,7 @@ describe("srv.virtual", function() {
             expect(srv).to.have.property("use").that.is.a("function");
             expect(srv).to.have.property("on").that.is.a("function");
             expect(srv).to.have.property("off").that.is.a("function");
-        })
+        });
     });
 
     //----------]>
@@ -673,11 +673,13 @@ describe("srv.virtual", function() {
 
             expect(state).to.be.a("string").and.equal("goto");
 
+            yield new Promise(x => setTimeout(x));
+
             done();
         });
 
         server.use("text", function* () {
-            return "goto";
+            return yield new Promise(x => setTimeout(x, 0, "goto"));
         });
 
 

@@ -49,8 +49,8 @@ gBot
 
     .on("text", function(bot, currency) {
         const url =
-            "https://query.yahooapis.com/v1/public/yql?q=select+*+from+yahoo.finance.xchange+where+pair+=+'"
-            + currency +
+            "https://query.yahooapis.com/v1/public/yql?q=select+*+from+yahoo.finance.xchange+where+pair+=+'" +
+            currency +
             "'&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
 
         //----------]>
