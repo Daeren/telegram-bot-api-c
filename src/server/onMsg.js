@@ -9,12 +9,14 @@
 
 //-----------------------------------------------------
 
-const rParseCmd         = require("./../parseCmd"),
+const rUtil             = require("./../util"),
+      rParseCmd         = require("./../parseCmd"),
+
       rResponseBuilder  = require("./responseBuilder");
 
 //-----------------------------------------------------
 
-const gReReplaceBotName = /^@\w{5,32}\s*/;
+const gReReplaceBotName = /^@\w{5,32}\s+|^@\w{5,32}$/;
 
 const C_BD_TYPE_UNKNOWN      = 0,
       C_BD_TYPE_MESSAGE      = 1,
@@ -33,9 +35,7 @@ function main(srvBot, data) {
 
     //--------]>
 
-    const botInstance = srvBot.instance;
-
-    //--------]>
+    const botInstance   = srvBot.instance;
 
     const inlineQuery   = data.inline_query,
           msg           = data.message;
@@ -44,11 +44,11 @@ function main(srvBot, data) {
                             inlineQuery && typeof(inlineQuery) === "object" ? C_BD_TYPE_INLINE_QUERY :
                             (msg && typeof(msg) === "object" ? C_BD_TYPE_MESSAGE : C_BD_TYPE_UNKNOWN);
 
-    //--------]>
+    let msgType         = null,
+        evName          = null,
+        cmdParam        = null;
 
-    let msgType             = null,
-        evName              = null,
-        cmdParam            = null;
+    //--------]>
 
     switch(bdataType) {
         case C_BD_TYPE_MESSAGE:
@@ -82,7 +82,10 @@ function main(srvBot, data) {
 
     //-----[Filter: botName]----}>
 
-    if(evName === "text" && msgIsGroup && msg.text[0] === "@" && !msg.reply_to_message && botInstance.disabled("onMsg.skipFilterBotName")) {
+    if(
+        msgIsGroup && evName === "text" && msg.text[0] === "@" &&
+        !msg.reply_to_message && botInstance.disabled("onMsg.skipFilterBotName")
+    ) {
         const t = msg.text = msg.text.replace(gReReplaceBotName, "");
 
         if(!t) {
@@ -92,7 +95,7 @@ function main(srvBot, data) {
 
     //------------]>
 
-    forEachAsync(botPlugin, onIterPlugin, onEndPlugin);
+    rUtil.forEachAsync(botPlugin, onIterPlugin, onEndPlugin);
 
     //------------]>
 
@@ -403,50 +406,6 @@ function executeGenerator(generator, callback) {
             generator.throw(error);
         } catch(e) {
             callback(e);
-        }
-    }
-}
-
-//---------]>
-
-function forEachAsync(data, iter, cbEnd) {
-    let i   = 0,
-        len = data.length;
-
-    //---------]>
-
-    if(len) {
-        run();
-    }
-    else {
-        if(cbEnd) {
-            cbEnd();
-        }
-    }
-
-    //---------]>
-
-    function run() {
-        iter(cbNext, data[i], i);
-    }
-
-    function cbNext(error, result) {
-        if(error) {
-            if(cbEnd) {
-                cbEnd(error);
-            }
-
-            return;
-        }
-
-        i++;
-
-        if(i >= len) {
-            if(cbEnd) {
-                cbEnd(error, result);
-            }
-        } else {
-            run();
         }
     }
 }

@@ -26,15 +26,15 @@ const rUtil             = require("./src/util"),
 
 //-----------------------------------------------------
 
-const gTgHostFile     = "api.telegram.org";
+const gTgHostFile = "api.telegram.org";
 
 //-----------------------------]>
 
-main.keyboard = rKeyboard;
-main.parseCmd = rParseCmd;
+main.keyboard   = rKeyboard;
+main.parseCmd   = rParseCmd;
 
-main.call = rTgApi.call;
-main.callJson = rTgApi.callJson;
+main.call       = rTgApi.call;
+main.callJson   = rTgApi.callJson;
 
 //-----------------------------------------------------
 
@@ -61,12 +61,27 @@ function main(token) {
     }
 
     CMain.prototype = {
-        "enable":       function(key) { this.kvCfgStore[key] = true; return this; },
-        "disable":      function(key) { delete this.kvCfgStore[key]; return this; },
-        "enabled":      function(key) { return this.kvCfgStore[key] === true; },
-        "disabled":     function(key) { return this.kvCfgStore[key] !== true; },
+        enable(key)                         { this.kvCfgStore[key] = true; return this; },
+        disable(key)                        { delete this.kvCfgStore[key]; return this; },
+        enabled(key)                        { return this.kvCfgStore[key] === true; },
+        disabled(key)                       { return this.kvCfgStore[key] !== true; },
 
-        "token":        function(t) {
+        engine(t)                           { this.mdEngine = t; return this; },
+        promise(t)                          { this.mdPromise = t; return this; },
+
+        call(method, data, callback)        { rTgApi.call(token, method, data, callback); },
+        callJson(method, data, callback)    { rTgApi.callJson(token, method, data, callback); },
+
+        polling(params, callback)           { return rServer.polling(this, params, callback); },
+        http(params, callback)              { return rServer.http(this, params, callback); },
+        virtual(callback)                   { return rServer.virtual(this, callback); },
+
+        "render":       mthCMainRender,
+        "send":         mthCMainSend,
+        "broadcast":    mthCMainBroadcast,
+        "download":     mthCMainDownload,
+
+        token(t) {
             if(!arguments.length) {
                 return token;
             }
@@ -74,22 +89,7 @@ function main(token) {
             token = t;
 
             return this;
-        },
-
-        "engine":       function(t) { this.mdEngine = t; return this; },
-        "promise":      function(t) { this.mdPromise = t; return this; },
-
-        "call":         function(method, data, callback) { rTgApi.call(token, method, data, callback); },
-        "callJson":     function(method, data, callback) { rTgApi.callJson(token, method, data, callback); },
-
-        "render":       mthCMainRender,
-        "send":         mthCMainSend,
-        "broadcast":    mthCMainBroadcast,
-        "download":     mthCMainDownload,
-
-        "polling":      function(params, callback) { return rServer.polling(this, params, callback); },
-        "http":         function(params, callback) { return rServer.http(this, params, callback); },
-        "virtual":      function(callback) { return rServer.virtual(this, callback); }
+        }
     };
 
     //-------------------------]>
@@ -155,21 +155,14 @@ function main(token) {
         function cbPromise(resolve, reject) {
             let cmdName, cmdData;
 
-            callback = callback || function(error, results) {
-                if(error) {
-                    reject(error);
-                }
-                else {
-                    resolve(results);
-                }
-            };
+            callback = callback || ((error, result) => error ? reject(error) : resolve(result));
 
             //--------]>
 
             if(Array.isArray(data)) {
                 const results = {};
 
-                forEachAsync(data, function(next, d) {
+                rUtil.forEachAsync(data, function(next, d) {
                     call(d, function(error, body) {
                         const stack = results[cmdName] = results[cmdName] || [];
                         stack.push(body);
@@ -233,7 +226,7 @@ function main(token) {
 
         init();
 
-        forEachAsync(ids, function(next, id, index) {
+        rUtil.forEachAsync(ids, function(next, id, index) {
             process.nextTick(send);
 
             //--------------]>
@@ -325,14 +318,7 @@ function main(token) {
         //-------------------------]>
 
         function cbPromise(resolve, reject) {
-            callback = callback || function(error, results) {
-                if(error) {
-                    reject(error);
-                }
-                else {
-                    resolve(results);
-                }
-            };
+            callback = callback || ((error, result) => error ? reject(error) : resolve(result));
 
             //--------]>
 
@@ -492,48 +478,4 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
     //----------]>
 
     return result;
-}
-
-//-------------[HELPERS]--------------}>
-
-function forEachAsync(data, iter, cbEnd) {
-    let i   = 0,
-        len = data.length;
-
-    //---------]>
-
-    if(len) {
-        run();
-    }
-    else {
-        if(cbEnd) {
-            cbEnd();
-        }
-    }
-
-    //---------]>
-
-    function run() {
-        iter(cbNext, data[i], i);
-    }
-
-    function cbNext(error, result) {
-        if(error) {
-            if(cbEnd) {
-                cbEnd(error, result);
-            }
-
-            return;
-        }
-
-        i++;
-
-        if(i >= len) {
-            if(cbEnd) {
-                cbEnd(error, result);
-            }
-        } else {
-            run();
-        }
-    }
 }

@@ -509,14 +509,7 @@ function genMethodsForMe(bot) {
             //-------------------------]>
 
             function cbPromise(resolve, reject) {
-                callback = callback || function(error, results) {
-                    if(error) {
-                        reject(error);
-                    }
-                    else {
-                        resolve(results);
-                    }
-                };
+                callback = callback || ((error, result) => error ? reject(error) : resolve(result));
 
                 apiCallJson(method, data, function(error, data) {
                     error = error || genErrorByTgResponse(data) || null;

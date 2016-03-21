@@ -21,8 +21,10 @@ const gHttpKeepAliveAgent   = new rHttp.Agent({"keepAlive": true}),
 //-----------------------------------------------------
 
 module.exports = {
-    "createReadStreamByUrl":    createReadStreamByUrl,
-    "getFilenameByMime":        getFilenameByMime
+    createReadStreamByUrl,
+    getFilenameByMime,
+
+    forEachAsync
 };
 
 //-----------------------------------------------------
@@ -79,4 +81,49 @@ function getFilenameByMime(contentType) {
     }
 
     return result || "";
+}
+
+//-------------[HELPERS]--------------}>
+
+function forEachAsync(data, iter, cbEnd) {
+    const len   = data.length;
+
+    let i       = 0;
+
+    //---------]>
+
+    if(len) {
+        run();
+    }
+    else {
+        if(cbEnd) {
+            cbEnd();
+        }
+    }
+
+    //---------]>
+
+    function run() {
+        iter(cbNext, data[i], i);
+    }
+
+    function cbNext(error, result) {
+        if(error) {
+            if(cbEnd) {
+                cbEnd(error, result);
+            }
+
+            return;
+        }
+
+        i++;
+
+        if(i >= len) {
+            if(cbEnd) {
+                cbEnd(error, result);
+            }
+        } else {
+            run();
+        }
+    }
 }

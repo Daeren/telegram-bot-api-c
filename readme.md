@@ -537,8 +537,7 @@ objSrv
 ```js
 objSrv
     .use(function(type, bot, next) {
-        if(bot.message.text === "room")
-            next("room.menu"); else next();
+        next(bot.message.text === "room" ? "room.menu" : "");
     })
     .use(function(type, bot) {
         console.log("If not the room");

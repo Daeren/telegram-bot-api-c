@@ -1,6 +1,6 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "10.0.0",
+    "version": "10.0.01",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
     "homepage": "https://666.io",
@@ -17,7 +17,7 @@
     ],
 
     "author": {
-        "name": "Daeren Torn",
+        "name": "Daeren",
         "email": "x@db.gg"
     },
 	
