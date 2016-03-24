@@ -10,7 +10,8 @@
 //-----------------------------------------------------
 
 const rFs               = require("fs"),
-      rPath             = require("path");
+      rPath             = require("path"),
+      rUrl              = require("url");
 
 const rRequest          = require("./request"),
       rMethods          = require("./methods"),
@@ -90,61 +91,72 @@ function getReadStreamByUrl(url, data, callback) {
         rUtil.createReadStreamByUrl(url, onResponse);
     }
 
-    //-----)>
-
     function onResponse(error, response) {
         if(!error) {
             const statusCode = response.statusCode;
 
             if(statusCode < 200 || statusCode > 399) {
-                response.destroy();
                 error = new Error("statusCode: " + statusCode);
             }
-        }
 
-        if(error) {
-            callback(error);
-            return;
+            if(error) {
+                end();
+                return;
+            }
         }
 
         //--------------]>
 
-        const headers         = response.headers;
+        const headers         = response.headers || {};
 
         const location        = headers["location"],
               contentLength   = headers["content-length"];
 
-        //-----[Redirect]-----}>
+        //---------]>
 
         if(location && redirectCount) {
+            const urlParams = rUrl.parse(url),
+                  locParams = rUrl.parse(location);
+
+            for(let name in urlParams) {
+                if(hasOwnProperty.call(urlParams, name) && !locParams[name]) {
+                    locParams[name] = urlParams[name];
+                }
+            }
+
+            url = rUrl.format(locParams);
+
             redirectCount--;
-
-            url = location;
-
             response.destroy();
+
             createStream();
-
-            return;
         }
-
-        //-----[Filters]-----}>
-
-        if(contentLength) {
+        else if(contentLength) {
             const paramsMaxSize = Math.min(Math.max(parseInt(data.maxSize, 10) || gMaxFileSize, gMaxFileSize), gMaxFileSize);
 
             if(contentLength > paramsMaxSize) {
                 error = new Error("maxSize: " + paramsMaxSize);
             }
+
+            end();
+        }
+        else {
+            end();
         }
 
-        //------------]>
+        //--------------]>
 
-        if(error) {
-            response.destroy();
-            response = null;
+        function end() {
+            if(error) {
+                if(response) {
+                    response.destroy();
+                }
+
+                response = null;
+            }
+
+            callback(error, response);
         }
-
-        callback(error, response);
     }
 }
 
@@ -471,7 +483,7 @@ function callAPIJson(token, method, data, callback) {
     }
 }
 
-//------------------]>
+//--------[PrivateMethods]--------}>
 
 function genMethodsForMe(bot) {
     let result = {};

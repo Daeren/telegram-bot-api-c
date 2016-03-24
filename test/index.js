@@ -858,6 +858,19 @@ describe("Instance: bot", function() {
             });
         });
 
+        it("sendDocument(url-redirect) | callback", function(done) {
+            api.sendDocument({
+                "chat_id":      chatId,
+                "document":     "https://jigsaw.w3.org/HTTP/300/301.html"
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("document").that.is.an("object");
+
+                done();
+            });
+        });
+
         it("sendSticker(url) | callback", function(done) {
             api.sendSticker({
                 "chat_id":      chatId,
