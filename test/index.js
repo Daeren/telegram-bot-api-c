@@ -1049,6 +1049,7 @@ function checkSendLocation(error, data) {
 
 //-----------]>
 
+/*
 function checkWithError(error, done) {
     if(done) {
         setTimeout(function() {
@@ -1060,6 +1061,7 @@ function checkWithError(error, done) {
         expect(error).to.be.an.instanceof(Error);
     }
 }
+*/
 
 function checkWithoutError(error, done) {
     if(done) {
