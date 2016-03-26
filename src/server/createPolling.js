@@ -12,6 +12,8 @@
 const rCreateBot    = require("./createBot"),
       rOnMsg        = require("./onMsg");
 
+const rErrors       = require("./../errors");
+
 //-----------------------------------------------------
 
 module.exports = main;
@@ -88,12 +90,10 @@ function main(botFather, params, callback) {
 
             if(error) {
                 runTimer();
-                return;
             }
-
-            //--------]>
-
-            onLoadSuccess(data);
+            else {
+                onLoadSuccess(data);
+            }
         });
     }
 
@@ -107,21 +107,22 @@ function main(botFather, params, callback) {
 
     function onLoadSuccess(data) {
         if(!data.ok) {
-            if(data.error_code === 409) {
+            if(data.error_code === rErrors.ERR_USED_WEBHOOK) {
                 botFather.callJson("setWebhook", null, load);
             }
             else {
                 runTimer();
             }
-
-            return;
         }
+        else {
+            const result = data.result;
 
-        if(data.result.length) {
-            data.result.forEach(onMsg);
-            load();
-        } else {
-            runTimer();
+            if(result.length > 0) {
+                result.forEach(onMsg);
+                load();
+            } else {
+                runTimer();
+            }
         }
 
         //------------]>

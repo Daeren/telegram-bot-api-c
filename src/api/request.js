@@ -41,19 +41,19 @@ function main(token, method, callback) {
         throw new Error("request: `method` was not specified");
     }
 
-    if(!callback) {
-        throw new Error("request: `callback` was not specified");
-    }
-
     //------)>
 
     gReqOptions.path = "/bot" + token + "/" + method;
 
     //--------------]>
 
-    return rHttps.request(gReqOptions, cbRequest).on("error", callback);
+    return callback ? rHttps.request(gReqOptions, cbRequest).on("error", cbError) : rHttps.request(gReqOptions);
 
     //--------------]>
+
+    function cbError(error) {
+        callback(error, null, null);
+    }
 
     function cbRequest(response) {
         let firstChunk, chunks;

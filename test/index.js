@@ -537,9 +537,9 @@ describe("Instance: bot", function() {
                 .call("getFile", {
                     "file_id": "0"
                 }, function(error, result, response) {
-                    checkWithError(error);
+                    checkWithoutError(error);
 
-                    expect(result).to.be.null;
+                    expect(result).to.be.an.instanceof(Buffer);
                     expect(response).to.be.an("object").and.not.equal(null);
 
                     done();

@@ -17,7 +17,8 @@ const rRequest          = require("./request"),
       rMethods          = require("./methods"),
       rProto            = require("./proto");
 
-const rUtil             = require("./../util");
+const rUtil             = require("./../util"),
+      rErrors           = require("./../errors");
 
 //-----------------------------------------------------
 
@@ -175,10 +176,6 @@ function callAPI(token, method, data, callback) {
 
     //-------------------------]>
 
-    if(!token || typeof(token) !== "string") {
-        throw new Error("Forbidden. Check the Access Token: " + token + " [" + method + "]");
-    }
-
     if(typeOfData === "function") {
         callback = data;
         data = null;
@@ -189,34 +186,7 @@ function callAPI(token, method, data, callback) {
 
     //-------------------------]>
 
-    const req = rRequest(token, method, function(error, body, response) {
-        if(!callback) {
-            return;
-        }
-
-        if(!error) {
-            const statusCode = response.statusCode;
-
-            if(statusCode >= 500) {
-                error = new Error("Server Error: " + statusCode);
-            }
-            else if(statusCode === 401) {
-                error = new Error("Invalid access token provided: " + token);
-            }
-            else if(statusCode !== 200) {
-                error = new Error(body ? body.toString() : ("Status code:" + statusCode));
-            }
-            else if(!body) {
-                error = new Error("Body: empty");
-            }
-        }
-
-        if(error) {
-            body = null;
-        }
-
-        callback(error, body, response);
-    });
+    const req = rRequest(token, method, callback);
 
     //----------------]>
 
@@ -461,7 +431,7 @@ function callAPIJson(token, method, data, callback) {
 
     //-----------]>
 
-    callAPI(token, method, data, cbCallAPI);
+    callAPI(token, method, data, callback ? cbCallAPI : null);
 
     //-----------]>
 
@@ -472,6 +442,7 @@ function callAPIJson(token, method, data, callback) {
             }
             else {
                 error = new Error("Expected JSON.\r\n\r\nBody:\r\n" + result.toString());
+                error.code = rErrors.ERR_FAILED_PARSE_DATA;
             }
         }
 
@@ -523,23 +494,23 @@ function genMethodsForMe(bot) {
             function cbPromise(resolve, reject) {
                 callback = callback || ((error, result) => error ? reject(error) : resolve(result));
 
-                apiCallJson(method, data, function(error, data) {
-                    error = error || genErrorByTgResponse(data) || null;
+                apiCallJson(method, data, function(error, response) {
+                    error = error || genErrorByTgResponse(response) || null;
 
                     if(!error) {
-                        data = data.result;
+                        response = response.result;
                     }
 
-                    callback(error, data);
+                    callback(error, response);
                 });
             }
         };
     }
 
-    function genErrorByTgResponse(data) {
-        if(data && !data.ok) {
-            const error = new Error(data.description);
-            error.code = data.error_code;
+    function genErrorByTgResponse(response) {
+        if(response && !response.ok) {
+            const error = new Error(response.description);
+            error.code = response.error_code;
 
             return error;
         }

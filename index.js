@@ -18,6 +18,7 @@ const rTgApi            = require("./src/api");
 const rSendMethods      = require("./src/sendMethods");
 
 const rUtil             = require("./src/util"),
+      rErrors           = require("./src/errors"),
 
       rParseCmd         = require("./src/parseCmd"),
       rKeyboard         = require("./src/keyboard"),
@@ -38,7 +39,7 @@ main.callJson   = rTgApi.callJson;
 
 //-----------------------------------------------------
 
-module.exports = main;
+module.exports = rErrors(main);
 
 if(!module.parent) {
     require("./src/cli");
@@ -94,7 +95,7 @@ function main(token) {
 
     //-------------------------]>
 
-    return new CMain();
+    return rErrors(new CMain());
 
     //-----------[Methods]----------}>
 

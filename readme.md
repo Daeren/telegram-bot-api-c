@@ -26,6 +26,7 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* [Error codes](#refErrors): +
 * KeepAlive (+50% to the speed of requests): +
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * [JS Generators (yield + promise)](#refJSGenerators): +
@@ -824,19 +825,31 @@ api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || dat
 // e    - Error: request/JSON.parse/response.ok
 // data - JSON: response.result or null
 
-//------------]>
+//-------]>
 
 gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 // e    - Error: request/JSON.parse
 // data - JSON: response or null
 
-//------------]>
+//-------]>
 
 gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 // e    - Error: request
 // data - Buffer: response
+
+//------------]>
+
+// e.code:
+//
+// gBot.ERR_INTERNAL_SERVER
+// gBot.ERR_MESSAGE_LIMITS
+// gBot.ERR_USED_WEBHOOK
+// gBot.ERR_FORBIDDEN
+// gBot.ERR_INVALID_TOKEN
+// gBot.ERR_NOT_FOUND
+// gBot.ERR_FAILED_PARSE_DATA
 ```
 
 
