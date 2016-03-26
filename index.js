@@ -243,7 +243,7 @@ function main(token) {
 
             function onEnd(error) {
                 if(error) {
-                    if(error.code === 429) {
+                    if(error.code === rErrors.ERR_MESSAGE_LIMITS) {
                         setTimeout(send, 1000 * 45);
                     }
                     else {
