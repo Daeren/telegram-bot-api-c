@@ -841,7 +841,10 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
 
 //------------]>
 
-// e.code:
+// e.code           - api.sendMessage( ...
+// data.error_code  - callJson("sendMessage" ...
+//
+// rBot or gBot
 //
 // gBot.ERR_INTERNAL_SERVER
 // gBot.ERR_MESSAGE_LIMITS

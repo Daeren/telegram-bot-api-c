@@ -49,15 +49,16 @@ describe("errors", function() {
         const object = gErrors(Object.create(null));
 
         for(let name in object) {
-            expect(gErrors).to.have.property(name);
+            if(hasOwnProperty.call(object, name)) {
+                expect(gErrors).to.have.property(name);
+            }
         }
 
         for(let name in gErrors) {
-            expect(object).to.have.property(name);
-        }
-
-        for(let name in gErrors) {
-            expect(rBot).to.have.property(name);
+            if(hasOwnProperty.call(gErrors, name)) {
+                expect(object).to.have.property(name);
+                expect(rBot).to.have.property(name);
+            }
         }
     });
 
