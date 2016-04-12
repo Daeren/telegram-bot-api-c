@@ -9,7 +9,10 @@
 
 //-----------------------------------------------------
 
-const gMethods = [];
+const gMethods              = [],
+      gSendMethods          = [];
+
+const gSendMethodsAliases   = {};
 
 const gProtoTable = {
     "forwardMessage": [
@@ -197,8 +200,23 @@ for(let name in gProtoTable) {
         continue;
     }
 
+    //----------]>
+
+    const sendMethodMatch = name.match(/^send(.+)/);
+
+    if(sendMethodMatch) {
+        const shortName = sendMethodMatch[1][0].toLowerCase() + sendMethodMatch[1].substr(1);
+
+        gSendMethods.push(name);
+        gSendMethodsAliases[shortName] = name;
+    }
+
+    //----------]>
+
     gMethods.push(name);
     gProtoTable[name.toLowerCase()] = gProtoTable[name];
+
+    //----------]>
 
     delete gProtoTable[name];
 }
@@ -206,6 +224,10 @@ for(let name in gProtoTable) {
 //-----------------------------------------------------
 
 module.exports = {
-    "methods":  gMethods,
-    "params":   gProtoTable
+    "methods":              gMethods,
+
+    "sendMethods":          gSendMethods,
+    "sendMethodsAliases":   gSendMethodsAliases,
+
+    "params":               gProtoTable
 };

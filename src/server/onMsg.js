@@ -276,7 +276,7 @@ function main(srvBot, data) {
 
         switch(type) {
             case C_BD_TYPE_MESSAGE:
-                result.answer = (isReply) => {
+                result.answer = function(isReply) {
                     const answer = new rResponseBuilder(result, botInstance);
                     answer.isReply = !!isReply;
 

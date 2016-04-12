@@ -10,12 +10,9 @@
 //-----------------------------------------------------
 
 const rFs               = require("fs"),
-      rStream           = require("stream"),
       rPath             = require("path");
 
 const rTgApi            = require("./src/api");
-
-const rSendMethods      = require("./src/sendMethods");
 
 const rUtil             = require("./src/util"),
       rErrors           = require("./src/errors"),
@@ -58,7 +55,7 @@ function main(token) {
         this.keyboard   = rKeyboard;
         this.parseCmd   = rParseCmd;
 
-        this.api        = rTgApi.genMethodsForMe(this);
+        this.api        = rTgApi.genMethodsFor(this);
     }
 
     CMain.prototype = {
@@ -78,8 +75,6 @@ function main(token) {
         virtual(callback)                   { return rServer.virtual(this, callback); },
 
         "render":       mthCMainRender,
-        "send":         mthCMainSend,
-        "broadcast":    mthCMainBroadcast,
         "download":     mthCMainDownload,
 
         token(t) {
@@ -140,162 +135,6 @@ function main(token) {
         }
     }
 
-    function mthCMainSend(id, data, callback) {
-        const self = this;
-
-        //-----]>
-
-        if(typeof(callback) === "undefined") {
-            return new this.mdPromise(cbPromise);
-        }
-
-        cbPromise();
-
-        //-------------------------]>
-
-        function cbPromise(resolve, reject) {
-            let cmdName, cmdData;
-
-            callback = callback || ((error, result) => error ? reject(error) : resolve(result));
-
-            //--------]>
-
-            if(Array.isArray(data)) {
-                const results = {};
-
-                rUtil.forEachAsync(data, function(next, d) {
-                    call(d, function(error, body) {
-                        const stack = results[cmdName] = results[cmdName] || [];
-                        stack.push(body);
-
-                        next(error, results);
-                    });
-
-                }, callback);
-            }
-            else {
-                call(data, callback);
-            }
-
-            //--------]>
-
-            function call(d, cb) {
-                cmdName = getName(d);
-
-                if(!cmdName) {
-                    throw new Error("Send: element not found!");
-                }
-
-                cmdData = d[cmdName];
-                cmdData = prepareDataForSendApi(id, cmdName, cmdData, d);
-
-                self.api[rSendMethods.map[cmdName]](cmdData, cb);
-            }
-
-            function getName(d) {
-                let type,
-                    len = rSendMethods.length;
-
-                while(len--) {
-                    type = rSendMethods.keys[len];
-
-                    if(hasOwnProperty.call(d, type)) {
-                        return type;
-                    }
-                }
-            }
-        }
-    }
-
-    function mthCMainBroadcast(ids, data, callback) {
-        const self = this;
-
-        let result  = {},
-            isEnd   = false,
-
-            numUsersPerSec, dTime, startTime;
-
-        //-----]>
-
-        result.stop = function() {
-            isEnd = true;
-        };
-
-        callback = callback || function() {};
-
-        //--------]>
-
-        init();
-
-        rUtil.forEachAsync(ids, function(next, id, index) {
-            process.nextTick(send);
-
-            //--------------]>
-
-            function send() {
-                if(isEnd) {
-                    callback(null, index);
-                }
-                else {
-                    self.send(id, data, onEnd);
-                }
-            }
-
-            function onEnd(error) {
-                if(error) {
-                    if(error.code === rErrors.ERR_MESSAGE_LIMITS) {
-                        setTimeout(send, 1000 * 45);
-                    }
-                    else {
-                        next(error, index);
-                    }
-
-                    return;
-                }
-
-                //---------]>
-
-                numUsersPerSec--;
-                dTime = startTime - Date.now();
-
-                //---------]>
-
-                if(!numUsersPerSec && dTime < 1000) {
-                    dTime = 1000 - dTime;
-
-                    if(dTime <= 20) {
-                        init();
-                        next(null, index);
-                    }
-                    else {
-                        setTimeout(function() {
-                            init();
-                            next(null, index);
-                        }, dTime);
-                    }
-                }
-                else if(dTime > 1000) {
-                    init();
-                    next(null, index);
-                }
-                else {
-                    next(null, index);
-                }
-            }
-        }, callback);
-
-        //-------------------------]>
-
-        return result;
-
-        //-------------------------]>
-
-        function init() {
-            numUsersPerSec = 30;
-            startTime = Date.now();
-        }
-    }
-
     function mthCMainDownload(fid, dir, name, callback) {
         const self = this;
 
@@ -309,6 +148,8 @@ function main(token) {
             callback = name;
             name = undefined;
         }
+
+        //-------------------------]>
 
         if(typeof(callback) === "undefined") {
             return new this.mdPromise(cbPromise);
@@ -400,90 +241,4 @@ function main(token) {
             });
         }
     }
-}
-
-//-------------------------------------------]>
-
-function prepareDataForSendApi(id, cmdName, cmdData, data) {
-    const result = Object.create(data);
-
-    //----------]>
-
-    result.chat_id = id;
-
-    //----------]>
-
-    switch(typeof(cmdData)) {
-        case "string":
-            switch(cmdName) {
-                case "location":
-                case "venue":
-                    cmdData = cmdData.split(/\s+/);
-
-                    result.latitude = cmdData[0];
-                    result.longitude = cmdData[1];
-
-                    break;
-
-                case "contact":
-                    result.phone_number = cmdData;
-
-                    break;
-
-                case "chatAction":
-                    result.action = cmdData;
-
-                    break;
-
-                default:
-                    result[cmdName] = cmdData;
-
-                    break;
-            }
-
-            break;
-
-        case "object":
-            switch(cmdName) {
-                case "location":
-                case "venue":
-                    if(Array.isArray(cmdData)) {
-                        result.latitude = cmdData[0];
-                        result.longitude = cmdData[1];
-                    }
-                    else if(cmdData) {
-                        result.latitude = cmdData.latitude;
-                        result.longitude = cmdData.longitude;
-                    }
-
-                    break;
-
-                default:
-                    if(cmdData instanceof rStream.Stream) {
-                        switch(cmdName) {
-                            case "photo":
-                            case "audio":
-                            case "document":
-                            case "sticker":
-                            case "video":
-                            case "voice":
-                                result[cmdName] = cmdData;
-
-                                break;
-
-                            default:
-                                break;
-                        }
-                    }
-            }
-
-            break;
-
-        default:
-            break;
-    }
-
-    //----------]>
-
-    return result;
 }

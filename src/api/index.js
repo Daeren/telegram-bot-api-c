@@ -44,7 +44,7 @@ module.exports = {
     "call":             callAPI,
     "callJson":         callAPIJson,
 
-    "genMethodsForMe":  genMethodsForMe
+    genMethodsFor
 };
 
 //-----------------------------------------------------
@@ -168,24 +168,21 @@ function callAPI(token, method, data, callback) {
     const typeOfData = typeof(data),
           reqMParams = rProto.params[method];
 
-    let isStream,
-        dataIsMap;
-
-    //-------------------------]>
+    //--------]>
 
     if(typeOfData === "function") {
         callback = data;
         data = null;
     }
-    else if(reqMParams && data && data instanceof Map) {
-        dataIsMap = true;
-    }
+
+    //--------]>
+
+    const dataIsMap = !!(reqMParams && data && data instanceof Map),
+          req       = rRequest(token, method, callback);
+
+    let isStream;
 
     //-------------------------]>
-
-    const req = rRequest(token, method, callback);
-
-    //----------------]>
 
     if(reqMParams && data) {
         let isWritten = false;
@@ -398,13 +395,7 @@ function callAPI(token, method, data, callback) {
     }
 
     function bindStreamEvents(s) {
-        s
-            .on("error", onEnd)
-            .on("end", onEnd);
-
-        //------]>
-
-        return s;
+        return s.on("error", onEnd).on("end", onEnd);
 
         //------]>
 
@@ -453,7 +444,7 @@ function callAPIJson(token, method, data, callback) {
 
 //--------[PrivateMethods]--------}>
 
-function genMethodsForMe(bot) {
+function genMethodsFor(bot) {
     let result = {};
 
     //--------------]>

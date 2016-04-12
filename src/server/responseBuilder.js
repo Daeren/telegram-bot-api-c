@@ -9,11 +9,11 @@
 
 //-----------------------------------------------------
 
-const rSendMethods = require("./../sendMethods");
+const rUtil         = require("./../util"),
+      rAPIProto     = require("./../api/proto");
 
 //-----------------------------------------------------
 
-const gElements = rSendMethods.keys;
 const gModifiers = [
     "maxSize", "filename",
 
@@ -45,17 +45,32 @@ function CMain(botReqCtx, botInstance) {
     this.isReply        = false;
 }
 
+CMain.prototype = Object.create(null);
+
 //-----[Elements]-----}>
 
-gElements
-    .forEach(function(name) {
-        CMain.prototype[name] = function(data, params) {
+(function createElements(sendMethodsAliases) {
+    for(let alias in sendMethodsAliases) {
+        if(hasOwnProperty.call(sendMethodsAliases, alias)) {
+            addElementMethod(alias, sendMethodsAliases[alias]);
+        }
+    }
+
+    function addElementMethod(alias, original) {
+        const baseElementField  = getBaseElementField(alias),
+              baseDataField     = getBaseDataField(alias);
+
+        CMain.prototype[baseElementField] = function(input, params) {
             const lastElement   = this.lastElement,
                   elem          = params ? Object.create(params) : {};
 
             //--------]>
 
-            elem[name] = data;
+            elem.__method__ = original;
+
+            if(input !== null && typeof(input) !== "undefined" && !dataModifier(baseDataField, input, elem)) {
+                elem[baseDataField] = input;
+            }
 
             if(lastElement) {
                 let queue = this.queue;
@@ -79,7 +94,64 @@ gElements
 
             return this;
         };
-    });
+    }
+
+    function getBaseElementField(method) {
+        switch(method) {
+            case "message": return "text";
+
+            default:        return method;
+        }
+    }
+
+    function getBaseDataField(method) {
+        switch(method) {
+            case "message":     return "text";
+            case "contact":     return "phone_number";
+            case "chatAction":  return "action";
+
+            default:            return method;
+        }
+    }
+
+    function dataModifier(name, input, output) {
+        switch(typeof(input)) {
+            case "string":
+                switch(name) {
+                    case "location":
+                    case "venue":
+                        input = input.split(/\s+/);
+
+                        output.latitude = input[0];
+                        output.longitude = input[1];
+
+                        return true;
+                }
+
+                break;
+
+            case "object":
+                switch(name) {
+                    case "location":
+                    case "venue":
+                        if(Array.isArray(input)) {
+                            output.latitude = input[0];
+                            output.longitude = input[1];
+                        }
+                        else if(input) {
+                            output.latitude = input.latitude;
+                            output.longitude = input.longitude;
+                        }
+
+                        return true;
+                }
+
+                break;
+        }
+
+        return false;
+    }
+})(rAPIProto.sendMethodsAliases);
 
 //-----[Modifiers]-----}>
 
@@ -159,21 +231,61 @@ CMain.prototype.render = function(data) {
 //-----[Exec]-----}>
 
 CMain.prototype.send = function(callback) {
-    const queue     = this.queue;
-    let lastElement = this.lastElement;
+    const botInstance   = this.botInstance,
+          lastElement   = this.lastElement;
+
+    const chatId        = this.botReqCtx.cid;
+
+    let queue           = this.queue;
 
     //-------]>
 
     if(queue) {
         queue.push(lastElement);
-        lastElement = queue;
-
         this.queue = null;
+    }
+    else {
+        queue = [lastElement];
     }
 
     this.lastElement = null;
 
     //--------]>
 
-    return this.botInstance.send(this.botReqCtx.cid, lastElement, callback);
+    if(typeof(callback) === "undefined") {
+        return new botInstance.mdPromise(cbPromise);
+    }
+
+    cbPromise();
+
+    //--------]>
+
+    function cbPromise(resolve, reject) {
+        callback = callback || ((error, result) => error ? reject(error) : resolve(result));
+
+        //-----]>
+
+        rUtil.forEachAsync(queue, iterElements, endIterElemnts);
+
+        //-----]>
+
+        function iterElements(next, e) {
+            const apiMethod = botInstance.api[e.__method__];
+
+            if(!e.chat_id) {
+                e.chat_id = chatId;
+            }
+
+            apiMethod(e, next);
+        }
+
+        function endIterElemnts(error, result, index) {
+            if(error) {
+                callback(error, index);
+            }
+            else {
+                callback(null, result);
+            }
+        }
+    }
 };

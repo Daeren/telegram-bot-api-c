@@ -121,7 +121,7 @@ describe("Instance: bot", function() {
             "engine", "promise", "token",
 
             "call", "callJson",
-            "render", "send", "download",
+            "render", "download",
 
             "polling", "http", "virtual",
 
@@ -638,108 +638,6 @@ describe("Instance: bot", function() {
                 });
         });
 
-        //-----------------]>
-
-        it("send(text) | callback", function(done) {
-            let data        = {"text": "Hi"};
-            let dataClone   = jsonClone(data);
-
-            objBot.send(chatId, data, function(error, result) {
-                checkSendMessage(error, result);
-
-                expect(data).to.deep.equal(dataClone);
-
-                midEditText = result.message_id;
-
-                done();
-            });
-        });
-
-        it("send(photo-url-stream) | callback", function(done) {
-            const url = "https://www.google.ru/images/logos/ps_logo2.png";
-            const request = require("https").get(url);
-
-            //----------]>
-
-            request
-                .on("error", function(error) {
-                    checkWithoutError(error, done);
-                })
-                .on("response", function(response) {
-                    let data = {"photo": response};
-
-                    objBot.send(chatId, data, function(error, data) {
-                        checkBaseFields(error, data);
-
-                        expect(data).to.have.property("photo").that.is.an("array");
-
-                        midEditCaption = data.message_id;
-
-                        done();
-                    });
-                });
-        });
-
-        it("send(array) | promise", function(done) {
-            let data = [
-                {"chatAction": "typing"},
-                {"text": "Hi"},
-                {"location": "57.0061726 40.9821055"}
-            ];
-
-            objBot
-                .send(chatId, data)
-                .then(function(result) {
-                    expect(result).to.be.an("object").and.not.equal(null);
-
-                    expect(result).to.have.property("chatAction").that.is.an("array");
-                    expect(result).to.have.property("text").that.is.an("array");
-
-                    done();
-                }, function(error) {
-                    checkWithoutError(error, done);
-                });
-        });
-
-        it("send.location | callback", function(done) {
-            let data = {"location": "57.0061726 40.9821055"};
-            let dataClone   = jsonClone(data);
-
-            objBot.send(chatId, data, function(error, result) {
-                checkSendLocation(error, result);
-
-                expect(data).to.deep.equal(dataClone);
-
-                done();
-            });
-        });
-
-        it("send.venue | callback", function(done) {
-            let data = {"venue": "57.0061726 40.9821055", "title": "ATK", "address": "Potatov Str."};
-            let dataClone   = jsonClone(data);
-
-            objBot.send(chatId, data, function(error, result) {
-                checkBaseFields(error, result);
-
-                expect(data).to.deep.equal(dataClone);
-
-                done();
-            });
-        });
-
-        it("send.contact | callback", function(done) {
-            let data = {"contact": "+8 888 888 88 88", "first_name": "Potato +"};
-            let dataClone   = jsonClone(data);
-
-            objBot.send(chatId, data, function(error, result) {
-                checkBaseFields(error, result);
-
-                expect(data).to.deep.equal(dataClone);
-
-                done();
-            });
-        });
-
     });
 
     //-----------------]>
@@ -768,10 +666,10 @@ describe("Instance: bot", function() {
             api.sendMessage({
                 "chat_id":      chatId,
                 "text":        rFs.createReadStream(__dirname + "/data/msg.json")
-            }, function(error, data) {
-                checkBaseFields(error, data);
+            }, function(error, result) {
+                checkBaseFields(error, result);
 
-                expect(data).to.have.property("text").that.is.an("string");
+                expect(result).to.have.property("text").that.is.an("string");
 
                 done();
             });
@@ -783,10 +681,12 @@ describe("Instance: bot", function() {
                 ["text", "data-map"]
             ]);
 
-            api.sendMessage(data, function(error, data) {
-                checkBaseFields(error, data);
+            api.sendMessage(data, function(error, result) {
+                checkBaseFields(error, result);
 
-                expect(data).to.have.property("text").that.is.an("string");
+                expect(result).to.have.property("text").that.is.an("string");
+
+                midEditText = result.message_id;
 
                 done();
             });
@@ -813,10 +713,12 @@ describe("Instance: bot", function() {
                 "chat_id":      chatId,
                 "photo":        __dirname + "/data/MiElPotato.jpg",
                 "caption":      "MiElPotato"
-            }, function(error, data) {
-                checkBaseFields(error, data);
+            }, function(error, result) {
+                checkBaseFields(error, result);
 
-                expect(data).to.have.property("photo").that.is.an("array");
+                expect(result).to.have.property("photo").that.is.an("array");
+
+                midEditCaption = result.message_id;
 
                 done();
             });
@@ -928,10 +830,10 @@ describe("Instance: bot", function() {
             api.sendVoice({
                 "chat_id":      chatId,
                 "voice":        "http://upload.wikimedia.org/wikipedia/en/4/45/ACDC_-_Back_In_Black-sample.ogg"
-            }, function(error, data) {
-                checkBaseFields(error, data);
+            }, function(error, result) {
+                checkBaseFields(error, result);
 
-                expect(data).to.have.property("voice").that.is.an("object");
+                expect(result).to.have.property("voice").that.is.an("object");
 
                 done();
             });
@@ -942,8 +844,32 @@ describe("Instance: bot", function() {
                 "chat_id":      chatId,
                 "latitude":     "57.0061726",
                 "longitude":    "40.9821055"
-            }, function(error, data) {
-                checkSendLocation(error, data);
+            }, function(error, result) {
+                checkSendLocation(error, result);
+                done();
+            });
+        });
+
+        it("sendVenue | callback", function(done) {
+            api.sendVenue({
+                "chat_id":      chatId,
+                "latitude":     "57.0061726",
+                "longitude":    "40.9821055",
+                "title":        "ATK",
+                "address":      "Potatov Str."
+            }, function(error, result) {
+                checkBaseFields(error, result);
+                done();
+            });
+        });
+
+        it("sendContact | callback", function(done) {
+            api.sendContact({
+                "chat_id":      chatId,
+                "phone_number": "+8 888 888 88 88",
+                "first_name":   "Potatov Str."
+            }, function(error, result) {
+                checkBaseFields(error, result);
                 done();
             });
         });
@@ -961,30 +887,32 @@ describe("Instance: bot", function() {
         });
 
         it("editMessageText | callback", function(done) {
+            const text = "EDITED";
+
             api.editMessageText({
                 "chat_id":      chatId,
                 "message_id":   midEditText,
-                "text":         "EDITED"
-            }, function(error, data) {
-                console.log(error);
-                console.log(data);
-
+                "text":         text
+            }, function(error, result) {
                 checkWithoutError(error);
+
+                expect(result.text).to.be.a("string").and.equal(text);
 
                 done();
             });
         });
 
         it("editMessageCaption | callback", function(done) {
+            const caption = "EDITED";
+
             api.editMessageCaption({
                 "chat_id":      chatId,
                 "message_id":   midEditCaption,
-                "caption":      "EDITED"
-            }, function(error, data) {
-                console.log(error);
-                console.log(data);
-
+                "caption":      caption
+            }, function(error, result) {
                 checkWithoutError(error);
+
+                expect(result.caption).to.be.a("string").and.equal(caption);
 
                 done();
             });

@@ -79,7 +79,6 @@ function main(bot, onMsg) {
     //-----)>
 
     ctx.render  = ctxRender;
-    ctx.send    = ctxSend;
     ctx.forward = ctxForward;
     ctx.answer  = ctxAnswer;
 
@@ -171,10 +170,6 @@ function main(bot, onMsg) {
         //-------------]>
 
         return arguments.length < 2 ? bot.api.sendMessage(data) : bot.api.sendMessage(data, callback);
-    }
-
-    function ctxSend(data, callback) {
-        return bot.send(this.cid, data, callback);
     }
 
     function ctxForward(callback) {

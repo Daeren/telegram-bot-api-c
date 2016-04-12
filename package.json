@@ -1,6 +1,6 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "10.2.1",
+    "version": "11.0.0",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
     "homepage": "https://666.io",
@@ -20,7 +20,7 @@
         "name": "Daeren",
         "email": "x@db.gg"
     },
-    
+
     "preferGlobal": "true",
 
     "bin": {
@@ -30,7 +30,7 @@
     "scripts": {
         "test": "mocha --reporter spec"
     },
-    
+
     "repository": {
         "type": "git",
         "url": "git://github.com/Daeren/telegram-bot-api-c.git"

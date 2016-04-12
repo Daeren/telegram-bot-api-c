@@ -91,7 +91,7 @@ function response(who, bot, params) {
     data.text = params && params.id ? "" : bot;
     data.reply_markup = bot.keyboard(bot.message.text);
 
-    bot.send(data).then(console.info, console.error);
+    bot.answer().text(null, data).send().then(console.info, console.error);
 }
 
 //-------------]>

@@ -7,19 +7,19 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 
 
 ```js
-require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text": "Hi"});
+require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text": "+"});
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "Hi"});
+require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "+"});
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"));
 ```
 
 ```js
-> tg-api TOKEN sendMessage --chat_id=0 --text="Hi"
+> tg-api TOKEN sendMessage --chat_id=0 --text="+"
 ```
 
 
@@ -29,9 +29,9 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
 * [Error codes](#refErrors): +
 * KeepAlive (+50% to the speed of requests): +
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
-* [JS Generators (yield + promise)](#refJSGenerators): +
 * [InlineQuery](#refInlineQuery): +
 * Analytics: [tgb-pl-botanio][4]
+* Removed: bot.send(..), bot.broadcast(..)
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -58,7 +58,6 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
 * [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
-* [Broadcast](#refBroadcast)
 * [InlineQuery](#refInlineQuery)
 * [Errors](#refErrors)
 * [CLI](#refCLI)
@@ -133,18 +132,9 @@ let file, data;
 //----)>
 
 file = __dirname + "/MiElPotato.jpg";
-data = [ // Queue
-    {"text": ["H", "i"]},
-    {"photo": file, "caption": "#2EASY"}
-];
+data = () => ({"chat_id": 0, "text": Date.now(), "photo": file, "caption": "#2EASY"});
 
-objBot.send("chatId", data);
-
-//----)>
-
-data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
-
-api.sendMessage(data(), function() { });
+api.sendMessage(data(), function(e, r) { });
 api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
     
@@ -365,14 +355,6 @@ objSrv
         
         bot.answer().text("Hi").text("Hi 2").send();
         
-        //----[Send | HashTable: One element]----}>
-        
-        bot.send({"text": "Hi"});
-
-        //----[Send | HashTable: Queue]----}>
-        
-        bot.send([{"text": "Hi"}, {"text": "Hi 2"}]);
-        
         //----[Send_ELEMENT]----}>
         
         bot.sendMessage("Hello").then(console.log);
@@ -423,7 +405,7 @@ objSrv
 
             .send() // <-- Uses: bot.cid
 
-            .then(console.log);  // <-- Return: hashTable | {elemName: [results]}
+            .then(console.log);  // <-- Return: number | lastIndex
         
         //------[ONE ELEMENT]------}>
         
@@ -644,16 +626,15 @@ objBot.polling(bot => {
 const rBot = require("telegram-bot-api-c");
 
 function cbMsg(bot) {
-    let data = {};
+    const params = {};
     
-    data.text = "Hell Word!";
-    data.reply_markup = bot.keyboard() === bot.keyboard.hide();
-    data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
+    params.reply_markup = bot.keyboard() === bot.keyboard.hide();
+    params.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
     
-    data.reply_markup = bot.keyboard.hOx();
-    data.reply_markup = bot.keyboard.inline.hOx();
+    params.reply_markup = bot.keyboard.hOx();
+    params.reply_markup = bot.keyboard.inline.hOx();
     
-    bot.send(data);
+    bot.sendMessage("Hell Word!", params);
 }
 
 rBot.keyboard.numpad(true); // <-- Once
@@ -714,35 +695,6 @@ objBot
     .download("file_id", function(error, info) {
         info.stream.pipe(require("fs").createWriteStream("./myFile"));
     });
-```
-
-
-
-<a name="refBroadcast"></a>
-#### Broadcast (prototype)
-
-```js
-const ids   = ["10", "1-0", "-20"], // <-- An infinite number of identifiers
-      data  = {"text": "Hi"};
-
-const bProc = objBot.broadcast(ids, data, (e, lastIndex) => console.log(e, lastIndex));
-
-// bProc.stop();
-// Error: stop the queue
-
-/*
-When sending messages inside a particular chat,
-avoid sending more than one message per second.
-We may allow short bursts that go over this limit,
-but eventually you'll begin receiving 429 errors.
-
-If you're sending bulk notifications to multiple users,
-the API will not allow more than 30 messages per second or so.
-Consider spreading out notifications over large intervals of 8-12
-hours for best results.
-
-|> Broadcast solves this problem
-*/
 ```
 
 
@@ -996,20 +948,22 @@ npm test
 | virtual           | [callback(bot, cmd)]                                                  | object                            |
 
 
-#### Methods: send / Response Builder
+#### Methods: Response Builder
 
 | Name          | Type                                  | Note                                                              |
 |---------------|---------------------------------------|-------------------------------------------------------------------|
 |               | -                                     |                                                                   |
-| text          | string, stream, buffer                |                                                                   |
-| photo         | string, stream, buffer                | Ext: jpg, jpeg, gif, tif, png, bmp                                |
-| audio         | string, stream, buffer                | Ext: mp3                                                          |
-| document      | string, stream, buffer                |                                                                   |
-| sticker       | string, stream, buffer                | Ext: webp [, jpg, jpeg, gif, tif, png, bmp]                       |
-| video         | string, stream, buffer                | Ext: mp4                                                          |
-| voice         | string, stream, buffer                | Ext: ogg                                                          |
-| location      | string, json                          | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
-| chatAction    | string                                |                                                                   |
+| text          | string, buffer, stream                |                                                                   |
+| photo         | string, buffer, stream                | Ext: jpg, jpeg, gif, tif, png, bmp                                |
+| audio         | string, buffer, stream                | Ext: mp3                                                          |
+| document      | string, buffer, stream                |                                                                   |
+| sticker       | string, buffer, stream                | Ext: webp [, jpg, jpeg, gif, tif, png, bmp]                       |
+| video         | string, buffer, stream                | Ext: mp4                                                          |
+| voice         | string, buffer, stream                | Ext: ogg                                                          |
+| location      | string, buffer, json                  | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
+| venue         | string, buffer, json                  | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
+| contact       | string, buffer                        |                                                                   |
+| chatAction    | string, buffer                        |                                                                   |
 
 
 #### Methods: polling
@@ -1071,7 +1025,6 @@ npm test
 |                   | -                     |                                                        |
 | forward           | function              | Uses: mid, from, to                                    |
 | render            | function              | Uses: cid                                              |
-| send              | function              | Uses: cid                                              |
 |                   | -                     |                                                        |
 | sendMessage       | function              |                                                        |
 | sendPhoto         | function              |                                                        |
@@ -1081,6 +1034,8 @@ npm test
 | sendVideo         | function              |                                                        |
 | sendVoice         | function              |                                                        |
 | sendLocation      | function              |                                                        |
+| sendVenue         | function              |                                                        |
+| sendContact       | function              |                                                        |
 | sendChatAction    | function              |                                                        |
 
 

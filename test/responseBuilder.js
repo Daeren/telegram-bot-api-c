@@ -36,19 +36,24 @@ const gBotReq       = {
 const gCreateRB = function() { return new CResponseBuilder(gBotReq, objBot); };
 
 const gElements = [
-    "text", "photo", "audio", "document", "sticker", "video", "voice", "location", "chatAction"
+    "text", "photo", "audio", "document", "sticker", "video", "voice", "location", "venue", "contact", "chatAction"
 ];
 
 const gModifiers = [
     "keyboard",
 
     "maxSize", "filename",
-    "latitude", "longitude",
 
-    "disableWebPagePreview",
-    "parseMode",
+    "latitude", "longitude",
     "caption", "duration", "performer", "title",
-    "replyToMessageId"
+
+    "disableWebPagePreview", "disableNotification",
+    "showAlert",
+
+    "phoneNumber", "firstName", "lastName",
+    "parseMode", "replyMarkup",
+
+    "replyToMessageId", "messageId", "inlineMessageId"
 ];
 
 //-----------------------------------------------------
@@ -132,7 +137,6 @@ describe("CResponseBuilder", function() {
 
             rb
                 .chatAction("typing")
-
                 .photo(url)
                 .keyboard("1 2 3");
 
@@ -140,18 +144,14 @@ describe("CResponseBuilder", function() {
 
             let lastElement = rb.lastElement;
 
-            //----------]>
-
             expect(lastElement.reply_markup).to.deep.equal(objBot.keyboard("1 2 3"));
 
             //----------]>
 
-            rb
-                .send()
+            rb.send()
                 .then(function(result) {
                     expect(result).to.be.a("object");
 
-                    expect(result).to.have.property("chatAction").that.is.an("array");
                     expect(result).to.have.property("photo").that.is.an("array");
 
                     done();
@@ -227,12 +227,13 @@ function checkError(error) {
 
 //-----------]>
 
-function checkBaseFields(error, data) {
+function checkBaseFields(error, result) {
     checkError(error);
-    expect(data).to.be.a("object");
 
-    expect(data).to.have.property("message_id");
-    expect(data).to.have.property("from").that.is.an("object");
-    expect(data).to.have.property("chat").that.is.an("object");
-    expect(data).to.have.property("date");
+    expect(result).to.be.a("object");
+
+    expect(result).to.have.property("message_id");
+    expect(result).to.have.property("from").that.is.an("object");
+    expect(result).to.have.property("chat").that.is.an("object");
+    expect(result).to.have.property("date");
 }

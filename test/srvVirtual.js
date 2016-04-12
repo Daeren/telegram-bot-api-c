@@ -749,7 +749,6 @@ function tCheckBaseBotFields(bot) {
     //----------]>
 
     expect(bot).to.have.property("render").that.is.a("function");
-    expect(bot).to.have.property("send").that.is.a("function");
     expect(bot).to.have.property("forward").that.is.a("function");
     expect(bot).to.have.property("answer").that.is.a("function");
 
@@ -768,6 +767,8 @@ function tCheckBaseBotFields(bot) {
         "sendVideo",
         "sendVoice",
         "sendLocation",
+        "sendVenue",
+        "sendContact",
         "sendChatAction"
     ]
         .forEach(function(e) {

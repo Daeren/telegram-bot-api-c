@@ -110,7 +110,7 @@ function forEachAsync(data, iter, cbEnd) {
     function cbNext(error, result) {
         if(error) {
             if(cbEnd) {
-                cbEnd(error, result);
+                cbEnd(error, result, i);
             }
 
             return;
@@ -120,7 +120,7 @@ function forEachAsync(data, iter, cbEnd) {
 
         if(i >= len) {
             if(cbEnd) {
-                cbEnd(error, result);
+                cbEnd(error, result, i);
             }
         } else {
             run();
