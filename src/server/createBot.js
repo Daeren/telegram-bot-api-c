@@ -13,9 +13,9 @@ const rEvents = require("events");
 
 //-----------------------------------------------------
 
-const gMaxListeners = 100;
+const gMaxListeners     = 100;
 
-const gMapSendMethods      = {
+const gMapSendMethods   = {
     "text":         "sendMessage",
     "photo":        "sendPhoto",
     "audio":        "sendAudio",
@@ -24,6 +24,8 @@ const gMapSendMethods      = {
     "video":        "sendVideo",
     "voice":        "sendVoice",
     "location":     "sendLocation",
+    "venue":        "sendVenue",
+    "contact":      "sendContact",
     "action":       "sendChatAction"
 };
 
@@ -111,6 +113,7 @@ function main(bot, onMsg) {
 
             switch(fieldName) {
                 case "location":
+                case "venue":
                     if(!input) {
                         break;
                     }
@@ -127,6 +130,11 @@ function main(bot, onMsg) {
                         data.latitude = input.latitude;
                         data.longitude = input.longitude;
                     }
+
+                    break;
+
+                case "contact":
+                    result.phone_number = input;
 
                     break;
 

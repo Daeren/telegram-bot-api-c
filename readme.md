@@ -75,58 +75,58 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
 #### Start
 
 ```js
-const rBot    = require("telegram-bot-api-c");
-const objBot  = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const rTgBot    = require("telegram-bot-api-c");
 
-//----[Server]----}>
+const gBot      = rTgBot(process.env.TELEGRAM_BOT_TOKEN),
+      gSrv      = gBot.polling(onDefault);
 
-let srv = objBot.polling(onDefault);
+//-----------]>
 
-//----)>
-
-srv
+gSrv
     .on("/start", onCmdStart)
     .on("/", onCmdNotFound)
 
     .on("enterChat", onEnterChat)
     .on("text", onText)
     .on("photo document", onPhotoOrDoc)
+    .on("pinnedMessage", onPinnedMessage)
+    
     .on("*", onNotFound)
 
+    .on(/^id\s+(\d+)/i, onTextRegExp)
     .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
-    .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp)
+    .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
 
-    .on(/^id\s+(\d+)/i, onTextRegExp);
 
-//----)>
-
-/*
- 'bot' | objBot -> Sugar -> CtxPerRequest
- 'bot instanceof objBot.constructor' | true
-
- cmd.type | common or private
-
- /start [text] -> common
- /start@bot [text] -> private
- @bot /start [text] -> private
-*/
-
-function onDefault(bot, cmd, state) { }
-
-function onNotFound(bot, data, state) { }
-function onCmdNotFound(bot, params, state) { }
+function onDefault(bot, cmd, gotoState) { }
 
 function onCmdStart(bot, params) { }
-function onTextRegExp(bot, params) { }
+function onCmdNotFound(bot, params, gotoState) { }
 
-function onEnterChat(bot, data) { }
-function onText(bot, data) { }
+function onEnterChat(bot, member) { }
+function onText(bot, text) { }
 function onPhotoOrDoc(bot, data) { }
+function onPinnedMessage(bot, message) { }
+
+function onNotFound(bot, data, gotoState) { }
+
+function onTextRegExp(bot, data) { }
+
+//-----------]>
+
+'bot' | gBot -> Sugar -> CtxPerRequest
+'bot instanceof gBot.constructor' | true
+
+cmd.type | common or private
+
+/start [text] -> common
+/start@bot [text] -> private
+@bot /start [text] -> private
 
 //----[API]----}>
 
-const api      = objBot.api,
-      keyboard = objBot.keyboard;
+const api      = gBot.api,
+      keyboard = gBot.keyboard;
 
 let file, data;
 
@@ -147,7 +147,9 @@ data = () => ({"chat_id": 0, "text": Date.now(), "parse_mode": "markdown"});
 api.sendMessage(data(), function() { });
 api.sendMessage(data()).then(data).then(function(x) {
     x.photo = file;
+    
     x.reply_markup = keyboard.hOx(/*once, selective*/);
+    x.reply_markup = keyboard.inline.hOx();
     x.reply_markup = keyboard("X Y Z");
     x.reply_markup = keyboard([["X"]], "resize once selective");
 
@@ -673,9 +675,8 @@ vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
 abcd, numpad, hide
 
 Normal keyboard:
-
-vOx(once, selective)
-numpad(once, selective)
+ vOx(once, selective)
+ numpad(once, selective)
 ```
 
 | Name              | Note                                 |
