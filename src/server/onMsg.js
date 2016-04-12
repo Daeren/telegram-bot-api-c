@@ -353,8 +353,6 @@ function getEventNameByTypeMsg(type) {
 function getTypeMsg(m) {
     let t;
 
-    console.log(m);
-
     if(
         hasOwnProperty.call(m, t = "text") ||
         hasOwnProperty.call(m, t = "photo") ||
