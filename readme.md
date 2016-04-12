@@ -939,8 +939,6 @@ npm test
 | callJson          | method[, data][, callback(error, json, response)]                     |                                   |
 |                   | -                                                                     |                                   |
 | render            | template, data                                                        | string                            |
-| send              | id, data[, callback(error, json, response)]                           | promise or undefined              |
-| broadcast         | ids, data[, callback(error)]                                          | object {stop}                     |
 | download          | fid[, dir][, name][, callback(error, info {id,size,file,stream})]     | promise or undefined              |
 |                   | -                                                                     |                                   |
 | http              | [options][, callback(bot, cmd)]                                       | object                            |
@@ -1094,7 +1092,7 @@ MIT
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [100]: https://core.telegram.org/bots/2-0-intro
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=1
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=11
 [image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=1
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
 
