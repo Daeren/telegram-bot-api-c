@@ -14,7 +14,6 @@ const rFs               = require("fs"),
       rUrl              = require("url");
 
 const rRequest          = require("./request"),
-      rMethods          = require("./methods"),
       rProto            = require("./proto");
 
 const rUtil             = require("./../util"),
@@ -42,8 +41,6 @@ updateBoundary();
 //-----------------------------------------------------
 
 module.exports = {
-    "methods":          rMethods,
-
     "call":             callAPI,
     "callJson":         callAPIJson,
 
@@ -169,7 +166,7 @@ function callAPI(token, method, data, callback) {
     //-------------------------]>
 
     const typeOfData = typeof(data),
-          reqMParams = rProto[method];
+          reqMParams = rProto.params[method];
 
     let isStream,
         dataIsMap;
@@ -461,7 +458,7 @@ function genMethodsForMe(bot) {
 
     //--------------]>
 
-    rMethods.forEach(setMethod);
+    rProto.methods.forEach(setMethod);
 
     //--------------]>
 

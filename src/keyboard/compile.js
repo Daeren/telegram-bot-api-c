@@ -20,11 +20,66 @@ module.exports = main;
 function main(input) {
     const map = {};
 
-    const result = function(buttons, params) {
-        if(typeof(buttons) === "string") {
-            buttons = buttons.split(/\s+/).map(function(x) { return [x]; });
+    //----------]>
+
+    for(let name in input.bin) {
+        if(!input.bin.hasOwnProperty(name)) {
+            continue;
         }
 
+        const kb = input.bin[name];
+
+        //----]>
+
+        name = name[0].toUpperCase() + name.substr(1);
+
+        map["v" + name] = kb.map(x => [x]);
+        map["h" + name] = [kb];
+    }
+
+    for(let name in input.norm) {
+        if(!input.norm.hasOwnProperty(name)) {
+            continue;
+        }
+
+        const kb = input.norm[name];
+
+        //----]>
+
+        keyboardBuilder[name] = genFKB("keyboard", kb, false);
+        inlineKeyboardBuilder[name] = genFKB("inline_keyboard", kb, false, true);
+    }
+
+    for(let name in map) {
+        if(!map.hasOwnProperty(name)) {
+            continue;
+        }
+        
+        const kb = map[name];
+
+        //----]>
+
+        keyboardBuilder[name] = genFKB("keyboard", kb, true);
+        inlineKeyboardBuilder[name] = genFKB("inline_keyboard", kb, true, true);
+    }
+
+    //-----)>
+
+    keyboardBuilder.inline = inlineKeyboardBuilder;
+    keyboardBuilder.hide = genFKB("hide_keyboard");
+
+    //----------]>
+
+    return keyboardBuilder;
+
+    //----------]>
+
+    function inlineKeyboardBuilder(buttons) {
+        return typeof(buttons) === "string" ? {"inline_keyboard": buttons.split(/\s+/).map(text => [{text, "callback_data": text}])} : buttons;
+    }
+
+    function keyboardBuilder(buttons, params) {
+        buttons = typeof(buttons) === "string" ? buttons.split(/\s+/).map(x => [x]) : buttons;
         buttons = buttons === false || !arguments.length ? {"hide_keyboard": true} : {"keyboard": buttons};
 
         if(!params) {
@@ -48,57 +103,26 @@ function main(input) {
         }
 
         return buttons;
-    };
-
-    //----------]>
-
-    for(let name in input.bin) {
-        if(!input.bin.hasOwnProperty(name)) {
-            continue;
-        }
-
-        let kb = input.bin[name];
-
-        name = name[0].toUpperCase() + name.substr(1);
-
-        map["v" + name] = kb.map(function(x) { return [x]; });
-        map["h" + name] = [kb];
     }
-
-    for(let name in map) {
-        if(!map.hasOwnProperty(name)) {
-            continue;
-        }
-
-        let kb = map[name];
-        result[name] = genFKB("keyboard", kb, true);
-    }
-
-    for(let name in input.norm) {
-        if(!input.norm.hasOwnProperty(name)) {
-            continue;
-        }
-
-        let kb = input.norm[name];
-        result[name] = genFKB("keyboard", kb);
-    }
-
-    //-----)>
-
-    result.hide = genFKB("hide_keyboard");
-
-    //----------]>
-
-    return result;
 }
 
 //----------------------------------]>
 
-function genFKB(type, kb, resize) {
-    return function(once, selective) {
-        const k = {};
+function genFKB(type, kb, resize, inline) {
+    return inline ? inlineKb : normalKb;
 
-        k[type] = kb || true;
+    //----------]>
+
+    function inlineKb() {
+        return {
+            [type]: kb.map(x => (Array.isArray(x) ? x.map(y => ({"text": y, "callback_data": y})) : {"text": x, "callback_data": x}))
+        };
+    }
+
+    function normalKb(once, selective) {
+        const k = {
+            [type]: kb || true
+        };
 
         if(resize) {
             k.resize_keyboard = true;
@@ -113,5 +137,5 @@ function genFKB(type, kb, resize) {
         }
 
         return k;
-    };
+    }
 }

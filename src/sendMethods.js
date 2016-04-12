@@ -18,6 +18,8 @@ const gMap      = {
     "video":        "sendVideo",
     "voice":        "sendVoice",
     "location":     "sendLocation",
+    "venue":        "sendVenue",
+    "contact":      "sendContact",
     "chatAction":   "sendChatAction"
 };
 

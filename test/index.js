@@ -19,6 +19,8 @@ const expect    = rChai.expect;
 const rBot      = require("./../index"),
       rFs       = require("fs");
 
+const rAPIProto = require("./../src/api/proto");
+
 //-----------------------------------------------------
 
 const token     = process.env.TELEGRAM_BOT_TOKEN,
@@ -31,6 +33,8 @@ const api       = objBot.api,
       keyboard  = objBot.keyboard,
 
       parseCmd  = objBot.parseCmd;
+
+let midEditText, midEditCaption;
 
 //-----------------------------------------------------
 
@@ -49,19 +53,20 @@ describe("Module: bot", function() {
     describe("Method", function() {
 
         it("keyboard", function() {
-            expect(rBot).to.have.property("keyboard").that.is.an("function");
+            expect(rBot).to.have.property("keyboard").that.is.a("function");
+            expect(rBot.keyboard).to.have.property("inline").that.is.a("function");
         });
 
         it("parseCmd", function() {
-            expect(rBot).to.have.property("parseCmd").that.is.an("function");
+            expect(rBot).to.have.property("parseCmd").that.is.a("function");
         });
 
         it("call", function() {
-            expect(rBot).to.have.property("call").that.is.an("function");
+            expect(rBot).to.have.property("call").that.is.a("function");
         });
 
         it("callJson", function() {
-            expect(rBot).to.have.property("callJson").that.is.an("function");
+            expect(rBot).to.have.property("callJson").that.is.a("function");
         });
 
     });
@@ -126,25 +131,16 @@ describe("Instance: bot", function() {
         //-----------------]>
 
         it("api", function() {
-            const apiMethods = [
-                "answerInlineQuery",
-
-                "forwardMessage",
-                "sendMessage", "sendPhoto", "sendAudio", "sendDocument", "sendSticker", "sendVideo", "sendVoice", "sendLocation", "sendChatAction",
-                "getMe", "getUserProfilePhotos", "getUpdates", "getFile",
-                "setWebhook"
-            ];
-
             expect(api).to.be.an("object").and.not.equal(null);
 
-            for(let method of apiMethods) {
+            for(let method of rAPIProto.methods) {
                 expect(api).to.have.property(method);
             }
         });
 
         for(let method of botMethods) {
             it(method, function() {
-                expect(objBot).to.have.property(method).that.is.an("function");
+                expect(objBot).to.have.property(method).that.is.a("function");
             });
         }
 
@@ -653,6 +649,8 @@ describe("Instance: bot", function() {
 
                 expect(data).to.deep.equal(dataClone);
 
+                midEditText = result.message_id;
+
                 done();
             });
         });
@@ -674,6 +672,8 @@ describe("Instance: bot", function() {
                         checkBaseFields(error, data);
 
                         expect(data).to.have.property("photo").that.is.an("array");
+
+                        midEditCaption = data.message_id;
 
                         done();
                     });
@@ -707,6 +707,32 @@ describe("Instance: bot", function() {
 
             objBot.send(chatId, data, function(error, result) {
                 checkSendLocation(error, result);
+
+                expect(data).to.deep.equal(dataClone);
+
+                done();
+            });
+        });
+
+        it("send.venue | callback", function(done) {
+            let data = {"venue": "57.0061726 40.9821055", "title": "ATK", "address": "Potatov Str."};
+            let dataClone   = jsonClone(data);
+
+            objBot.send(chatId, data, function(error, result) {
+                checkBaseFields(error, result);
+
+                expect(data).to.deep.equal(dataClone);
+
+                done();
+            });
+        });
+
+        it("send.contact | callback", function(done) {
+            let data = {"contact": "+8 888 888 88 88", "first_name": "Potato +"};
+            let dataClone   = jsonClone(data);
+
+            objBot.send(chatId, data, function(error, result) {
+                checkBaseFields(error, result);
 
                 expect(data).to.deep.equal(dataClone);
 
@@ -929,6 +955,36 @@ describe("Instance: bot", function() {
             }, function(error, isOk) {
                 checkWithoutError(error);
                 expect(isOk).to.be.a("boolean");
+
+                done();
+            });
+        });
+
+        it("editMessageText | callback", function(done) {
+            api.editMessageText({
+                "chat_id":      chatId,
+                "message_id":   midEditText,
+                "text":         "EDITED"
+            }, function(error, data) {
+                console.log(error);
+                console.log(data);
+
+                checkWithoutError(error);
+
+                done();
+            });
+        });
+
+        it("editMessageCaption | callback", function(done) {
+            api.editMessageCaption({
+                "chat_id":      chatId,
+                "message_id":   midEditCaption,
+                "caption":      "EDITED"
+            }, function(error, data) {
+                console.log(error);
+                console.log(data);
+
+                checkWithoutError(error);
 
                 done();
             });

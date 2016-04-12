@@ -9,6 +9,8 @@
 
 //-----------------------------------------------------
 
+const gMethods = [];
+
 const gProtoTable = {
     "forwardMessage": [
         ["string", "chat_id"],
@@ -82,6 +84,28 @@ const gProtoTable = {
         ["json", "reply_markup"]
     ],
 
+    "sendVenue": [
+        ["string", "chat_id"],
+        ["string", "latitude"],
+        ["string", "longitude"],
+        ["string", "title"],
+        ["string", "address"],
+        ["string", "foursquare_id"],
+        ["boolean", "disable_notification"],
+        ["string", "reply_to_message_id"],
+        ["json", "reply_markup"]
+    ],
+
+    "sendContact": [
+        ["string", "chat_id"],
+        ["string", "phone_number"],
+        ["string", "first_name"],
+        ["string", "last_name"],
+        ["boolean", "disable_notification"],
+        ["string", "reply_to_message_id"],
+        ["json", "reply_markup"]
+    ],
+
     "sendChatAction": [
         ["string", "chat_id"],
         ["string", "action"]
@@ -104,6 +128,8 @@ const gProtoTable = {
         ["string", "file_id"]
     ],
 
+    "getMe": null,
+
 
     "setWebhook": [
         ["string", "url"],
@@ -113,10 +139,54 @@ const gProtoTable = {
 
     "answerInlineQuery": [
         ["string", "inline_query_id"],
+        ["json", "results"],
         ["string", "cache_time"],
         ["boolean", "is_personal"],
         ["string", "next_offset"],
-        ["json", "results"]
+        ["string", "switch_pm_text"],
+        ["string", "switch_pm_parameter"]
+    ],
+
+    "kickChatMember": [
+        ["string", "chat_id"],
+        ["string", "user_id"]
+    ],
+
+    "unbanChatMember": [
+        ["string", "chat_id"],
+        ["string", "user_id"]
+    ],
+
+    "answerCallbackQuery": [
+        ["string", "callback_query_id"],
+        ["string", "text"],
+        ["boolean", "show_alert"]
+    ],
+
+
+    "editMessageText": [
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"],
+        ["string", "text"],
+        ["string", "parse_mode"],
+        ["boolean", "disable_web_page_preview"],
+        ["json", "reply_markup"]
+    ],
+
+    "editMessageCaption": [
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"],
+        ["string", "caption"],
+        ["json", "reply_markup"]
+    ],
+
+    "editMessageReplyMarkup": [
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"],
+        ["json", "reply_markup"]
     ]
 };
 
@@ -127,6 +197,7 @@ for(let name in gProtoTable) {
         continue;
     }
 
+    gMethods.push(name);
     gProtoTable[name.toLowerCase()] = gProtoTable[name];
 
     delete gProtoTable[name];
@@ -134,4 +205,7 @@ for(let name in gProtoTable) {
 
 //-----------------------------------------------------
 
-module.exports = gProtoTable;
+module.exports = {
+    "methods":  gMethods,
+    "params":   gProtoTable
+};

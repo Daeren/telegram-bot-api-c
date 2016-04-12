@@ -417,10 +417,16 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
         case "string":
             switch(cmdName) {
                 case "location":
+                case "venue":
                     cmdData = cmdData.split(/\s+/);
 
                     result.latitude = cmdData[0];
                     result.longitude = cmdData[1];
+
+                    break;
+
+                case "contact":
+                    result.phone_number = cmdData;
 
                     break;
 
@@ -440,6 +446,7 @@ function prepareDataForSendApi(id, cmdName, cmdData, data) {
         case "object":
             switch(cmdName) {
                 case "location":
+                case "venue":
                     if(Array.isArray(cmdData)) {
                         result.latitude = cmdData[0];
                         result.longitude = cmdData[1];

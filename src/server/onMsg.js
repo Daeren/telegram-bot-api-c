@@ -330,8 +330,8 @@ function main(srvBot, data) {
 
 function getEventNameByTypeMsg(type) {
     switch(type) {
-        case "new_chat_participant":    return "enterChat";
-        case "left_chat_participant":   return "leftChat";
+        case "new_chat_member":         return "enterChat";
+        case "left_chat_member":        return "leftChat";
 
         case "new_chat_title":          return "chatTitle";
         case "new_chat_photo":          return "chatNewPhoto";
@@ -344,13 +344,16 @@ function getEventNameByTypeMsg(type) {
         case "migrate_to_chat_id":      return "migrateToChatId";
         case "migrate_from_chat_id":    return "migrateFromChatId";
 
-        default:
-            return type;
+        case "pinned_message":          return "pinnedMessage";
+
+        default:                        return type;
     }
 }
 
 function getTypeMsg(m) {
     let t;
+
+    console.log(m);
 
     if(
         hasOwnProperty.call(m, t = "text") ||
@@ -360,11 +363,12 @@ function getTypeMsg(m) {
         hasOwnProperty.call(m, t = "sticker") ||
         hasOwnProperty.call(m, t = "video") ||
         hasOwnProperty.call(m, t = "voice") ||
-        hasOwnProperty.call(m, t = "contact") ||
         hasOwnProperty.call(m, t = "location") ||
+        hasOwnProperty.call(m, t = "venue") ||
+        hasOwnProperty.call(m, t = "contact") ||
 
-        hasOwnProperty.call(m, t = "new_chat_participant") ||
-        hasOwnProperty.call(m, t = "left_chat_participant") ||
+        hasOwnProperty.call(m, t = "new_chat_member") ||
+        hasOwnProperty.call(m, t = "left_chat_member") ||
 
         hasOwnProperty.call(m, t = "new_chat_title") ||
         hasOwnProperty.call(m, t = "new_chat_photo") ||
@@ -375,7 +379,9 @@ function getTypeMsg(m) {
         hasOwnProperty.call(m, t = "channel_chat_created") ||
 
         hasOwnProperty.call(m, t = "migrate_to_chat_id") ||
-        hasOwnProperty.call(m, t = "migrate_from_chat_id")
+        hasOwnProperty.call(m, t = "migrate_from_chat_id") ||
+
+        hasOwnProperty.call(m, t = "pinned_message")
     ) {
         return t;
     }

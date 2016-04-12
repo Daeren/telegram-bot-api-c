@@ -16,12 +16,17 @@ const rSendMethods = require("./../sendMethods");
 const gElements = rSendMethods.keys;
 const gModifiers = [
     "maxSize", "filename",
-    "latitude", "longitude",
 
-    "disable_web_page_preview",
-    "parse_mode",
+    "latitude", "longitude",
     "caption", "duration", "performer", "title",
-    "reply_to_message_id"
+
+    "disable_web_page_preview", "disable_notification",
+    "show_alert",
+
+    "phone_number", "first_name", "last_name",
+    "parse_mode", "reply_markup",
+
+    "reply_to_message_id", "message_id", "inline_message_id"
 ];
 
 //-----------------------------------------------------
@@ -85,7 +90,7 @@ gModifiers
         const funcName = name
             .split("_")
             .map(function(e, i) {
-                if(!i && e === "disable") {
+                if(!i && (e === "disable" || e === "show")) {
                     defValue = true;
                 }
 

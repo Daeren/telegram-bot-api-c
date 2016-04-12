@@ -5,10 +5,9 @@ npm -g install telegram-bot-api-c
 git clone https://github.com/Daeren/telegram-bot-api-c.git
 ```
 
-#### OneShot
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
+require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text": "Hi"});
 ```
 
 ```js
@@ -16,7 +15,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "H
 ```
 
 ```js
-require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text": "Hi"});
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("Hi"));
 ```
 
 ```js
@@ -26,20 +25,17 @@ require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text"
 
 [Telegram Bot API][3]
 
+* [Bot API 2.0][100]: +
 * [Error codes](#refErrors): +
 * KeepAlive (+50% to the speed of requests): +
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * [JS Generators (yield + promise)](#refJSGenerators): +
 * [InlineQuery](#refInlineQuery): +
-* [Virtual (StressTest / Express)](#refVirtual): +
 * Analytics: [tgb-pl-botanio][4]
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
-- Rewritten: callAPI
-```
 
-```
 - message: buffer, stream, string
 - photo|audio|voice|video|document|sticker: buffer, stream, file_id, path, url
 - certificate: buffer, stream, path, url
@@ -645,35 +641,41 @@ objBot.polling(bot => {
 ```js
 const rBot = require("telegram-bot-api-c");
 
-rBot.keyboard.numpad(true); // <-- Once
-rBot.keyboard.numpad(false, true); // <-- Selective
-
 function cbMsg(bot) {
     let data = {};
     
     data.text = "Hell Word!";
     data.reply_markup = bot.keyboard() === bot.keyboard.hide();
     data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
+    
     data.reply_markup = bot.keyboard.hOx();
+    data.reply_markup = bot.keyboard.inline.hOx();
     
     bot.send(data);
 }
 
+rBot.keyboard.numpad(true); // <-- Once
+rBot.keyboard.numpad(false, true); // <-- Selective
 
-// rBot.keyboard([buttons][, params])
-//
-// buttons: string or array or false
-// params: "resize once selective"
+rBot.keyboard.inline.numpad();
 
+//------------------------------
 
-// v - vertically; h - horizontally;
-//
-// vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
-// abcd, numpad, hide
-//
-// vOx(once, selective)
-// numpad(once, selective)
+rBot.keyboard(buttons[, params])
+rBot.inline(buttons)
 
+buttons: `string`, `array of array` or `false`
+params: "resize once selective"
+
+v - vertically; h - horizontally;
+
+vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
+abcd, numpad, hide
+
+Normal keyboard:
+
+vOx(once, selective)
+numpad(once, selective)
 ```
 
 | Name              | Note                                 |
@@ -1087,6 +1089,7 @@ npm test
 |-------------------|---------------------------------------|-------------------------------------------|
 |                   | -                                     |                                           |
 | inlineQuery       | bot, query                            |                                           |
+| pinnedMessage     | bot, message                          |                                           |
 |                   | -                                     |                                           |
 | enterChat         | bot, data                             |                                           |
 | leftChat          | bot, data                             |                                           |
@@ -1109,8 +1112,9 @@ npm test
 | sticker           | bot, data                             |                                           |
 | video             | bot, data                             |                                           |
 | voice             | bot, data                             |                                           |
-| contact           | bot, data                             |                                           |
 | location          | bot, data                             |                                           |
+| venue             | bot, data                             |                                           |
+| contact           | bot, data                             |                                           |
 |                   | -                                     |                                           |
 | (regexp)          | data, params                          |                                           |
 |                   | -                                     |                                           |
@@ -1132,6 +1136,7 @@ MIT
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+[100]: https://core.telegram.org/bots/2-0-intro
 
 [image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=1
 [image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=1
