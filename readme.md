@@ -7,15 +7,15 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 
 
 ```js
-require("telegram-bot-api-c").call("TOKEN", "sendMessage", {"chat_id": 0, "text": "+"});
+require("telegram-bot-api-c").call("TOKEN", "sendMessage", {chat_id: 0, text: "+"})
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").api.sendMessage({"chat_id": 0, "text": "+"});
+require("telegram-bot-api-c")("TOKEN").api.sendMessage({chat_id: 0, text: "+"})
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"));
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 ```
 
 ```js
