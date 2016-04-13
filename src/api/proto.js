@@ -9,10 +9,11 @@
 
 //-----------------------------------------------------
 
-const gMethods              = [],
-      gSendMethods          = [];
+const gMethods                      = [],
+      gSendMethods                  = [];
 
-const gSendMethodsAliases   = {};
+const gAliasesSendMethods           = {},
+      gAliasesSendMethodsFields     = {};
 
 const gProtoTable = {
     "forwardMessage": [
@@ -205,10 +206,15 @@ for(let name in gProtoTable) {
     const sendMethodMatch = name.match(/^send(.+)/);
 
     if(sendMethodMatch) {
-        const shortName = sendMethodMatch[1][0].toLowerCase() + sendMethodMatch[1].substr(1);
+        const shortName = sendMethodMatch[1][0].toLowerCase() + sendMethodMatch[1].substr(1),
+
+              alias     = getAliasByShortMethod(shortName),
+              dataField = getBaseDataFieldByShortMethod(shortName);
 
         gSendMethods.push(name);
-        gSendMethodsAliases[shortName] = name;
+
+        gAliasesSendMethods[alias] = name;
+        gAliasesSendMethodsFields[alias] = dataField;
     }
 
     //----------]>
@@ -224,10 +230,80 @@ for(let name in gProtoTable) {
 //-----------------------------------------------------
 
 module.exports = {
-    "methods":              gMethods,
+    //------[HELPERS]------}>
 
-    "sendMethods":          gSendMethods,
-    "sendMethodsAliases":   gSendMethodsAliases,
+    "methods":                  gMethods,
 
-    "params":               gProtoTable
+    "sendMethods":              gSendMethods,
+    "aliasesSendMethods":       gAliasesSendMethods,
+    "aliasesSendMethodsFields": gAliasesSendMethodsFields,
+
+    //------[PROTO]------}>
+
+    "params":                   gProtoTable,
+
+    //------[METHODS]------}>
+
+    genSendMethodsFor,
+    dataModifierForSendMethod
 };
+
+//-----------------------------------------------------
+
+function genSendMethodsFor(iter) {
+    const aliases = gAliasesSendMethods;
+
+    //--------]>
+
+    for(let alias in aliases) {
+        if(hasOwnProperty.call(aliases, alias)) {
+            iter(alias, aliases[alias], gAliasesSendMethodsFields[alias]);
+        }
+    }
+}
+
+function dataModifierForSendMethod(method, input, output) {
+    if(input === null || typeof(input) === "undefined") {
+        return false;
+    }
+
+    switch(method) {
+        case "sendLocation":
+        case "sendVenue":
+            if(typeof(input) === "string") {
+                input = input.split(/\s+/);
+            }
+
+            if(Array.isArray(input)) {
+                output.latitude = input[0];
+                output.longitude = input[1];
+            }
+            else if(typeof(input) === "object") {
+                output.latitude = input.latitude;
+                output.longitude = input.longitude;
+            }
+
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+function getAliasByShortMethod(shortMethod) {
+    switch(shortMethod) {
+        case "message": return "text";
+
+        default:        return shortMethod;
+    }
+}
+
+function getBaseDataFieldByShortMethod(shortMethod) {
+    switch(shortMethod) {
+        case "message":     return "text";
+        case "contact":     return "phone_number";
+        case "chatAction":  return "action";
+
+        default:            return shortMethod;
+    }
+}

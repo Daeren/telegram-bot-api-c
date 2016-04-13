@@ -9,25 +9,13 @@
 
 //-----------------------------------------------------
 
-const rEvents = require("events");
+const rEvents       = require("events");
+
+const rAPIProto     = require("./../api/proto");
 
 //-----------------------------------------------------
 
-const gMaxListeners     = 100;
-
-const gMapSendMethods   = {
-    "text":         "sendMessage",
-    "photo":        "sendPhoto",
-    "audio":        "sendAudio",
-    "document":     "sendDocument",
-    "sticker":      "sendSticker",
-    "video":        "sendVideo",
-    "voice":        "sendVoice",
-    "location":     "sendLocation",
-    "venue":        "sendVenue",
-    "contact":      "sendContact",
-    "action":       "sendChatAction"
-};
+const gMaxListeners = 100;
 
 //-----------------------------------------------------
 
@@ -38,10 +26,10 @@ module.exports = main;
 function main(bot, onMsg) {
     /*jshint validthis:true */
 
-    let result;
-
     const ctx   = Object.create(bot),
           ev    = new rEvents();
+
+    let result;
 
     //---------]>
 
@@ -84,19 +72,12 @@ function main(bot, onMsg) {
 
     //-----[Send methods]-----}>
 
-    for(let fieldName in gMapSendMethods) {
-        if(!gMapSendMethods.hasOwnProperty(fieldName)) {
-            continue;
-        }
+    rAPIProto.genSendMethodsFor(function addElementMethod(alias, original, baseDataField) {
+        const apiMethod = bot.api[original];
 
         //-----------]>
 
-        const methodName = gMapSendMethods[fieldName];
-        const apiMethod = bot.api[methodName];
-
-        //-----------]>
-
-        ctx[methodName] = function(input, params, callback) {
+        ctx[original] = function(input, params, callback) {
             if(typeof(params) === "function") {
                 callback = params;
                 params = undefined;
@@ -108,44 +89,15 @@ function main(bot, onMsg) {
 
             data.chat_id = params && params.chat_id || this.cid;
 
-            //---)>
-
-            switch(fieldName) {
-                case "location":
-                case "venue":
-                    if(!input) {
-                        break;
-                    }
-
-                    if(typeof(input) === "string") {
-                        input = input.split(/\s+/);
-                    }
-
-                    if(Array.isArray(input)) {
-                        data.latitude = input[0];
-                        data.longitude = input[1];
-                    }
-                    else if(typeof(input) === "object") {
-                        data.latitude = input.latitude;
-                        data.longitude = input.longitude;
-                    }
-
-                    break;
-
-                case "contact":
-                    result.phone_number = input;
-
-                    break;
-
-                default:
-                    data[fieldName] = input;
+            if(input !== null && typeof(input) !== "undefined" && !rAPIProto.dataModifierForSendMethod(original, input, data)) {
+                data[baseDataField] = input;
             }
 
             //-----------]>
 
             return callback ?  apiMethod(data, callback) : apiMethod(data);
         };
-    }
+    });
 
     //--------------]>
 

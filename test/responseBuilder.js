@@ -150,9 +150,7 @@ describe("CResponseBuilder", function() {
 
             rb.send()
                 .then(function(result) {
-                    expect(result).to.be.a("object");
-
-                    expect(result).to.have.property("photo").that.is.an("array");
+                    expect(result).to.be.a("array");
 
                     done();
                 }, function(error) {

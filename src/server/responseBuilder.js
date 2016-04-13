@@ -49,18 +49,11 @@ CMain.prototype = Object.create(null);
 
 //-----[Elements]-----}>
 
-(function createElements(sendMethodsAliases) {
-    for(let alias in sendMethodsAliases) {
-        if(hasOwnProperty.call(sendMethodsAliases, alias)) {
-            addElementMethod(alias, sendMethodsAliases[alias]);
-        }
-    }
+(function createElements(aliases) {
+    rAPIProto.genSendMethodsFor(addElementMethod);
 
-    function addElementMethod(alias, original) {
-        const baseElementField  = getBaseElementField(alias),
-              baseDataField     = getBaseDataField(alias);
-
-        CMain.prototype[baseElementField] = function(input, params) {
+    function addElementMethod(alias, original, baseDataField) {
+        CMain.prototype[alias] = function(input, params) {
             const lastElement   = this.lastElement,
                   elem          = params ? Object.create(params) : {};
 
@@ -68,7 +61,7 @@ CMain.prototype = Object.create(null);
 
             elem.__method__ = original;
 
-            if(input !== null && typeof(input) !== "undefined" && !dataModifier(baseDataField, input, elem)) {
+            if(input !== null && typeof(input) !== "undefined" && !rAPIProto.dataModifierForSendMethod(original, input, elem)) {
                 elem[baseDataField] = input;
             }
 
@@ -95,63 +88,7 @@ CMain.prototype = Object.create(null);
             return this;
         };
     }
-
-    function getBaseElementField(method) {
-        switch(method) {
-            case "message": return "text";
-
-            default:        return method;
-        }
-    }
-
-    function getBaseDataField(method) {
-        switch(method) {
-            case "message":     return "text";
-            case "contact":     return "phone_number";
-            case "chatAction":  return "action";
-
-            default:            return method;
-        }
-    }
-
-    function dataModifier(name, input, output) {
-        switch(typeof(input)) {
-            case "string":
-                switch(name) {
-                    case "location":
-                    case "venue":
-                        input = input.split(/\s+/);
-
-                        output.latitude = input[0];
-                        output.longitude = input[1];
-
-                        return true;
-                }
-
-                break;
-
-            case "object":
-                switch(name) {
-                    case "location":
-                    case "venue":
-                        if(Array.isArray(input)) {
-                            output.latitude = input[0];
-                            output.longitude = input[1];
-                        }
-                        else if(input) {
-                            output.latitude = input.latitude;
-                            output.longitude = input.longitude;
-                        }
-
-                        return true;
-                }
-
-                break;
-        }
-
-        return false;
-    }
-})(rAPIProto.sendMethodsAliases);
+})();
 
 //-----[Modifiers]-----}>
 
@@ -234,7 +171,8 @@ CMain.prototype.send = function(callback) {
     const botInstance   = this.botInstance,
           lastElement   = this.lastElement;
 
-    const chatId        = this.botReqCtx.cid;
+    const chatId        = this.botReqCtx.cid,
+          isOne         = !this.queue || this.queue.length <= 0;
 
     let queue           = this.queue;
 
@@ -265,27 +203,29 @@ CMain.prototype.send = function(callback) {
 
         //-----]>
 
-        rUtil.forEachAsync(queue, iterElements, endIterElemnts);
+        const results = isOne ? null : [];
+
+        rUtil.forEachAsync(queue, iterElements, callback);
 
         //-----]>
 
-        function iterElements(next, e) {
-            const apiMethod = botInstance.api[e.__method__];
+        function iterElements(next, elem, index) {
+            const apiMethod = botInstance.api[elem.__method__];
 
-            if(!e.chat_id) {
-                e.chat_id = chatId;
+            if(!elem.chat_id) {
+                elem.chat_id = chatId;
             }
 
-            apiMethod(e, next);
-        }
+            apiMethod(elem, function(error, result) {
+                if(error) {
+                    error.index = index;
+                }
+                else if(results) {
+                    results.push(result);
+                }
 
-        function endIterElemnts(error, result, index) {
-            if(error) {
-                callback(error, index);
-            }
-            else {
-                callback(null, result);
-            }
+                next(error, isOne ? result : results);
+            });
         }
     }
 };
