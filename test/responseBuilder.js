@@ -200,6 +200,16 @@ describe("CResponseBuilder", function() {
                 });
         });
 
+        it("send(location).oneElem | callback", function(done) {
+            gCreateRB()
+                .location("50 60")
+                .send(function(error, result) {
+                    checkBaseFields(error, result);
+
+                    done();
+                });
+        });
+
     });
 });
 

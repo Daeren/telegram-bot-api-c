@@ -169,21 +169,16 @@ CMain.prototype.render = function(data) {
 
 CMain.prototype.send = function(callback) {
     const botInstance   = this.botInstance,
+          chatId        = this.botReqCtx.cid;
+
+    const queue         = this.queue,
           lastElement   = this.lastElement;
-
-    const chatId        = this.botReqCtx.cid,
-          isOne         = !this.queue || this.queue.length <= 0;
-
-    let queue           = this.queue;
 
     //-------]>
 
     if(queue) {
         queue.push(lastElement);
         this.queue = null;
-    }
-    else {
-        queue = [lastElement];
     }
 
     this.lastElement = null;
@@ -203,9 +198,14 @@ CMain.prototype.send = function(callback) {
 
         //-----]>
 
-        const results = isOne ? null : [];
+        const results = queue ? [] : null;
 
-        rUtil.forEachAsync(queue, iterElements, callback);
+        if(queue) {
+            rUtil.forEachAsync(queue, iterElements, callback);
+        }
+        else {
+            iterElements(callback, lastElement, 0);
+        }
 
         //-----]>
 
@@ -224,7 +224,7 @@ CMain.prototype.send = function(callback) {
                     results.push(result);
                 }
 
-                next(error, isOne ? result : results);
+                next(error, results || result);
             });
         }
     }
