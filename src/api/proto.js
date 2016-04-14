@@ -19,6 +19,7 @@ const gProtoTable = {
     "forwardMessage": [
         ["string", "chat_id"],
         ["string", "from_chat_id"],
+        ["boolean", "disable_notification"],
         ["string", "message_id"]
     ],
 
@@ -26,6 +27,7 @@ const gProtoTable = {
         ["string", "chat_id"],
         ["string", "parse_mode"],
         ["boolean", "disable_web_page_preview"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["message", "text"]
@@ -34,6 +36,7 @@ const gProtoTable = {
     "sendPhoto": [
         ["string", "chat_id"],
         ["string", "caption"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["photo", "photo"]
@@ -44,6 +47,7 @@ const gProtoTable = {
         ["string", "duration"],
         ["string", "performer"],
         ["string", "title"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["audio", "audio"]
@@ -51,6 +55,8 @@ const gProtoTable = {
 
     "sendDocument": [
         ["string", "chat_id"],
+        ["string", "caption"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["document", "document"]
@@ -58,6 +64,7 @@ const gProtoTable = {
 
     "sendSticker": [
         ["string", "chat_id"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["sticker", "sticker"]
@@ -66,7 +73,10 @@ const gProtoTable = {
     "sendVideo": [
         ["string", "chat_id"],
         ["string", "duration"],
+        ["string", "width"],
+        ["string", "height"],
         ["string", "caption"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["video", "video"]
@@ -75,6 +85,7 @@ const gProtoTable = {
     "sendVoice": [
         ["string", "chat_id"],
         ["string", "duration"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"],
         ["voice", "voice"]
@@ -84,6 +95,7 @@ const gProtoTable = {
         ["string", "chat_id"],
         ["string", "latitude"],
         ["string", "longitude"],
+        ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
