@@ -219,6 +219,7 @@ CMain.prototype.send = function(callback) {
             apiMethod(elem, function(error, result) {
                 if(error) {
                     error.index = index;
+                    error.results = results;
                 }
                 else if(results) {
                     results.push(result);
