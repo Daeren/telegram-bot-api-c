@@ -229,7 +229,6 @@ function checkError(error) {
 
     setTimeout(function() {
         expect(error).to.be.null;
-        done();
     }, 0);
 }
 

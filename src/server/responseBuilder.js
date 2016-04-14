@@ -49,7 +49,7 @@ CMain.prototype = Object.create(null);
 
 //-----[Elements]-----}>
 
-(function createElements(aliases) {
+(function createElements() {
     rAPIProto.genSendMethodsFor(addElementMethod);
 
     function addElementMethod(alias, original, baseDataField) {
