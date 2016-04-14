@@ -351,10 +351,6 @@ objSrv
         
         bot.answer().text("Hi", params).send();
         
-        //----[Send | RBuilder: Queue]----}>
-        
-        bot.answer().text("Hi").text("Hi 2").send();
-        
         //----[Send_ELEMENT]----}>
         
         bot.sendMessage("Hello").then(console.log);
@@ -365,7 +361,7 @@ objSrv
         //----[Forward]----}>
 
         bot.to = "chatId";
-        bot.forward();
+        bot.forward({"disable_notification": true});
     });
 ```
 
@@ -1025,8 +1021,8 @@ npm test
 | answer            | function(isReply)     | Response Builder; Uses: cid, mid                       |
 | answer            | function(result)      | inlineQuery; Uses: qid                                 |
 |                   | -                     |                                                        |
-| forward           | function              | Uses: mid, from, to                                    |
-| render            | function              | Uses: cid                                              |
+| forward           | function(params, cb)  | Uses: mid, from, to                                    |
+| render            | function(tmpl, in, cb)| Uses: cid                                              |
 |                   | -                     |                                                        |
 | sendMessage       | function              |                                                        |
 | sendPhoto         | function              |                                                        |

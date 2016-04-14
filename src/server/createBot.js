@@ -124,12 +124,18 @@ function main(bot, onMsg) {
         return arguments.length < 2 ? bot.api.sendMessage(data) : bot.api.sendMessage(data, callback);
     }
 
-    function ctxForward(callback) {
-        const data = {
-            "chat_id":      this.to,
-            "from_chat_id": this.from,
-            "message_id":   this.mid
-        };
+    function ctxForward(params, callback) {
+        if(typeof(params) === "function") {
+            callback = params;
+            params = {};
+        }
+        else {
+            params = Object.create(params);
+        }
+
+        params.chat_id = this.to;
+        params.from_chat_id = this.from;
+        params.message_id = this.mid;
 
         return arguments.length < 1 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
     }
