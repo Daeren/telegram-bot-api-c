@@ -47,15 +47,11 @@ function main(token, method, callback) {
 
     //--------------]>
 
-    return callback ? rHttps.request(gReqOptions, cbRequest).on("error", cbError) : rHttps.request(gReqOptions);
+    return callback ? rHttps.request(gReqOptions, onRequest).on("error", callback) : rHttps.request(gReqOptions);
 
     //--------------]>
 
-    function cbError(error) {
-        callback(error, null, null);
-    }
-
-    function cbRequest(response) {
+    function onRequest(response) {
         let firstChunk, chunks;
 
         //--------]>

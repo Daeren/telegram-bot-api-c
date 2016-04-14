@@ -782,32 +782,36 @@ api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || dat
 
 //-------]>
 
-gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
+gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
 
 // e    - Error: request/JSON.parse
 // data - JSON: response or null
+// res  - Class: http.IncomingMessage
 
 //-------]>
 
-gBot.call("sendMessage", {"chat_id": "0"}, (e, data) => console.log(e || data));
+gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
 
 // e    - Error: request
-// data - Buffer: response
+// data - Buffer: response or undefined
+// res  - Class: http.IncomingMessage
 
 //------------]>
 
-// e.code           - api.sendMessage( ...
-// data.error_code  - callJson("sendMessage" ...
-//
-// rBot or gBot
-//
-// gBot.ERR_INTERNAL_SERVER
-// gBot.ERR_MESSAGE_LIMITS
-// gBot.ERR_USED_WEBHOOK
-// gBot.ERR_FORBIDDEN
-// gBot.ERR_INVALID_TOKEN
-// gBot.ERR_NOT_FOUND
-// gBot.ERR_FAILED_PARSE_DATA
+/*
+  e.code           - api.sendMessage( ...
+  data.error_code  - callJson("sendMessage" ...
+ 
+  rBot or gBot
+ 
+  gBot.ERR_INTERNAL_SERVER
+  gBot.ERR_MESSAGE_LIMITS
+  gBot.ERR_USED_WEBHOOK
+  gBot.ERR_FORBIDDEN
+  gBot.ERR_INVALID_TOKEN
+  gBot.ERR_NOT_FOUND
+  gBot.ERR_FAILED_PARSE_DATA
+*/
 ```
 
 
@@ -1094,7 +1098,7 @@ MIT
 
 [image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=1102
 [image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=1
-[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png
+[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=2
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
 [cod_l]: https://www.codacy.com/app/daeren/telegram-bot-api-c/dashboard
