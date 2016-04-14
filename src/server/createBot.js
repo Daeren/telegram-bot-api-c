@@ -116,8 +116,8 @@ function main(bot, onMsg) {
 
         data = data ? Object.create(data) : {};
 
-        data.chat_id = this.cid;
-        data.text = template;
+        data.chat_id    = data.chat_id || this.cid;
+        data.text       = template;
 
         //-------------]>
 
@@ -129,13 +129,16 @@ function main(bot, onMsg) {
             callback = params;
             params = {};
         }
-        else {
+        else if(params) {
             params = Object.create(params);
         }
+        else {
+            params = {};
+        }
 
-        params.chat_id = this.to;
-        params.from_chat_id = this.from;
-        params.message_id = this.mid;
+        params.chat_id      = params.chat_id || this.to;
+        params.from_chat_id = params.from_chat_id || this.from;
+        params.message_id   = params.message_id || this.mid;
 
         return arguments.length < 1 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
     }
@@ -151,7 +154,7 @@ function main(bot, onMsg) {
         }
         else {
             data = Object.create(results);
-            data.inline_query_id = this.qid;
+            data.inline_query_id = data.inline_query_id || this.qid;
         }
 
         return arguments.length < 2 ? bot.api.answerInlineQuery(data) : bot.api.answerInlineQuery(data, callback);

@@ -45,7 +45,7 @@ const gModifiers = [
     "maxSize", "filename",
 
     "latitude", "longitude",
-    "caption", "duration", "performer", "title",
+    "caption", "duration", "performer", "title", "width", "height",
 
     "disableWebPagePreview", "disableNotification",
     "showAlert",
