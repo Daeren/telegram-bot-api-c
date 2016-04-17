@@ -92,7 +92,7 @@ function main(bot, onMsg) {
 
             //-----------]>
 
-            return callback ?  apiMethod(data, callback) : apiMethod(data);
+            return apiMethod(data, callback);
         };
     });
 
