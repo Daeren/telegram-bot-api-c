@@ -113,7 +113,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || da
   e.code           - gApi.sendMessage( ...
   data.error_code  - callJson("sendMessage" ...
  
-  rBot or gBot
+  rTgBot or gBot
  
   gBot.ERR_INTERNAL_SERVER
   gBot.ERR_MESSAGE_LIMITS
@@ -151,9 +151,9 @@ gBot
 function onDefault(bot, cmd, gotoState) { }
 function onError(error) { }
 
-function* onCmdStart_1(bot, params, next) { next(); } // <-- Async
-function onCmdStart_2(bot, params) { }                // <-- Sync
-function* onCmdStart_3(bot, params) { }               // <-- Sync | end
+function onCmdStart_1(bot, params, next) { next(); } // <-- Async
+function onCmdStart_2(bot, params) { }               // <-- Sync
+function onCmdStart_3(bot, params) { }               // <-- Sync | end
 
 function onEnterChat(bot, member) { }
 function onText(bot, text) { }
