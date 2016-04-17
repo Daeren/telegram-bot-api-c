@@ -29,9 +29,9 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
 * New: a mechanism of events
-* Added: error handling, full support for generators
-* Rewritten: server.onMsg, srv.createBot
-* Improved: responseBuilder
+* Added: events, error handling, full support for generators
+* Rewritten: server.onMsg
+* Improved: responseBuilder, srv.createBot
 * Removed: bot.send(..), bot.broadcast(..)
 
 ```
@@ -151,9 +151,9 @@ gBot
 function onDefault(bot, cmd, gotoState) { }
 function onError(error) { }
 
-function onCmdStart_1(bot, params, next) { next(); } // <-- Async
-function onCmdStart_2(bot, params) { }               // <-- Sync
-function onCmdStart_3(bot, params) { }               // <-- Sync | end
+function* onCmdStart_1(bot, params, next) { next(); } // <-- Async
+function onCmdStart_2(bot, params) { }                // <-- Sync
+function* onCmdStart_3(bot, params) { }               // <-- Sync | end
 
 function onEnterChat(bot, member) { }
 function onText(bot, text) { }
@@ -1024,42 +1024,41 @@ npm test
 | Name              | Args                                  | Note                                      |
 |-------------------|---------------------------------------|-------------------------------------------|
 |                   | -                                     |                                           |
-| message           | bot, message                          |                                           |
-| inlineQuery       | bot, data                             |                                           |
-| chosenInlineResult| bot, data                             |                                           |
-| callbackQuery     | bot, data                             |                                           |
+| message           | bot, message[, next]                  |                                           |
+| inlineQuery       | bot, data[, next]                     |                                           |
+| chosenInlineResult| bot, data[, next]                     |                                           |
+| callbackQuery     | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
-| pinnedMessage     | bot, message                          |                                           |
+| pinnedMessage     | bot, message[, next]                  |                                           |
 |                   | -                                     |                                           |
-| enterChat         | bot, data                             |                                           |
-| leftChat          | bot, data                             |                                           |
+| enterChat         | bot, data[, next]                     |                                           |
+| leftChat          | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
-| chatTitle         | bot, data                             |                                           |
-| chatNewPhoto      | bot, data                             |                                           |
-| chatDeletePhoto   | bot, data                             |                                           |
+| chatTitle         | bot, data[, next]                     |                                           |
+| chatNewPhoto      | bot, data[, next]                     |                                           |
+| chatDeletePhoto   | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
-| chatCreated       | bot, data                             |                                           |
-| superChatCreated  | bot, data                             |                                           |
-| channelChatCreated| bot, data                             |                                           |
+| chatCreated       | bot, data[, next]                     |                                           |
+| superChatCreated  | bot, data[, next]                     |                                           |
+| channelChatCreated| bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
-| migrateToChatId   | bot, data                             |                                           |
-| migrateFromChatId | bot, data                             |                                           |
+| migrateToChatId   | bot, data[, next]                     |                                           |
+| migrateFromChatId | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
-| text              | bot, data                             |                                           |
-| photo             | bot, data                             |                                           |
-| audio             | bot, data                             |                                           |
-| document          | bot, data                             |                                           |
-| sticker           | bot, data                             |                                           |
-| video             | bot, data                             |                                           |
-| voice             | bot, data                             |                                           |
-| location          | bot, data                             |                                           |
-| venue             | bot, data                             |                                           |
-| contact           | bot, data                             |                                           |
+| text              | bot, data[, next]                     |                                           |
+| photo             | bot, data[, next]                     |                                           |
+| audio             | bot, data[, next]                     |                                           |
+| document          | bot, data[, next]                     |                                           |
+| sticker           | bot, data[, next]                     |                                           |
+| video             | bot, data[, next]                     |                                           |
+| voice             | bot, data[, next]                     |                                           |
+| location          | bot, data[, next]                     |                                           |
+| venue             | bot, data[, next]                     |                                           |
+| contact           | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
-| (regexp)          | bot, params                           |                                           |
+| (regexp)          | bot, params[, next]                   |                                           |
 |                   | -                                     |                                           |
-| /name             | data, params, state                   | CMD                                       |
-| *                 | bot, cmd, state                       |                                           |
+| /name             | data, params[, next]                  | CMD                                       |
 
 
 ## License
