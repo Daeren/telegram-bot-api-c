@@ -32,7 +32,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 * Added: events, error handling, full support for generators
 * Rewritten: server.onMsg
 * Improved: responseBuilder, srv.createBot
-* Removed: bot.send(..), bot.broadcast(..)
+* Removed: bot.send(..), bot.broadcast(..), bot.on(*), bot.on(/)
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -67,7 +67,6 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 
 
 ![architecture][image-architecture]
-![serverMsg][image-serverMsg]
 
 
 
@@ -165,10 +164,10 @@ function onTextRegExp(bot, data) { }
 //-----------]>
 
 /*
-  bot                             | gBot -> Sugar -> CtxPerRequest
-  bot instanceof gBot.constructor | true
+  bot                               | gBot -> Sugar -> CtxPerRequest
+  bot instanceof gBot.constructor   | true
   
-  cmd.type              -> common or private
+  cmd.type                          | common or private
   
   /start [text]         -> common
   /start@bot [text]     -> private
@@ -1077,8 +1076,7 @@ MIT
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [100]: https://core.telegram.org/bots/2-0-intro
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=12
-[image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=12
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=122
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=2
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg

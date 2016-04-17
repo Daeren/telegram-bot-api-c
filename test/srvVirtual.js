@@ -696,6 +696,76 @@ describe("srv.virtual", function() {
         server.input(null, inputSrvMessageCmd);
     });
 
+    //-----)>
+
+    it("Instance (catch)", function(done) {
+        let count = 0;
+
+        let server = objBot
+            .virtual(function() {
+                throw new Error("#1");
+            })
+            .catch(function(error) {
+                expect(error).to.be.an.instanceof(Error);
+
+                count++;
+
+                if(count === 3) {
+                    done();
+                }
+            });
+
+        //-------]>
+
+        server.input(null, inputSrvMessage);
+
+        server.on("text", function() {
+            throw new Error("#2");
+        });
+
+        server.input(null, inputSrvMessage);
+
+        server.on(/(\w+)/, ["myText"], function(bot, params) {
+            throw new Error("#3");
+        });
+
+        server.input(null, inputSrvMessage);
+    });
+
+    it("Instance (catch | generators)", function(done) {
+        let count = 0;
+
+        let server = objBot
+            .virtual(function* () {
+                throw new Error("#1");
+            })
+            .catch(function(error) {
+                expect(error).to.be.an.instanceof(Error);
+
+                count++;
+
+                if(count === 3) {
+                    done();
+                }
+            });
+
+        //-------]>
+
+        server.input(null, inputSrvMessage);
+
+        server.on("text", function* () {
+            throw new Error("#2");
+        });
+
+        server.input(null, inputSrvMessage);
+
+        server.on(/(\w+)/, ["myText"], function* (bot, params) {
+            throw new Error("#3");
+        });
+
+        server.input(null, inputSrvMessage);
+    });
+
 });
 
 //-------------]>

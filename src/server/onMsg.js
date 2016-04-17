@@ -64,33 +64,31 @@ function main(srvBot, data) {
         //-------]>
 
         function onDefault() {
-            const onMsg = srvBot.onMsg;
+            let onMsg = srvBot.onMsg;
 
-            if(onMsg && !callGenerator(null, onMsg, onError)) {
-                setImmediate(onMsg, reqCtx, cmd, gotoState);
+            if(onMsg) {
+                try {
+                    onMsg = onMsg(reqCtx, cmd, gotoState);
+                } catch(e) {
+                    onError(e);
+                }
+
+                executeGenerator(onMsg, onError);
             }
         }
 
         function onError(error) {
             if(error) {
-                const cbCatch = srvBot.cbCatch;
+                let cbCatch = srvBot.cbCatch;
 
-                if(cbCatch && !callGenerator(error, cbCatch)) {
-                    setImmediate(cbCatch, error);
+                if(cbCatch) {
+                    cbCatch = cbCatch(error);
+                    executeGenerator(cbCatch);
                 }
                 else {
                     throw error;
                 }
             }
-        }
-
-        function callGenerator(error, func, callback) {
-            if(func && func.constructor.name === "GeneratorFunction") {
-                executeGenerator(error ? func(error) : func(reqCtx, cmd, gotoState), callback);
-                return true;
-            }
-
-            return false;
         }
     }
 }
@@ -438,6 +436,10 @@ function getMessageDataField(m) {
 //---------]>
 
 function executeGenerator(generator, callback) {
+    if(!generator || !generator[Symbol.iterator]) {
+        return false;
+    }
+
     callback = callback || pushException;
 
     //---------]>
@@ -453,12 +455,16 @@ function executeGenerator(generator, callback) {
         }
 
         if(!next.done) {
-            next.value.then(r => execute(r), onGenError);
+            next.value.then(execute, onGenError);
         }
         else {
             callback(null, next.value);
         }
     })();
+
+    //---------]>
+
+    return true;
 
     //---------]>
 
