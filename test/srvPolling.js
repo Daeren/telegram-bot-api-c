@@ -66,6 +66,7 @@ describe("srv.polling", function() {
             expect(srv).to.have.property("stop").that.is.a("function");
 
             expect(srv).to.have.property("logger").that.is.a("function");
+            expect(srv).to.have.property("catch").that.is.a("function");
             expect(srv).to.have.property("use").that.is.a("function");
             expect(srv).to.have.property("on").that.is.a("function");
             expect(srv).to.have.property("off").that.is.a("function");

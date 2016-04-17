@@ -18,10 +18,6 @@ const rUtil             = require("./../util"),
 
 const gReReplaceBotName = /^@\w{5,32}\s+|^@\w{5,32}$/;
 
-const C_BD_TYPE_UNKNOWN      = 0,
-      C_BD_TYPE_MESSAGE      = 1,
-      C_BD_TYPE_INLINE_QUERY = 2;
-
 //-----------------------------------------------------
 
 module.exports = main;
@@ -35,124 +31,315 @@ function main(srvBot, data) {
 
     //--------]>
 
-    const botInstance   = srvBot.instance;
-
-    const inlineQuery   = data.inline_query,
-          msg           = data.message;
-
-    const bdataType     =
-                            inlineQuery && typeof(inlineQuery) === "object" ? C_BD_TYPE_INLINE_QUERY :
-                            (msg && typeof(msg) === "object" ? C_BD_TYPE_MESSAGE : C_BD_TYPE_UNKNOWN);
-
-    let msgType         = null,
-        evName          = null,
-        cmdParam        = null;
+    const dataMessage               = data.message,
+          dataInlineQuery           = data.inline_query,
+          dataChosenInlineResult    = data.chosen_inline_result,
+          dataCallbackQuery         = data.callback_query;
 
     //--------]>
 
-    switch(bdataType) {
-        case C_BD_TYPE_MESSAGE:
-            msgType = getTypeMsg(msg);
-            evName = getEventNameByTypeMsg(msgType);
-
-            break;
-
-        case C_BD_TYPE_INLINE_QUERY:
-            evName = "inlineQuery";
-
-            break;
-
-        default:
-            return;
+    if(dataCallbackQuery && typeof(dataCallbackQuery) === "object") {
+        onIncomingCallbackQuery(srvBot, dataCallbackQuery, onEnd);
+    }
+    else if(dataChosenInlineResult && typeof(dataChosenInlineResult) === "object") {
+        onIncomingChosenInlineResult(srvBot, dataChosenInlineResult, onEnd);
+    }
+    else if(dataInlineQuery && typeof(dataInlineQuery) === "object") {
+        onIncomingInlineQuery(srvBot, dataInlineQuery, onEnd);
+    }
+    else if(dataMessage && typeof(dataMessage) === "object") {
+        onIncomingMessage(srvBot, dataMessage, onEnd);
     }
 
-    //--------]>
+    //-------)>
 
-    const msgChat           = msg ? msg.chat : null;
+    function onEnd(error, reqCtx, cmd, gotoState) {
+        if(error) {
+            onError(error);
+        }
+        else if(reqCtx) {
+            onDefault();
+        }
 
-    const msgChatId         = msgChat ? msgChat.id : 0,
+        //-------]>
 
-          msgIsGroup        = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
-          msgIsReply        = !!(msg && msg.reply_to_message);
+        function onDefault() {
+            const onMsg = srvBot.onMsg;
 
-    const botPlugin         = srvBot.plugin,
-          botFilters        = srvBot.filters,
+            if(onMsg && !callGenerator(null, onMsg, onError)) {
+                setImmediate(onMsg, reqCtx, cmd, gotoState);
+            }
+        }
 
-          reqCtxBot         = createReqCtx(bdataType);
+        function onError(error) {
+            if(error) {
+                const cbCatch = srvBot.cbCatch;
+
+                if(cbCatch && !callGenerator(error, cbCatch)) {
+                    setImmediate(cbCatch, error);
+                }
+                else {
+                    throw error;
+                }
+            }
+        }
+
+        function callGenerator(error, func, callback) {
+            if(func && func.constructor.name === "GeneratorFunction") {
+                executeGenerator(error ? func(error) : func(reqCtx, cmd, gotoState), callback);
+                return true;
+            }
+
+            return false;
+        }
+    }
+}
+
+//----------------------------------------]>
+
+function onIncomingCallbackQuery(srvBot, input, callback) {
+    runAction("callbackQuery", srvBot.plugins, srvBot.events, input, createReqCtx(), null, null, callback);
+
+    //------------]>
+
+    function createReqCtx() {
+        const result = Object.create(srvBot.ctx);
+        const botApi = srvBot.instance.api;
+
+        //---------]>
+
+        result.cqid = input.id;
+        result.qid = input.inline_message_id;
+        result.callbackQuery = input;
+
+        result.answer = answer;
+
+        //---------]>
+
+        return result;
+
+        //---------]>
+
+        function answer(result, callback) {
+            let data;
+
+            if(typeof(result) === "function") {
+                callback = result;
+                result = null;
+            }
+
+            if(result) {
+                data = typeof(result) === "string" ? {"text": result} : Object.create(result);
+                data.callback_query_id = data.callback_query_id || this.cqid;
+            }
+
+            return botApi.answerCallbackQuery(data, callback);
+        }
+    }
+}
+
+function onIncomingChosenInlineResult(srvBot, input, callback) {
+    runAction("chosenInlineResult", srvBot.plugins, srvBot.events, input, createReqCtx(), null, null, callback);
+
+    //------------]>
+
+    function createReqCtx() {
+        const result = Object.create(srvBot.ctx);
+
+        //---------]>
+
+        result.qid = input.inline_message_id;
+        result.chosenInlineResult = input;
+
+        //---------]>
+
+        return result;
+    }
+}
+
+function onIncomingInlineQuery(srvBot, input, callback) {
+    runAction("inlineQuery", srvBot.plugins, srvBot.events, input, createReqCtx(), null, null, callback);
+
+    //------------]>
+
+    function createReqCtx() {
+        const result = Object.create(srvBot.ctx);
+        const botApi = srvBot.instance.api;
+
+        //---------]>
+
+        result.qid = input.id;
+
+        result.inlineQuery = input;
+        result.answer = answer;
+
+        //---------]>
+
+        return result;
+
+        //---------]>
+
+        function answer(results, callback) {
+            let data;
+
+            if(typeof(results) === "function") {
+                callback = results;
+                results = null;
+            }
+
+            if(results) {
+                data = Array.isArray(results) ? {"results": results} : Object.create(results);
+                data.inline_query_id = data.inline_query_id || this.qid;
+            }
+
+            return botApi.answerInlineQuery(data, callback);
+        }
+    }
+}
+
+function onIncomingMessage(srvBot, input, callback) {
+    const msgType           = getMessageDataField(input),
+          evName            = getEventNameByMsgField(msgType);
+
+    const msgChat           = input.chat;
+
+    const isGroup           = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
+          isReply           = !!(input.reply_to_message);
+
+    const botInstance       = srvBot.instance;
 
     //-----[Filter: botName]----}>
 
-    if(
-        msgIsGroup && evName === "text" && msg.text[0] === "@" &&
-        !msg.reply_to_message && botInstance.disabled("onMsg.skipFilterBotName")
-    ) {
-        const t = msg.text = msg.text.replace(gReReplaceBotName, "");
+    if(isGroup && !isReply && evName === "text" && input.text[0] === "@" && botInstance.disabled("onMsg.skipFilterBotName")) {
+        input.text = input.text.replace(gReReplaceBotName, "");
 
-        if(!t) {
+        if(!input.text) {
             return;
         }
     }
 
     //------------]>
 
-    rUtil.forEachAsync(botPlugin, onIterPlugin, onEndPlugin);
+    runAction("message", srvBot.plugins, srvBot.events, input, createReqCtx(), evName, msgType, callback);
 
     //------------]>
 
-    function onIterPlugin(next, plugin) {
+    function createReqCtx() {
+        const result = Object.create(srvBot.ctx);
+
+        //---------]>
+
+        result.isGroup = isGroup;
+        result.isReply = isReply;
+
+        result.from = result.cid = msgChat.id;
+        result.mid = input.message_id;
+
+        result.message = input;
+        result.answer = answer;
+
+        //---------]>
+
+        return result;
+
+        //---------]>
+
+        function answer(isReply) {
+            const answer = new rResponseBuilder(result, botInstance);
+            answer.isReply = !!isReply;
+
+            return answer;
+        }
+    }
+}
+
+//---------]>
+
+function runAction(ingDataType, queue, events, input, reqCtx, evName, dataField, callback) {
+    const data = dataField ? input[dataField] : null;
+
+    let cmdParams;
+
+    //------------]>
+
+    if(!cmdParams && evName === "text") {
+        cmdParams = rParseCmd(data);
+    }
+
+    rUtil.forEachAsync(queue, iterQueue, onEndQueue);
+
+    //------------]>
+
+    function iterQueue(next, plugin) {
         const plType            = plugin[0],
-              plCallback        = plugin[1];
+              plParams          = plugin[1],
+              plIsFilter        = plugin[2],
+              plCallback        = plugin[3];
 
         const isPlGenerator     = plCallback.constructor.name === "GeneratorFunction",
-              isPlWithFilter    = typeof(plType) !== "undefined",
-              isPlSync          = isPlGenerator ? false : plCallback.length < (isPlWithFilter ? 2 : 3);
+              isPlWithFilter    = !!plType,
+              isPlSync          = isPlGenerator ? false : plCallback.length < 3;
 
-        let isEnd = false;
+        let plData              = data,
+            isEnd               = false;
 
-        let result;
+        let cbPlResult;
 
         //----------]>
 
         if(isPlWithFilter) {
-            if(evName !== plType) {
-                onEnd();
+            if(ingDataType === plType) {
+                plData = input;
+            }
+            else if(cmdParams && cmdParams.cmd === plType) {
+                plData = cmdParams;
+            }
+            else if(evName !== plType) {
+                onNext();
                 return;
             }
+            else if(plIsFilter && (plIsFilter instanceof RegExp)) {
+                plData = plData.match(plIsFilter);
 
-            result = isPlGenerator || isPlSync ? plCallback(reqCtxBot) : plCallback(reqCtxBot, onEnd);
-        }
-        else {
-            result = isPlGenerator || isPlSync ? plCallback(evName, reqCtxBot) : plCallback(evName, reqCtxBot, onEnd);
-        }
+                if(!plData) {
+                    onNext();
+                    return;
+                }
 
-        callGenerator();
+                if(plParams) {
+                    const result  = {};
 
-        if(isPlSync) {
-            onEnd(result);
+                    for(let i = 0, len = Math.min(plData.length - 1, plParams.length); i < len; i++) {
+                        result[plParams[i]] = plData[i + 1];
+                    }
+
+                    plData = result;
+                }
+            }
         }
 
         //---------]>
 
-        function callGenerator() {
-            if(!isPlGenerator) {
-                return false;
-            }
-
-            executeGenerator(result, function(error, result) {
-                if(!error) {
-                    onEnd(result);
-                    return;
-                }
-
-                if(!callEventError(error)) {
-                    setImmediate(() => { throw error; });
-                }
-            });
-
-            return true;
+        try {
+            cbPlResult = isPlGenerator || isPlSync ? plCallback(reqCtx, plData) : plCallback(reqCtx, plData, onNext);
+        } catch(error) {
+            onNext(error);
+            return;
         }
 
-        function onEnd(state) {
+        //---------]>
+
+        if(isPlGenerator) {
+            executeGenerator(cbPlResult, (error, result) => onNext(error || result));
+        }
+
+        if(isPlSync) {
+            onNext(cbPlResult);
+        }
+
+        //---------]>
+
+        function onNext(state) {
             if(isEnd) {
                 throw new Error("Plugin: double call `next`");
             }
@@ -163,173 +350,28 @@ function main(srvBot, data) {
         }
     }
 
-    function onEndPlugin(state) {
-        switch(evName) {
-            case "inlineQuery":
-                callEventWithState(evName, inlineQuery.query);
-
-                break;
-
-            case "text":
-                const msgText = msg.text;
-
-                //-----[CMD]----}>
-
-                cmdParam = rParseCmd(msgText);
-
-                if(cmdParam) {
-                    break;
-                }
-
-                //-----[RE]----}>
-
-                const ftLenRe = botFilters.regexp.length;
-
-                if(ftLenRe) {
-                    let rule, reParams;
-
-                    for(let re, i = 0; !rule && i < ftLenRe; i++) {
-                        re = botFilters.regexp[i];
-                        reParams = msgText.match(re.rule);
-
-                        if(reParams) {
-                            rule = re.rule;
-
-                            if(rule && re.binds) {
-                                let result  = {},
-                                    binds   = re.binds;
-
-                                for(let j = 0, jLen = Math.min(reParams.length - 1, binds.length); j < jLen; j++) {
-                                    result[binds[j]] = reParams[j + 1];
-                                }
-
-                                reParams = result;
-                            }
-                        }
-                    }
-
-                    if(rule) {
-                        botFilters.ev.emit(rule, reqCtxBot, reParams);
-                        return;
-                    }
-                }
-
-                break;
-
-            default:
-                break;
-        }
-
-        if(cmdParam) {
-            callEventWithState(cmdParam.cmd, cmdParam) || callEventWithState("/", cmdParam) || state && callEvent("/", cmdParam, state) || callDefaultOnMsg();
-        }
-        else if(!evName) {
-            callDefaultOnMsg();
+    function onEndQueue(state) {
+        if(state && state instanceof Error) {
+            callback(state, reqCtx, cmdParams);
         }
         else {
-            const data = msgType ? msg[msgType] : null;
-            evName && callEventWithState(evName, data) || callEventWithState("*", data) || state && callEvent("*", data, state) || callDefaultOnMsg();
-        }
+            const evType = cmdParams ? cmdParams.cmd : (evName || ingDataType);
+            queue = events && events[state ? (evType + ":" + state) : evType];
 
-        //-------]>
-
-        function callDefaultOnMsg() {
-            const onMsg = srvBot.onMsg;
-
-            if(onMsg && !callGenerator(onMsg)) {
-                setImmediate(onMsg, reqCtxBot, cmdParam, state);
+            if(queue) {
+                runAction(ingDataType, queue, null, input, reqCtx, evName, dataField, callback);
+            }
+            else {
+                callback(null, events ? reqCtx : null, cmdParams, state);
             }
         }
-
-        function callGenerator(func) {
-            if(func && func.constructor.name === "GeneratorFunction") {
-                func = func(reqCtxBot, cmdParam, state);
-
-                executeGenerator(func, function(error) {
-                    if(error && !callEventError(error)) {
-                        setImmediate(() => { throw error; });
-                    }
-                });
-
-                return true;
-            }
-
-            return false;
-        }
-
-        function callEventWithState(type, params) {
-            if(state) {
-                type += ":" + state;
-            }
-
-            return callEvent(type, params);
-        }
-    }
-
-    //-------)>
-
-    function createReqCtx(type) {
-        const result = Object.create(srvBot.ctx);
-
-        result.isGroup = msgIsGroup;
-        result.isReply = msgIsReply;
-
-        switch(type) {
-            case C_BD_TYPE_MESSAGE:
-                result.answer = function(isReply) {
-                    const answer = new rResponseBuilder(result, botInstance);
-                    answer.isReply = !!isReply;
-
-                    return answer;
-                };
-
-                result.from = result.cid = msgChatId;
-                result.mid = msg.message_id;
-
-                result.message = msg;
-
-                break;
-
-            case C_BD_TYPE_INLINE_QUERY:
-                result.qid = inlineQuery.id;
-                result.inlineQuery = inlineQuery;
-
-                break;
-
-            default:
-                break;
-        }
-
-        //---------------]>
-
-        return result;
-    }
-
-    //----[Events: helpers]----}>
-
-    function callEvent(type, params, state) {
-        if(botFilters.ev.listenerCount(type)) {
-            botFilters.ev.emit(type, reqCtxBot, params, state);
-            return true;
-        }
-
-        return false;
-    }
-
-    function callEventError(error) {
-        if(botFilters.ev.listenerCount("error")) {
-            botFilters.ev.emit("error", error);
-            return true;
-        }
-
-        return false;
     }
 }
 
-//----------------------------------------]>
+//---------]>
 
-function getEventNameByTypeMsg(type) {
-    switch(type) {
+function getEventNameByMsgField(field) {
+    switch(field) {
         case "new_chat_member":         return "enterChat";
         case "left_chat_member":        return "leftChat";
 
@@ -346,11 +388,11 @@ function getEventNameByTypeMsg(type) {
 
         case "pinned_message":          return "pinnedMessage";
 
-        default:                        return type;
+        default:                        return field;
     }
 }
 
-function getTypeMsg(m) {
+function getMessageDataField(m) {
     let t;
 
     if(
@@ -388,6 +430,10 @@ function getTypeMsg(m) {
 //---------]>
 
 function executeGenerator(generator, callback) {
+    callback = callback || pushException;
+
+    //---------]>
+
     (function execute(input) {
         let next;
 
@@ -395,6 +441,7 @@ function executeGenerator(generator, callback) {
             next = generator.next(input);
         } catch(e) {
             callback(e);
+            return;
         }
 
         if(!next.done) {
@@ -404,6 +451,14 @@ function executeGenerator(generator, callback) {
             callback(null, next.value);
         }
     })();
+
+    //---------]>
+
+    function pushException(error) {
+        if(error) {
+            setImmediate(function() { throw error; });
+        }
+    }
 
     function onGenError(error) {
         try {

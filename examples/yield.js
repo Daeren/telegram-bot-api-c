@@ -28,7 +28,12 @@ gBot
 
         yield error();
     })
-    .use(function* (type, bot) {
+    .catch(function* (error) {
+        //x / 0;
+        console.error(error);
+    })
+
+    .use(function* () {
         yield auth("D", "13");
     })
     .use("text", function* (bot) {
@@ -39,11 +44,8 @@ gBot
         }
     })
 
-    .on("text:eventYield", function(bot, data) {
+    .on("text:eventYield", function* (bot, data) {
         console.log("eventYield:", data);
-    })
-    .on("error", function(error) { // <-- Only for JS Generators
-        console.error(error);
     });
 
 //----------------]>

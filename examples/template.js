@@ -29,17 +29,12 @@ objBot
 
     .polling(onNotFound)
 
-    .use(function(type, bot, next) {
-        expect(type).to.be.a("string");
+    .use(function(bot, data, next) {
         expect(next).to.be.a("function");
 
         //----------]>
 
         tCheckBaseBotFields(bot);
-
-        //----------------------]>
-
-        let data;
 
         //-----[DEFAULT]-----}>
 
@@ -119,7 +114,6 @@ function tCheckBaseBotFields(bot) {
     //----------]>
 
     expect(bot).to.have.property("answer").that.is.an("function");
-    expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
     expect(bot).to.have.property("render").that.is.an("function");
 }

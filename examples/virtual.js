@@ -21,11 +21,7 @@ const rBot      = require("./../index");
 
 const objBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
 const objSrv    = objBot
-    .enable("url.unsafe")
-
     .virtual(bot => {
-        console.log(bot);
-
         bot.answer().text("Not found!").send();
     })
     //.on(/./, console.log)

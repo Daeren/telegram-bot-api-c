@@ -163,6 +163,13 @@ const gProtoTable = {
         ["string", "switch_pm_parameter"]
     ],
 
+    "answerCallbackQuery": [
+        ["string", "callback_query_id"],
+        ["string", "text"],
+        ["boolean", "show_alert"]
+    ],
+
+
     "kickChatMember": [
         ["string", "chat_id"],
         ["string", "user_id"]
@@ -171,12 +178,6 @@ const gProtoTable = {
     "unbanChatMember": [
         ["string", "chat_id"],
         ["string", "user_id"]
-    ],
-
-    "answerCallbackQuery": [
-        ["string", "callback_query_id"],
-        ["string", "text"],
-        ["boolean", "show_alert"]
     ],
 
 

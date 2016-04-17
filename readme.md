@@ -23,22 +23,24 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 ```
 
 
-[Telegram Bot API][3]
+[Telegram Bot API][3] and [Bot API 2.0][100]
 
-* [Bot API 2.0][100]: +
-* [Error codes](#refErrors): +
-* KeepAlive (+50% to the speed of requests): +
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
-* [InlineQuery](#refInlineQuery): +
+* KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
+* New: a mechanism of events
+* Added: error handling, full support for generators
+* Rewritten: server.onMsg, srv.createBot
+* Improved: responseBuilder
 * Removed: bot.send(..), bot.broadcast(..)
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
 
-- message: buffer, stream, string
+- message:                                  buffer, stream, string
+- location|venue|contact:                   buffer, string
 - photo|audio|voice|video|document|sticker: buffer, stream, file_id, path, url
-- certificate: buffer, stream, path, url
+- certificate:                              buffer, stream, path, url
 ```
 
 #### Index
@@ -59,7 +61,6 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
 * [InlineQuery](#refInlineQuery)
-* [Errors](#refErrors)
 * [CLI](#refCLI)
 * [Test](#refTest)
 
@@ -77,20 +78,70 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 const rTgBot    = require("telegram-bot-api-c");
 
 const gBot      = rTgBot(process.env.TELEGRAM_BOT_TOKEN),
-      gSrv      = gBot.polling(onDefault);
+      gApi      = gBot.api;
 
-//-----------]>
+//----------------------------]>
 
-gSrv
-    .on("/start", onCmdStart)
-    .on("/", onCmdNotFound)
+gApi
+    .sendMessage({"chat_id": "0"})
+    .then(console.info, console.error);
+    
+gApi.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || data));
+
+// e    - Error: request/JSON.parse/response.ok
+// data - JSON: response.result or null
+
+//-------]>
+
+gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
+
+// e    - Error: request/JSON.parse
+// data - JSON: response or null
+// res  - Class: http.IncomingMessage
+
+//-------]>
+
+gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
+
+// e    - Error: request
+// data - Buffer: response or undefined
+// res  - Class: http.IncomingMessage
+
+//------------]>
+
+/*
+  e.code           - gApi.sendMessage( ...
+  data.error_code  - callJson("sendMessage" ...
+ 
+  rBot or gBot
+ 
+  gBot.ERR_INTERNAL_SERVER
+  gBot.ERR_MESSAGE_LIMITS
+  gBot.ERR_USED_WEBHOOK
+  gBot.ERR_FORBIDDEN
+  gBot.ERR_INVALID_TOKEN
+  gBot.ERR_NOT_FOUND
+  gBot.ERR_FAILED_PARSE_DATA
+*/
+
+//----------------------------]>
+
+gBot
+    .polling(onDefault)
+    .catch(onError)
+    
+    .use(bot => "syncGotoMyMenu")
+    .use((bot, data, next) => next(new Error("never get")))
+    .use("/start", bot => { })
+
+    .on("/start", onCmdStart_1)
+    .on("/start", onCmdStart_2)
+    .on("/start", onCmdStart_3)
 
     .on("enterChat", onEnterChat)
-    .on("text", onText)
+    .on("text:syncGotoMyMenu", onText)
     .on("photo document", onPhotoOrDoc)
     .on("pinnedMessage", onPinnedMessage)
-    
-    .on("*", onNotFound)
 
     .on(/^id\s+(\d+)/i, onTextRegExp)
     .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
@@ -98,53 +149,31 @@ gSrv
 
 
 function onDefault(bot, cmd, gotoState) { }
+function onError(error) { }
 
-function onCmdStart(bot, params) { }
-function onCmdNotFound(bot, params, gotoState) { }
+function onCmdStart_1(bot, params, next) { next(); } // <-- Async
+function onCmdStart_2(bot, params) { }               // <-- Sync
+function onCmdStart_3(bot, params) { }               // <-- Sync | end
 
 function onEnterChat(bot, member) { }
 function onText(bot, text) { }
 function onPhotoOrDoc(bot, data) { }
 function onPinnedMessage(bot, message) { }
 
-function onNotFound(bot, data, gotoState) { }
-
 function onTextRegExp(bot, data) { }
 
 //-----------]>
 
-'bot' | gBot -> Sugar -> CtxPerRequest
-'bot instanceof gBot.constructor' | true
-
-cmd.type | common or private
-
-/start [text] -> common
-/start@bot [text] -> private
-@bot /start [text] -> private
-
-//----[API]----}>
-
-const api      = gBot.api,
-      keyboard = gBot.keyboard;
-
-let file, data;
-
-//----)>
-
-file = __dirname + "/MiElPotato.jpg";
-data = () => ({"chat_id": 0, "text": Date.now(), "photo": file, "caption": "#2EASY"});
-
-api.sendMessage(data(), function(e, r) { });
-api.sendMessage(data()).then(data).then(function(x) {
-    x.photo = file;
-    
-    x.reply_markup = keyboard.hOx(/*once, selective*/);
-    x.reply_markup = keyboard.inline.hOx();
-    x.reply_markup = keyboard("X Y Z");
-    x.reply_markup = keyboard([["X"]], "resize once selective");
-
-    api.sendPhoto(x);
-});
+/*
+  bot                             | gBot -> Sugar -> CtxPerRequest
+  bot instanceof gBot.constructor | true
+  
+  cmd.type              -> common or private
+  
+  /start [text]         -> common
+  /start@bot [text]     -> private
+  @bot /start [text]    -> private
+*/
 ```
 
 
@@ -337,7 +366,7 @@ objBot.http(cbMsg);
 
 ```js
 objSrv
-    .use(function(type, bot, next) {
+    .use(function(bot) {
         const imgURL  = "https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg";
         
         const isReply = true,
@@ -372,7 +401,7 @@ objSrv
 
 ```js
 objSrv
-    .use(function(type, bot, next) {
+    .use(function(bot) {
         const params = {
             "parse_mode":   "markdown", // <-- text,
             "caption":      "myCaption" // <-- photo
@@ -482,10 +511,10 @@ function cbLogger(error, data) {
 
 ```js
 objSrv
-    .use(function(type, bot, next) {
+    .use(function(bot, data, next) {
         console.log("Async | Type: %s", type);
 
-        if(bot.message.text === "next") {
+        if(data === "next") {
             next();
         }
     })
@@ -494,7 +523,7 @@ objSrv
 
         bot.user = {};
     })
-    .use(function(type, bot) {
+    .use(function(bot) {
         console.log("Sync | Type: %s", type);
         
         bot.user.id = 1;
@@ -513,10 +542,10 @@ objSrv
 
 ```js
 objSrv
-    .use(function(type, bot, next) {
-        next(bot.message.text === "room" ? "room.menu" : "");
+    .use(function(bot, data, next) {
+        next(data === "room" ? "room.menu" : "");
     })
-    .use(function(type, bot) {
+    .use(function(bot) {
         console.log("If not the room");
         
         // return "room.menu";
@@ -547,7 +576,11 @@ gBot
         //x / 0;
         yield error();
     })
-    .use(function* (type, bot) {
+    .catch(function* (error) {
+        console.error(error);
+    })
+    
+    .use(function* (bot) {
         yield auth("D", "13");
     })
     .use("text", function* (bot) {
@@ -558,11 +591,8 @@ gBot
         }
     })
 
-    .on("text:eventYield", function(bot, data) {
+    .on("text:eventYield", function* (bot, data) {
         console.log("eventYield:", data);
-    })
-    .on("error", function(error) { // <-- Only for JS Generators
-        console.error(error);
     });
 
 //----------------]>
@@ -703,7 +733,7 @@ https://core.telegram.org/bots/inline
 ```js
 gBot
     .polling()
-    .on("inlineQuery", function(bot, query) {
+    .on("inlineQuery", function(bot, data) {
         const idx = Date.now().toString(32) + Math.random().toString(24);
         const results = [
             {
@@ -716,7 +746,7 @@ gBot
 
             {
                 "type":         "article",
-                "title":        "Title #2: " + query,
+                "title":        "Title #2: " + data.query,
                 "message_text": "Text...yeah"
             },
 
@@ -755,62 +785,6 @@ bot
 ```
 
 
-
-<a name="refErrors"></a>
-#### Errors 
-
-```js
-const rBot    = require("telegram-bot-api-c");
-const gBot    = rBot(process.env.TELEGRAM_BOT_TOKEN);
-
-const api     = gBot.api;
-
-//------------]>
-
-api
-    .sendMessage({"chat_id": "0"})
-    .then(console.info, console.error);
-    
-api.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || data));
-
-// e    - Error: request/JSON.parse/response.ok
-// data - JSON: response.result or null
-
-//-------]>
-
-gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
-
-// e    - Error: request/JSON.parse
-// data - JSON: response or null
-// res  - Class: http.IncomingMessage
-
-//-------]>
-
-gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
-
-// e    - Error: request
-// data - Buffer: response or undefined
-// res  - Class: http.IncomingMessage
-
-//------------]>
-
-/*
-  e.code           - api.sendMessage( ...
-  data.error_code  - callJson("sendMessage" ...
- 
-  rBot or gBot
- 
-  gBot.ERR_INTERNAL_SERVER
-  gBot.ERR_MESSAGE_LIMITS
-  gBot.ERR_USED_WEBHOOK
-  gBot.ERR_FORBIDDEN
-  gBot.ERR_INVALID_TOKEN
-  gBot.ERR_NOT_FOUND
-  gBot.ERR_FAILED_PARSE_DATA
-*/
-```
-
-
 <a name="refSendFileAsBuffer"></a>
 #### Send file as Buffer 
 
@@ -821,7 +795,7 @@ const imgBuffer = require("fs").readFileSync(__dirname + "/MiElPotato.jpg");
 //------------]>
 
 objSrv
-    .use(function(type, bot, next) {
+    .use(function(bot, next) {
         bot
             .answer()
             .photo(imgBuffer)
@@ -966,40 +940,43 @@ npm test
 
 #### Methods: polling
 
-| Name          | Arguments                             | Return                                    |
-|---------------|---------------------------------------|-------------------------------------------|
-|               | -                                     |                                           |
-| start         |                                       | this                                      |
-| stop          |                                       | this                                      |
-|               | -                                     |                                           |
-| logger        | callback(error, buffer)               | this                                      |
-| use           | [type], callback(type, bot[, next])   | this                                      |
-| on            | type[, params], callback(data, params)| this                                      |
-| off           | [type][, callback]                    | this                                      |
+| Name          | Arguments                                     | Return                                    |
+|---------------|-----------------------------------------------|-------------------------------------------|
+|               | -                                             |                                           |
+| start         |                                               | this                                      |
+| stop          |                                               | this                                      |
+|               | -                                             |                                           |
+| logger        | callback(error, buffer)                       | this                                      |
+| catch         | callback(error)                               | this                                      |
+| use           | [type], callback(bot[, data, next])           | this                                      |
+| on            | type[, params], callback(data, params[, next])| this                                      |
+| off           | [type][, callback]                            | this                                      |
 
 #### Methods: http
 
-| Name          | Arguments                             | Return                                    |
-|---------------|---------------------------------------|-------------------------------------------|
-|               | -                                     |                                           |
-| bot           | bot, path[, callback(json, request)]  | srv                                       |
-|               | -                                     |                                           |
-| logger        | callback(error, buffer)               | this                                      |
-| use           | [type], callback(type, bot[, next])   | this                                      |
-| on            | type[, params], callback(data, params)| this                                      |
-| off           | [type][, callback]                    | this                                      |
+| Name          | Arguments                                     | Return                                    |
+|---------------|-----------------------------------------------|-------------------------------------------|
+|               | -                                             |                                           |
+| bot           | bot, path[, callback(json, request)]          | srv                                       |
+|               | -                                             |                                           |
+| logger        | callback(error, buffer)                       | this                                      |
+| catch         | callback(error)                               | this                                      |
+| use           | [type], callback(bot[, data, next])           | this                                      |
+| on            | type[, params], callback(data, params[, next])| this                                      |
+| off           | [type][, callback]                            | this                                      |
 
 #### Methods: virtual
 
-| Name          | Arguments                             | Return                                    |
-|---------------|---------------------------------------|-------------------------------------------|
-| input         | error, data                           |                                           |
-| middleware    |                                       |                                           |
-|               | -                                     |                                           |
-| logger        | callback(error, buffer)               | this                                      |
-| use           | [type], callback(type, bot[, next])   | this                                      |
-| on            | type[, params], callback(data, params)| this                                      |
-| off           | [type][, callback]                    | this                                      |
+| Name          | Arguments                                     | Return                                    |
+|---------------|-----------------------------------------------|-------------------------------------------|
+| input         | error, data                                   |                                           |
+| middleware    |                                               |                                           |
+|               | -                                             |                                           |
+| logger        | callback(error, buffer)                       | this                                      |
+| catch         | callback(error)                               | this                                      |
+| use           | [type], callback(bot[, data, next])           | this                                      |
+| on            | type[, params], callback(data, params[, next])| this                                      |
+| off           | [type][, callback]                            | this                                      |
 
 
 #### Fields: bot (srv.on("*", bot => 0)
@@ -1010,6 +987,7 @@ npm test
 | isGroup           | boolean               | bot.isGroup = bot.message.chat.type === [super]group   |
 | isReply           | boolean               | bot.isReply = !!bot.message.reply_to_message           |
 |                   | -                     |                                                        |
+| cqid              | string                | bot.qid = bot.callbackQuery.id                         |
 | qid               | string                | bot.qid = bot.inlineQuery.id                           |
 | cid               | number                | bot.cid = bot.message.chat.id                          |
 | mid               | number                | bot.mid = bot.message.message_id                       |
@@ -1017,9 +995,13 @@ npm test
 | to                | number                | bot.to = undefined                                     |
 |                   | -                     |                                                        |
 | message           | object                | Incoming message                                       |
+| inlineQuery       | object                | Incoming inline query                                  |
+| chosenInlineResult| object                | The result of an inline query that was chosen          |
+| callbackQuery     | object                | Incoming callback query                                |
 |                   | -                     |                                                        |
 | answer            | function(isReply)     | Response Builder; Uses: cid, mid                       |
 | answer            | function(result)      | inlineQuery; Uses: qid                                 |
+| answer            | function(result)      | callbackQuery; Uses: cqid                              |
 |                   | -                     |                                                        |
 | forward           | function(params, cb)  | Uses: mid, from, to                                    |
 | render            | function(tmpl, in, cb)| Uses: cid                                              |
@@ -1037,12 +1019,16 @@ npm test
 | sendChatAction    | function              |                                                        |
 
 
-#### Events: on
+#### Events: use / on
 
 | Name              | Args                                  | Note                                      |
 |-------------------|---------------------------------------|-------------------------------------------|
 |                   | -                                     |                                           |
-| inlineQuery       | bot, query                            |                                           |
+| message           | bot, message                          |                                           |
+| inlineQuery       | bot, data                             |                                           |
+| chosenInlineResult| bot, data                             |                                           |
+| callbackQuery     | bot, data                             |                                           |
+|                   | -                                     |                                           |
 | pinnedMessage     | bot, message                          |                                           |
 |                   | -                                     |                                           |
 | enterChat         | bot, data                             |                                           |
@@ -1070,9 +1056,9 @@ npm test
 | venue             | bot, data                             |                                           |
 | contact           | bot, data                             |                                           |
 |                   | -                                     |                                           |
-| (regexp)          | data, params                          |                                           |
+| (regexp)          | bot, params                           |                                           |
 |                   | -                                     |                                           |
-| /[name]           | data, params, state                   | CMD                                       |
+| /name             | data, params, state                   | CMD                                       |
 | *                 | bot, cmd, state                       |                                           |
 
 
@@ -1092,8 +1078,8 @@ MIT
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [100]: https://core.telegram.org/bots/2-0-intro
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=1102
-[image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=1
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=12
+[image-serverMsg]: https://666.io/assets/img/telegram-bot-api-c/serverMsg.png?x=12
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=2
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg

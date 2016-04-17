@@ -131,6 +131,7 @@ describe("srv.virtual", function() {
             expect(srv).to.have.property("middleware").that.is.a("function");
 
             expect(srv).to.have.property("logger").that.is.a("function");
+            expect(srv).to.have.property("catch").that.is.a("function");
             expect(srv).to.have.property("use").that.is.a("function");
             expect(srv).to.have.property("on").that.is.a("function");
             expect(srv).to.have.property("off").that.is.a("function");
@@ -165,16 +166,13 @@ describe("srv.virtual", function() {
 
         //------]>
 
-        server.use(function(type, bot) {
-            expect(type).to.be.a("string").and.equal("text");
-
+        server.use(function(bot) {
             bot.xMeta = 1;
 
             tCheckBaseBotFields(bot);
         });
 
-        server.use(function(type, bot, next) {
-            expect(type).to.be.a("string").and.equal("text");
+        server.use(function(bot, data, next) {
             expect(next).to.be.a("function");
             expect(bot).to.have.property("xMeta").that.is.an("number").and.equal(1);
 
@@ -190,7 +188,7 @@ describe("srv.virtual", function() {
             tCheckBaseBotFields(bot);
         });
 
-        server.use("text", function(bot, next) {
+        server.use("text", function(bot, data, next) {
             expect(next).to.be.a("function");
             expect(bot).to.have.property("xMeta").that.is.an("number").and.equal(2);
 
@@ -202,11 +200,10 @@ describe("srv.virtual", function() {
 
         //------]>
 
-        server.use(function* (type, bot) {
+        server.use(function* (bot) {
             const result = yield proc();
 
             expect(result).to.be.a("number").and.equal(13);
-            expect(type).to.be.a("string").and.equal("text");
             expect(bot).to.have.property("xMeta").that.is.an("number").and.equal(3);
 
             bot.xMeta++;
@@ -245,6 +242,17 @@ describe("srv.virtual", function() {
 
         server.logger(cbLogger);
 
+        server.on(/(\w+)/, function(bot, params, next) {
+            expect(params).to.be.a("array");
+            expect(params[0]).to.be.a("string").and.equal(bot.message.text);
+            expect(params[1]).to.be.a("string").and.equal(bot.message.text);
+
+            tCheckBaseBotFields(bot);
+            done();
+
+            next;
+        });
+
         server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
@@ -257,14 +265,6 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #4");
         });
 
-        server.on(/(\w+)/, function(bot, params) {
-            expect(params).to.be.a("array");
-            expect(params[0]).to.be.a("string").and.equal(bot.message.text);
-            expect(params[1]).to.be.a("string").and.equal(bot.message.text);
-
-            tCheckBaseBotFields(bot);
-            done();
-        });
 
         server.input(null, inputSrvMessage);
     });
@@ -276,6 +276,14 @@ describe("srv.virtual", function() {
 
         server.logger(cbLogger);
 
+        server.on(/(\w+)/, ["myText"], function(bot, params) {
+            expect(params).to.be.an("object");
+            expect(params.myText).to.be.a("string").and.equal(bot.message.text);
+
+            tCheckBaseBotFields(bot);
+            done();
+        });
+
         server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
@@ -286,14 +294,6 @@ describe("srv.virtual", function() {
 
         server.on("text", function() {
             throw new Error("The message passed through the event | #4");
-        });
-
-        server.on(/(\w+)/, ["myText"], function(bot, params) {
-            expect(params).to.be.an("object");
-            expect(params.myText).to.be.a("string").and.equal(bot.message.text);
-
-            tCheckBaseBotFields(bot);
-            done();
         });
 
         server.input(null, inputSrvMessage);
@@ -313,15 +313,15 @@ describe("srv.virtual", function() {
             .use("text", function(bot) {
                 expect(bot.message.text).to.be.a("string").and.equal("Hello");
             })
-            .use("text", function(bot, next) {
+            .use("text", function(bot, data, next) {
                 expect(bot.message.text).to.be.a("string").and.equal("Hello");
 
                 next();
             })
-            .use(function(type, bot) {
+            .use(function(bot) {
                 expect(bot.message.text).to.be.a("string").and.equal("Hello");
             })
-            .use(function(type, bot, next) {
+            .use(function(bot, data, next) {
                 expect(bot.message.text).to.be.a("string").and.equal("Hello");
 
                 next();
@@ -359,17 +359,17 @@ describe("srv.virtual", function() {
 
         server.logger(cbLogger);
 
+        server.on("photo text audio", function(bot) {
+            tCheckBaseBotFields(bot);
+            done();
+        });
+
         server.on("*", function() {
             throw new Error("The message passed through the event | #2");
         });
 
         server.on("/", function() {
             throw new Error("The message passed through the event | #3");
-        });
-
-        server.on("photo text audio", function(bot) {
-            tCheckBaseBotFields(bot);
-            done();
         });
 
         server.input(null, inputSrvMessage);
@@ -382,7 +382,10 @@ describe("srv.virtual", function() {
 
         server.logger(cbLogger);
 
-        server.on("*", function(bot) {
+        server.on("text", onText);
+        server.off("text", onText);
+
+        server.on("text", function(bot) {
             tCheckBaseBotFields(bot);
             done();
         });
@@ -390,9 +393,6 @@ describe("srv.virtual", function() {
         server.on("/", function() {
             throw new Error("The message passed through the event | #2");
         });
-
-        server.on("text", onText);
-        server.off("text", onText);
 
         server.input(null, inputSrvMessage);
 
@@ -408,8 +408,8 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.use(function(type, bot) {
-            return type === "text" && bot.message.text === "Hello" ? "goto" : "";
+        server.use(function(bot) {
+            return bot.message.text === "Hello" ? "goto" : "";
         });
 
         server.logger(cbLogger);
@@ -446,8 +446,8 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.use(function(type, bot, next) {
-            next(type === "text" && bot.message.text === "Hello" ? "goto" : "");
+        server.use(function(bot, data, next) {
+            next(bot.message.text === "Hello" ? "goto" : "");
         });
 
         server.logger(cbLogger);
@@ -481,20 +481,16 @@ describe("srv.virtual", function() {
 
     //-----)>
 
-    it("Instance (event: cmd)", function(done) {
-        let server = objBot.virtual(function() {
-            throw new Error("The message passed through the event | #1");
+    it("Instance (event: default | cmd)", function(done) {
+        let server = objBot.virtual(function(bot, cmd) {
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(cmd);
+
+            done();
         });
 
         server.on("*", function() {
             throw new Error("The message passed through the event | #2");
-        });
-
-        server.on("/", function(bot, params) {
-            tCheckBaseBotFields(bot);
-            tCheckBaseCmdFields(params);
-
-            done();
         });
 
         server.on("text", function() {
@@ -511,7 +507,7 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.use("text", function(bot, next) {
+        server.use("text", function(bot, data, next) {
             next("goto");
         });
 
@@ -550,20 +546,17 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | base)", function(done) {
-        let server = objBot.virtual(function() {
-            throw new Error("The message passed through the event | #1");
-        });
-
-        server.use(function(type, bot) {
-            return type === "text" && bot.message.text === "/test hello" ? "goto" : "";
-        });
-
-
-        server.on("/:goto", function(bot, params) {
+        let server = objBot.virtual(function(bot, cmd, state) {
             tCheckBaseBotFields(bot);
-            tCheckBaseCmdFields(params);
+            tCheckBaseCmdFields(cmd);
+
+            expect(state).to.be.a("string").and.equal("goto");
 
             done();
+        });
+
+        server.use(function(bot) {
+            return bot.message.text === "/test hello" ? "goto" : "";
         });
 
         server.on("/", function() {
@@ -589,24 +582,18 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | base-without)", function(done) {
-        let server = objBot.virtual(function() {
-            throw new Error("The message passed through the event | #1");
-        });
-
-        server.use("text", function() {
-            return "goto";
-        });
-
-
-        server.on("/", function(bot, params, state) {
+        let server = objBot.virtual(function(bot, cmd, state) {
             tCheckBaseBotFields(bot);
-            tCheckBaseCmdFields(params);
+            tCheckBaseCmdFields(cmd);
 
             expect(state).to.be.a("string").and.equal("goto");
 
             done();
         });
 
+        server.use("text", function() {
+            return "goto";
+        });
 
         server.on("text:goto", function() {
             throw new Error("The message passed through the event | #4");

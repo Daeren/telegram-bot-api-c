@@ -60,8 +60,7 @@ expect(objSrv).to.have.property("stop").that.is.an("function");
 //-----[PLUGIN]-----}>
 
 objSrv
-    .use(function(type, bot, next) {
-        expect(type).to.be.a("string");
+    .use(function(bot, data, next) {
         expect(next).to.be.a("function");
 
         //----------]>
@@ -70,25 +69,21 @@ objSrv
 
         //----------]>
 
-        console.log("Async | Type: %s", type);
+        console.log("Async");
 
-        if(bot.message.text === "room") {
+        if(data === "room") {
             next("room.menu");
         }
         else {
             next();
         }
     })
-    .use(function(type, bot) {
-        expect(type).to.be.a("string");
-
-        //----------]>
-
+    .use(function(bot) {
         tCheckBaseBotFields(bot);
 
         //----------]>
 
-        console.log("Sync | Type: %s", type);
+        console.log("Sync");
 
         //return "room.menu";
     });
@@ -96,7 +91,7 @@ objSrv
 //-----[Filter by `type`]-----}>
 
 objSrv
-    .use("text", function(bot, next) {
+    .use("text", function(bot, data, next) {
         tCheckBaseBotFields(bot);
 
         //----------]>
@@ -107,16 +102,12 @@ objSrv
     });
 
 objSrv
-    .use(function(type, bot) {
-        expect(type).to.be.a("string");
-
-        //----------]>
-
+    .use(function(bot) {
         tCheckBaseBotFields(bot);
 
         //----------]>
 
-        console.log("Before[use:type] Sync | Type: %s", type);
+        console.log("Before[use:type] Sync");
     });
 
 objSrv
@@ -231,7 +222,6 @@ function tCheckBaseBotFields(bot) {
     //----------]>
 
     expect(bot).to.have.property("answer").that.is.an("function");
-    expect(bot).to.have.property("send").that.is.an("function");
     expect(bot).to.have.property("forward").that.is.an("function");
     expect(bot).to.have.property("render").that.is.an("function");
 }

@@ -41,14 +41,11 @@ function main(bot, onMsg) {
         "instance":     bot,
         "ctx":          ctx,
 
-        "plugin":       [],
-
-        "filters": {
-            "ev":       ev,
-            "regexp":   []
-        },
+        "plugins":      [],
+        "events":       {},
 
         "cbLogger":     null,
+        "cbCatch":      null,
 
         //-----)>
 
@@ -58,6 +55,7 @@ function main(bot, onMsg) {
         "off":          srvEvOff,
 
         "logger":       srvLogger,
+        "catch":        srvCatch,
 
         //-----)>
 
@@ -68,11 +66,10 @@ function main(bot, onMsg) {
 
     ctx.render  = ctxRender;
     ctx.forward = ctxForward;
-    ctx.answer  = ctxAnswer;
 
     //-----[Send methods]-----}>
 
-    rAPIProto.genSendMethodsFor(function addElementMethod(alias, original, baseDataField) {
+    rAPIProto.genSendMethodsFor(function(alias, original, baseDataField) {
         const apiMethod = bot.api[original];
 
         //-----------]>
@@ -143,206 +140,145 @@ function main(bot, onMsg) {
         return arguments.length < 1 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
     }
 
-    function ctxAnswer(results, callback) {
-        let data;
-
-        if(Array.isArray(results)) {
-            data = {
-                "inline_query_id":  this.qid,
-                "results":          results
-            };
-        }
-        else {
-            data = Object.create(results);
-            data.inline_query_id = data.inline_query_id || this.qid;
-        }
-
-        return arguments.length < 2 ? bot.api.answerInlineQuery(data) : bot.api.answerInlineQuery(data, callback);
-    }
-
     //-----)>
 
-    function srvUse(type, callback) {
-        if(typeof(type) === "function") {
-            callback = type;
-            type = undefined;
+    function srvUse(type, params, callback) {
+        const event = buildEvent(type, params, callback);
+
+        //--------]>
+
+        if(!event) {
+            throw new Error("Failed to create event!");
         }
 
-        result.plugin.push([type, callback]);
+        result.plugins.push(event.result);
+
+        //--------]>
 
         return this;
     }
 
-    function srvEvOn(rule, params, func) {
-        if(typeof(params) === "function") {
-            func = params;
-            params = undefined;
-        }
-
-        //------]>
-
-        if(typeof(rule) === "string") {
-            const t = rule.split(/\s+/);
+    function srvEvOn(type, params, callback) {
+        if(typeof(type) === "string") {
+            const t = type.split(/\s+/);
 
             if(t.length > 1) {
-                rule = t;
+                type = t;
             }
         }
 
         //---)>
 
-        if(Array.isArray(rule)) {
-            rule.forEach(function(e) {
-                srvEvOn(e, params, func);
-            });
-
+        if(Array.isArray(type)) {
+            type.forEach(e => srvEvOn(e, params, callback));
             return this;
         }
 
-        //------]>
+        //--------]>
 
-        const fltEv   = result.filters.ev,
-              fltRe   = result.filters.regexp;
+        const event = buildEvent(type, params, callback);
 
-        switch(typeof(rule)) {
-            case "string":
-                fltEv.on(rule, func);
+        //--------]>
 
-                break;
-
-            case "object":
-                if(rule instanceof RegExp) {
-                    if(!fltEv.listenerCount(rule)) {
-                        if(params) {
-                            if(typeof(params) === "string") {
-                                params = params.split(/\s+/);
-                            }
-
-                            if(!Array.isArray(params)) {
-                                throw new Error("on | RegExp | `params` is not an array");
-                            }
-                        }
-
-                        fltRe.push({
-                            "rule":     rule,
-                            "binds":    params
-                        });
-                    }
-
-                    fltEv.on(rule, func);
-
-                    break;
-                }
-
-            default:
-                throw new Error("Unknown rule: " + rule);
+        if(!event) {
+            throw new Error("Failed to create event!");
         }
+
+        type = event.type;
+        (result.events[type] = result.events[type] || []).push(event.result);
+
+        //--------]>
 
         return this;
     }
 
-    function srvEvOff(rule, func) {
-        if(Array.isArray(rule)) {
-            rule.forEach(function(e) {
-                srvEvOff(e, func);
-            });
+    function srvEvOff(type, callback) {
+        const evProto   = buildEvent(type, null, callback),
+              events    = evProto && result.events[evProto.type];
 
-            return this;
-        }
+        if(events) {
+            const target    = evProto.result;
 
-        //------]>
+            let len         = events.length;
 
-        const filters = result.filters;
+            while(len--) {
+                const event = events[len];
 
-        const fltEv   = filters.ev,
-              fltRe   = filters.regexp;
-
-        //------]>
-
-        if(arguments.length && !fltEv.listenerCount(rule)) {
-            return this;
-        }
-
-        //------]>
-
-        if(arguments.length <= 1) {
-            if(arguments.length) {
-                switch(typeof(rule)) {
-                    case "object":
-                        if(rule instanceof RegExp) {
-                            removeFltRegExp(getIdFltRegExp(rule));
-                        }
-
-                        break;
-
-                    default:
-                        break;
+                if(target[3] === event[3] && target[2] === event[2]) {
+                    events.splice(len, 1);
+                    break;
                 }
             }
-            else {
-                filters.regexp = [];
-            }
-
-            ev.removeAllListeners(rule);
-
-            return this;
         }
-
-        //------]>
-
-        switch(typeof(rule)) {
-            case "string":
-                fltEv.removeListener(rule, func);
-
-                break;
-
-            case "object":
-                if(rule instanceof RegExp) {
-                    const id = getIdFltRegExp(rule);
-
-                    if(id >= 0) {
-                        fltEv.removeListener(rule, func);
-
-                        if(!fltEv.listenerCount(rule)) {
-                            removeFltRegExp(id);
-                        }
-                    }
-                }
-
-                break;
-
-            default:
-                break;
-        }
-
-        //------]>
 
         return this;
-
-        //------]>
-
-        function getIdFltRegExp(obj) {
-            for(let i = 0, len = fltRe.length; i < len; i++) {
-                if(fltRe[i].rule === obj) {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        function removeFltRegExp(id) {
-            if(id >= 0) {
-                fltRe.splice(id, 1);
-                return true;
-            }
-
-            return false;
-        }
     }
 
     function srvLogger(callback) {
         result.cbLogger = callback;
         return this;
+    }
+
+    function srvCatch(callback) {
+        result.cbCatch = callback;
+        return this;
+    }
+
+    //-----)>
+
+    function buildEvent(type, params, callback)  {
+        let filter,
+            result = null;
+
+        //--------]>
+
+        if(typeof(type) === "string") {
+            filter = type.split(":");
+
+            type = filter[0];
+            filter = filter[1];
+        }
+
+        //------]>
+
+        if(typeof(type) === "function") {
+            callback = type;
+            type = null;
+        } else if(typeof(params) === "function") {
+            callback = params;
+            params = null;
+        }
+
+        if(!callback) {
+            return result;
+        }
+
+        //------]>
+
+        if(type instanceof RegExp) {
+            if(params) {
+                if(typeof(params) === "string") {
+                    params = params.split(/\s+/);
+                }
+
+                if(!Array.isArray(params)) {
+                    throw new Error("buildEvent | RegExp | `params` is not an array");
+                }
+            }
+
+            result = ["text", params, type, callback];
+        }
+        else {
+            result = [type, params, null, callback];
+        }
+
+        type = result[0];
+        type = filter ? (type + ":" + filter) : type;
+
+        result = {type, result};
+
+        //------]>
+
+        return result;
     }
 }

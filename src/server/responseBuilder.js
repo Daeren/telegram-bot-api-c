@@ -122,8 +122,13 @@ CMain.prototype.keyboard = function(data, params) {
 
     //--------]>
 
-    data = arguments.length ? data : false;
-    data = this.botInstance.keyboard(data, params);
+    if(Array.isArray(data)) {
+        data = {"keyboard": data};
+    }
+    else if(typeof(data) !== "object") {
+        data = arguments.length ? data : false;
+        data = this.botInstance.keyboard(data, params);
+    }
 
     lastElement.reply_markup = data;
 
@@ -135,6 +140,13 @@ CMain.prototype.keyboard = function(data, params) {
     }
 
     //--------]>
+
+    return this;
+};
+
+CMain.prototype.inlineKeyboard = function(data) {
+    const lastElement = this.lastElement;
+    lastElement.reply_markup = Array.isArray(data) ? {"inline_keyboard": data} : (typeof(data) === "object" ? data : this.botInstance.keyboard.inline(data));
 
     return this;
 };

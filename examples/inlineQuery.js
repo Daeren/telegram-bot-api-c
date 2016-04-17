@@ -20,15 +20,17 @@ const gBot      = rTgBot(process.env.TELEGRAM_BOT_TOKEN);
 gBot
     .polling()
 
-    .on("/start", function(bot) {
+    .on("chosenInlineResult", function(bot, data) {
+
+    })
+
+    .on("callbackQuery", function(bot, data) {
         bot
-            .answer()
-            .text("Ok, let's go...")
-            .send()
+            .answer("test")
             .then(console.info, console.error);
     })
 
-    .on("inlineQuery", function(bot, query) {
+    .on("inlineQuery", function(bot, data) {
         const idx = Date.now().toString(32) + Math.random().toString(24);
 
         let results = [
@@ -42,7 +44,7 @@ gBot
 
             {
                 "type":         "article",
-                "title":        "Title #2: " + query,
+                "title":        "Title #2: " + data.query,
                 "message_text": "Text...yeah"
             },
 

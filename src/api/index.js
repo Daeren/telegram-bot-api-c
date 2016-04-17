@@ -464,12 +464,12 @@ function genMethodsFor(bot) {
 
             //-------]>
 
-            if(arguments.length === 1 && typeof(data) === "function") {
+            if(typeof(data) === "function") {
                 callback = data;
-                data = undefined;
+                data = null;
             }
 
-            if(typeof(callback) === "undefined") {
+            if(!callback) {
                 return new mdPromise(cbPromise);
             }
 
