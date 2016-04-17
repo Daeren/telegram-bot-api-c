@@ -121,6 +121,8 @@ function onIncomingCallbackQuery(srvBot, input, callback) {
         //---------]>
 
         function answer(result, callback) {
+            /*jshint validthis:true */
+
             let data;
 
             if(typeof(result) === "function") {
@@ -180,6 +182,8 @@ function onIncomingInlineQuery(srvBot, input, callback) {
         //---------]>
 
         function answer(results, callback) {
+            /*jshint validthis:true */
+
             let data;
 
             if(typeof(results) === "function") {
@@ -371,6 +375,8 @@ function runAction(ingDataType, queue, events, input, reqCtx, evName, dataField,
 //---------]>
 
 function getEventNameByMsgField(field) {
+    /*jshint maxcomplexity:50 */
+
     switch(field) {
         case "new_chat_member":         return "enterChat";
         case "left_chat_member":        return "leftChat";
@@ -393,6 +399,8 @@ function getEventNameByMsgField(field) {
 }
 
 function getMessageDataField(m) {
+    /*jshint maxcomplexity:50 */
+
     let t;
 
     if(

@@ -118,7 +118,7 @@ function main(bot, onMsg) {
 
         //-------------]>
 
-        return arguments.length < 2 ? bot.api.sendMessage(data) : bot.api.sendMessage(data, callback);
+        return bot.api.sendMessage(data, callback);
     }
 
     function ctxForward(params, callback) {
@@ -137,7 +137,7 @@ function main(bot, onMsg) {
         params.from_chat_id = params.from_chat_id || this.from;
         params.message_id   = params.message_id || this.mid;
 
-        return arguments.length < 1 ? bot.api.forwardMessage(data) : bot.api.forwardMessage(data, callback);
+        return bot.api.forwardMessage(params, callback);
     }
 
     //-----)>
