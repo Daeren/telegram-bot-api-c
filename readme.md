@@ -71,7 +71,6 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 
 
 <a name="refStart"></a>
-#### Start
 
 ```js
 const rTgBot    = require("telegram-bot-api-c");

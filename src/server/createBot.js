@@ -103,20 +103,15 @@ function main(bot, onMsg) {
     //--------------]>
 
     function ctxRender(template, data, callback) {
-        if(hasOwnProperty.call(data, "input")) {
-            data = data.input;
-        }
-
-        template = bot.render(template, data);
+        template    = bot.render(template, data && hasOwnProperty.call(data, "input") ? data.input : data);
+        data        = data ? Object.create(data) : {};
 
         //------]>
-
-        data = data ? Object.create(data) : {};
 
         data.chat_id    = data.chat_id || this.cid;
         data.text       = template;
 
-        //-------------]>
+        //------]>
 
         return bot.api.sendMessage(data, callback);
     }
