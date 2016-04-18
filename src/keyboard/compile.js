@@ -83,12 +83,12 @@ function main(input) {
 
             buttons = {
                 "inline_keyboard": isV ? buttons : [buttons]
-            }
+            };
         }
         else if(Array.isArray(buttons)) {
             buttons = {
                 "inline_keyboard": buttons
-            }
+            };
         }
 
         return buttons;
