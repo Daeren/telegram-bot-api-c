@@ -31,6 +31,7 @@ gBot
     .catch(function* (error) {
         //x / 0;
         console.error(error);
+        yield Promise.resolve();
     })
 
     .use(function* () {
@@ -46,6 +47,7 @@ gBot
 
     .on("text:eventYield", function* (bot, data) {
         console.log("eventYield:", data);
+        yield Promise.resolve();
     });
 
 //----------------]>

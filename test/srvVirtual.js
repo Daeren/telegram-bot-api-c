@@ -737,9 +737,12 @@ describe("srv.virtual", function() {
 
         let server = objBot
             .virtual(function* () {
+                yield Promise.resolve();
                 throw new Error("#1");
             })
-            .catch(function(error) {
+            .catch(function* (error) {
+                yield Promise.resolve();
+
                 expect(error).to.be.an.instanceof(Error);
 
                 count++;
@@ -754,12 +757,14 @@ describe("srv.virtual", function() {
         server.input(null, inputSrvMessage);
 
         server.on("text", function* () {
+            yield Promise.resolve();
             throw new Error("#2");
         });
 
         server.input(null, inputSrvMessage);
 
         server.on(/(\w+)/, ["myText"], function* () {
+            yield Promise.resolve();
             throw new Error("#3");
         });
 
