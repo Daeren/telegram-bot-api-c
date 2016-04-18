@@ -15,7 +15,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({chat_id: 0, text: "+"})
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().markdown("+").send())
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").send())
 ```
 
 ```js
@@ -1055,7 +1055,7 @@ MIT
 [100]: https://core.telegram.org/bots/2-0-intro
 
 [image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=123
-[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=2
+[image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=13
 
 [cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
 [cod_l]: https://www.codacy.com/app/daeren/telegram-bot-api-c/dashboard
