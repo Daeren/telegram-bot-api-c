@@ -217,7 +217,7 @@ describe("CResponseBuilder", function() {
 
         it("send(markdown).oneElem | callback", function(done) {
             gCreateRB()
-                .markdown("*TEST*")
+                .markdown("*TEST*", false, true)
                 .send(function(error, result) {
                     checkBaseFields(error, result);
 

@@ -68,19 +68,23 @@ CMain.prototype = Object.create(null);
             const lastElement   = this.lastElement,
                   elem          = defaultParams ? Object.create(defaultParams) : {};
 
-            let argsLen         = arguments.length;
+            const argsLen       = arguments.length;
 
             //--------]>
 
-            elem.__method__ = original;
+            for(let i = 0, offset = 0; i < argsLen && offset < argsLen; i++) {
+                const input = arguments[i],
+                      name  = argsTable[i + offset];
 
-            //--------]>
+                if(defaultParams && hasOwnProperty.call(defaultParams, name)) {
+                    i--;
+                    offset++;
 
-            while(argsLen--) {
-                const input = arguments[argsLen];
+                    continue;
+                }
 
                 if(input !== null && typeof(input) !== "undefined") {
-                    elem[argsTable[argsLen]] = input;
+                    elem[name] = input;
                 }
             }
 
@@ -94,13 +98,14 @@ CMain.prototype = Object.create(null);
                 queue.push(lastElement);
             }
 
-            this.lastElement = elem;
-
-            //-----)>
-
             if(this.enabledReply) {
                 elem.reply_to_message_id = this.botReqCtx.mid;
             }
+
+            //--------]>
+
+            elem.__method__ = original;
+            this.lastElement = elem;
 
             //--------]>
 

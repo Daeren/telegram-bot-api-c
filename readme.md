@@ -361,7 +361,10 @@ objBot.http(cbMsg);
 <a name="refResponseBuilder"></a>
 #### Response Builder
 
-```js
+```
+html(text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
+markdown(text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
+
 text(text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
 photo(photo, caption, disable_notification, reply_to_message_id, reply_markup)
 audio(audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup)
