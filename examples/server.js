@@ -106,10 +106,6 @@ function cbMsg(bot, cmd) {
             return bot.answer().photo("https://www.google.ru/images/logos/ps_logo2.png").send();
         })
         .then(() => {
-            bot.to = msgText;
-            return bot.forward();
-        })
-        .then(() => {
             return bot.answer().text("Forward: ok").send();
         })
         .then(console.log, console.error);
