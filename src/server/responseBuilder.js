@@ -79,7 +79,7 @@ CMain.prototype = Object.create(null);
             while(argsLen--) {
                 const input = arguments[argsLen];
 
-                if(input !== null && typeof(input) !== "undefined" && !rAPIProto.dataModifierForSendMethod(original, input, elem)) {
+                if(input !== null && typeof(input) !== "undefined") {
                     elem[argsTable[argsLen]] = input;
                 }
             }

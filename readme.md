@@ -15,7 +15,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({chat_id: 0, text: "+"})
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().text("+").send())
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().markdown("+").send())
 ```
 
 ```js
@@ -28,7 +28,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().text("+").sen
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
-* New: field bot.`from`, a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
+* New: [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
 * Added: events, error handling, full support for generators
 * Rewritten: server.onMsg, bot.answer
 * Improved: `Response Builder`, srv.createBot
@@ -401,8 +401,8 @@ objSrv
             .keyboard("old")
             .keyboard("new", "selective") // <-- Uses: bot.mid (selective)
 
-            .location("50 50")
-            .latitude(90)
+            .location(69, 96)
+            .latitude(13)
             .keyboard() // <-- Hide
 
             .send() // <-- Uses: bot.cid
@@ -902,20 +902,8 @@ npm test
 
 #### Methods: Response Builder
 
-| Name          | Type                                  | Note                                                              |
+| Name          | Args                                  | Note                                                              |
 |---------------|---------------------------------------|-------------------------------------------------------------------|
-|               | -                                     |                                                                   |
-| text          | string, buffer, stream                |                                                                   |
-| photo         | string, buffer, stream                | Ext: jpg, jpeg, gif, tif, png, bmp                                |
-| audio         | string, buffer, stream                | Ext: mp3                                                          |
-| document      | string, buffer, stream                |                                                                   |
-| sticker       | string, buffer, stream                | Ext: webp [, jpg, jpeg, gif, tif, png, bmp]                       |
-| video         | string, buffer, stream                | Ext: mp4                                                          |
-| voice         | string, buffer, stream                | Ext: ogg                                                          |
-| location      | string, buffer, json                  | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
-| venue         | string, buffer, json                  | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
-| contact       | string, buffer                        |                                                                   |
-| chatAction    | string, buffer                        |                                                                   |
 |               | -                                     |                                                                   |
 | inlineQuery   | (results)                             |                                                                   |
 | callbackQuery | ([message])                           |                                                                   |
@@ -926,8 +914,18 @@ npm test
 |               | -                                     |                                                                   |
 | isReply       | ([flag])                              |                                                                   |
 | send          | ([callback])                          |                                                                   |
-
-
+|               | -                                     |                                                                   |
+| text          |                                       |                                                                   |
+| photo         |                                       | Ext: jpg, jpeg, gif, tif, png, bmp                                |
+| audio         |                                       | Ext: mp3                                                          |
+| document      |                                       |                                                                   |
+| sticker       |                                       | Ext: webp [, jpg, jpeg, gif, tif, png, bmp]                       |
+| video         |                                       | Ext: mp4                                                          |
+| voice         |                                       | Ext: ogg                                                          |
+| location      |                                       |                                                                   |
+| venue         |                                       |                                                                   |
+| contact       |                                       |                                                                   |
+| chatAction    |                                       |                                                                   |
 
 #### Methods: polling
 
@@ -970,6 +968,7 @@ npm test
 | off           | [type][, callback]                            | this                                      |
 
 
+<a name="refFieldsSrvBot"></a>
 #### Fields: bot (srv.on("*", bot => 0)
 
 | Name              | Type                  | Note                                                   |

@@ -247,7 +247,7 @@ function callAPI(token, method, data, callback) {
                 break;
 
             case "string":
-                value = typeof(value) === "string" ? value : (Buffer.isBuffer(value) ? value : (value + ""));
+                value = typeof(value) === "string" || Buffer.isBuffer(value) ? value : (value + "");
 
                 req.write("\"\r\n\r\n");
 

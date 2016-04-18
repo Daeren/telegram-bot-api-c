@@ -448,8 +448,7 @@ module.exports = {
 
     //------[METHODS]------}>
 
-    genSendMethodsFor,
-    dataModifierForSendMethod
+    genSendMethodsFor
 };
 
 //-----------------------------------------------------
@@ -463,34 +462,6 @@ function genSendMethodsFor(iter) {
         if(hasOwnProperty.call(aliases, alias)) {
             iter(alias, aliases[alias]);
         }
-    }
-}
-
-function dataModifierForSendMethod(method, input, output) {
-    if(input === null || typeof(input) === "undefined") {
-        return false;
-    }
-
-    switch(method) {
-        case "sendLocation":
-        case "sendVenue":
-            if(typeof(input) === "string") {
-                input = input.split(/\s+/);
-            }
-
-            if(Array.isArray(input)) {
-                output.latitude = input[0];
-                output.longitude = input[1];
-            }
-            else if(typeof(input) === "object") {
-                output.latitude = input.latitude;
-                output.longitude = input.longitude;
-            }
-
-            return true;
-
-        default:
-            return false;
     }
 }
 
