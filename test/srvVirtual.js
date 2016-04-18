@@ -725,7 +725,7 @@ describe("srv.virtual", function() {
 
         server.input(null, inputSrvMessage);
 
-        server.on(/(\w+)/, ["myText"], function(bot, params) {
+        server.on(/(\w+)/, ["myText"], function() {
             throw new Error("#3");
         });
 
@@ -759,7 +759,7 @@ describe("srv.virtual", function() {
 
         server.input(null, inputSrvMessage);
 
-        server.on(/(\w+)/, ["myText"], function* (bot, params) {
+        server.on(/(\w+)/, ["myText"], function* () {
             throw new Error("#3");
         });
 
