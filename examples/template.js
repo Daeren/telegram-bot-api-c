@@ -81,12 +81,7 @@ function response(who, bot, params) {
     console.log("|params: ", params);
     console.log("+-----------------------|");
 
-    let data = {};
-
-    data.text = params && params.id ? "" : bot;
-    data.reply_markup = bot.keyboard(bot.message.text);
-
-    bot.answer().text(null, data).send().then(console.info, console.error);
+    bot.answer().text("X").keyboard(bot.message.text).send().then(console.info, console.error);
 }
 
 //-------------]>
@@ -109,11 +104,9 @@ function tCheckBaseBotFields(bot) {
 
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
-    expect(bot).to.have.property("from").that.equal(msg.chat.id);
 
     //----------]>
 
     expect(bot).to.have.property("answer").that.is.an("function");
-    expect(bot).to.have.property("forward").that.is.an("function");
     expect(bot).to.have.property("render").that.is.an("function");
 }

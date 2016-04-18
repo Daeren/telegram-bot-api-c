@@ -12,24 +12,24 @@
 const gMethods                      = [],
       gSendMethods                  = [];
 
-const gAliasesSendMethods           = {},
-      gAliasesSendMethodsFields     = {};
+const gAliasesSendMethods           = {};
 
 const gProtoTable = {
     "forwardMessage": [
-        ["string", "chat_id"],
-        ["string", "from_chat_id"],
+        ["string",  "chat_id"],
+        ["string",  "from_chat_id"],
         ["boolean", "disable_notification"],
-        ["string", "message_id"]
+        ["string",  "message_id"]
     ],
 
+
     "sendMessage": [
-        ["string", "chat_id"],
-        ["string", "parse_mode"],
+        ["string",  "chat_id"],
+        ["string",  "parse_mode"],
         ["boolean", "disable_web_page_preview"],
         ["boolean", "disable_notification"],
-        ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
+        ["string",  "reply_to_message_id"],
+        ["json",    "reply_markup"],
         ["message", "text"]
     ],
 
@@ -207,6 +207,196 @@ const gProtoTable = {
     ]
 };
 
+const gArgsTable  = {
+    "forwardMessage": [
+        "chat_id",
+        "from_chat_id",
+        "message_id",
+        "disable_notification"
+    ],
+
+
+    "sendMessage": [
+        "chat_id",
+        "text",
+        "parse_mode",
+        "disable_web_page_preview",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendPhoto": [
+        "chat_id",
+        "photo",
+        "caption",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendAudio": [
+        "chat_id",
+        "audio",
+        "performer",
+        "title",
+        "duration",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendDocument": [
+        "chat_id",
+        "document",
+        "caption",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendSticker": [
+        "chat_id",
+        "sticker",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendVideo": [
+        "chat_id",
+        "video",
+        "width",
+        "height",
+        "duration",
+        "caption",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendVoice": [
+        "chat_id",
+        "voice",
+        "duration",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendLocation": [
+        "chat_id",
+        "latitude",
+        "longitude",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendVenue": [
+        "chat_id",
+        "latitude",
+        "longitude",
+        "title",
+        "address",
+        "foursquare_id",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendContact": [
+        "chat_id",
+        "phone_number",
+        "first_name",
+        "last_name",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendChatAction": [
+        "chat_id",
+        "action"
+    ],
+
+
+    "getUserProfilePhotos": [
+        "user_id",
+        "offset",
+        "limit"
+    ],
+
+    "getUpdates": [
+        "offset",
+        "limit",
+        "timeout"
+    ],
+
+    "getFile": [
+        "file_id"
+    ],
+
+    "setWebhook": [
+        "url",
+        "certificate"
+    ],
+
+
+    "answerInlineQuery": [
+        "inline_query_id",
+        "results",
+        "next_offset",
+        "is_personal",
+        "cache_time",
+        "switch_pm_text",
+        "switch_pm_parameter"
+    ],
+
+    "answerCallbackQuery": [
+        "callback_query_id",
+        "text",
+        "show_alert"
+    ],
+
+
+    "kickChatMember": [
+        "chat_id",
+        "user_id"
+    ],
+
+    "unbanChatMember": [
+        "chat_id",
+        "user_id"
+    ],
+
+
+    "editMessageText": [
+        "chat_id",
+        "text",
+        "message_id",
+        "inline_message_id",
+        "parse_mode",
+        "disable_web_page_preview",
+        "reply_markup"
+    ],
+
+    "editMessageCaption": [
+        "chat_id",
+        "caption",
+        "message_id",
+        "inline_message_id",
+        "reply_markup"
+    ],
+
+    "editMessageReplyMarkup": [
+        "chat_id",
+        "reply_markup",
+        "message_id",
+        "inline_message_id"
+    ]
+};
+
 //-----------------------------------------------------
 
 for(let name in gProtoTable) {
@@ -224,10 +414,11 @@ for(let name in gProtoTable) {
               alias     = getAliasByShortMethod(shortName),
               dataField = getBaseDataFieldByShortMethod(shortName);
 
+        //----]>
+
         gSendMethods.push(name);
 
         gAliasesSendMethods[alias] = name;
-        gAliasesSendMethodsFields[alias] = dataField;
     }
 
     //----------]>
@@ -249,11 +440,11 @@ module.exports = {
 
     "sendMethods":              gSendMethods,
     "aliasesSendMethods":       gAliasesSendMethods,
-    "aliasesSendMethodsFields": gAliasesSendMethodsFields,
 
     //------[PROTO]------}>
 
     "params":                   gProtoTable,
+    "args":                     gArgsTable,
 
     //------[METHODS]------}>
 
@@ -270,7 +461,7 @@ function genSendMethodsFor(iter) {
 
     for(let alias in aliases) {
         if(hasOwnProperty.call(aliases, alias)) {
-            iter(alias, aliases[alias], gAliasesSendMethodsFields[alias]);
+            iter(alias, aliases[alias]);
         }
     }
 }

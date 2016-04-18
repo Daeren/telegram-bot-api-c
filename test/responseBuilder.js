@@ -36,7 +36,11 @@ const gBotReq       = {
 const gCreateRB = function() { return new CResponseBuilder(gBotReq, objBot); };
 
 const gElements = [
-    "text", "photo", "audio", "document", "sticker", "video", "voice", "location", "venue", "contact", "chatAction"
+    "text", "photo", "audio", "document", "sticker", "video", "voice", "location", "venue", "contact", "chatAction",
+
+    "inlineQuery", "callbackQuery",
+
+    "markdown", "html"
 ];
 
 const gModifiers = [
@@ -49,6 +53,7 @@ const gModifiers = [
 
     "disableWebPagePreview", "disableNotification",
     "showAlert",
+    "cacheTime", "nextOffset", "switchPmText", "switchPmParameter",
 
     "phoneNumber", "firstName", "lastName",
     "parseMode", "replyMarkup",
@@ -72,7 +77,7 @@ describe("CResponseBuilder", function() {
     describe("Methods", function() {
         const rb = gCreateRB();
 
-        ["send"]
+        ["send", "isReply"]
             .concat(gElements, gModifiers)
             .forEach(function(method) {
                 it(method, function() {

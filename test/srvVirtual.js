@@ -792,7 +792,6 @@ function tCheckBaseBotFields(bot) {
     const msg = bot.message;
 
     expect(msg).to.have.property("message_id");
-    expect(msg).to.have.property("from").that.is.an("object").and.not.equal(null);
     expect(msg).to.have.property("chat").that.is.an("object").and.not.equal(null);
     expect(msg).to.have.property("date");
 
@@ -801,13 +800,8 @@ function tCheckBaseBotFields(bot) {
 
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
-    expect(bot).to.have.property("from").that.equal(msg.chat.id);
 
-    //----------]>
-
-    expect(bot).to.have.property("render").that.is.a("function");
-    expect(bot).to.have.property("forward").that.is.a("function");
-    expect(bot).to.have.property("answer").that.is.a("function");
+    expect(bot).to.have.property("from").that.deep.equal(msg.from).that.is.an("object").and.not.equal(null);
 
     //----------]>
 
@@ -816,17 +810,8 @@ function tCheckBaseBotFields(bot) {
     //----------]>
 
     [
-        "sendMessage",
-        "sendPhoto",
-        "sendAudio",
-        "sendDocument",
-        "sendSticker",
-        "sendVideo",
-        "sendVoice",
-        "sendLocation",
-        "sendVenue",
-        "sendContact",
-        "sendChatAction"
+        "render",
+        "answer"
     ]
         .forEach(function(e) {
             expect(bot[e]).to.be.a("function");

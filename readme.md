@@ -15,7 +15,7 @@ require("telegram-bot-api-c")("TOKEN").api.sendMessage({chat_id: 0, text: "+"})
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
+require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().text("+").send())
 ```
 
 ```js
@@ -28,11 +28,11 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
-* New: a mechanism of events
-* Added: events, error handling, full support for generators
-* Rewritten: server.onMsg
-* Improved: responseBuilder, srv.createBot
-* Removed: bot.send(..), bot.broadcast(..), bot.on(*), bot.on(/)
+* New: a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
+* Added: field `from`, events, error handling, full support for generators
+* Rewritten: server.onMsg, bot.answer
+* Improved: `Response Builder`, srv.createBot
+* Removed: srv.forward, srv.send[_], bot.send, bot.broadcast, srv.on(*), srv.on(/)
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -51,7 +51,6 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.sendMessage("+"))
 * [Virtual](#refVirtual)
 * [mServer](#refMServer)
 * [Nginx + Node.js](#refExampleNginxNodejs)
-* [Server Response](#refServerResponse)
 * [Response Builder](#refResponseBuilder)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
@@ -192,9 +191,9 @@ let objSrv = objBot
     .on("/stop", cbCmdStop);
 
 function cbMsg(bot) {
-    const msg = bot.isGroup ? ">_>" : "Stop me: /stop";
+    const msg = bot.isGroup && bot.isReply ? ">_>" : "Stop me: /stop";
     
-    bot.answer(bot.isReply).text(msg).send();
+    bot.answer().isReply().text(msg).send();
 }
 
 function cbCmdStop(bot, params) {
@@ -359,65 +358,45 @@ objBot.http(cbMsg);
 
 
 
-<a name="refServerResponse"></a>
-#### Server Response
-
-```js
-objSrv
-    .use(function(bot) {
-        const imgURL  = "https://pp.vk.me/c627530/v627530230/2fce2/PF9loxF4ick.jpg";
-        
-        const isReply = true,
-              params  = {};
-    
-        //----[Send Reply | RBuilder: Queue]----}>
-        
-        bot.answer(isReply).text("=_=").photo(imgURL).send();
-        
-        //----[Send | RBuilder: One element]----}>
-        
-        bot.answer().text("Hi", params).send();
-        
-        //----[Send_ELEMENT]----}>
-        
-        bot.sendMessage("Hello").then(console.log);
-        bot.sendPhoto(imgURL, params);
-        bot.sendDocument(imgURL, (e, r) => console.log(e || r));
-        bot.sendLocation([60, 60]);
-        
-        //----[Forward]----}>
-
-        bot.to = "chatId";
-        bot.forward({"disable_notification": true});
-    });
-```
-
-
-
 <a name="refResponseBuilder"></a>
 #### Response Builder
 
 ```js
+text(text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
+photo(photo, caption, disable_notification, reply_to_message_id, reply_markup)
+audio(audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup)
+document(document, caption, disable_notification, reply_to_message_id, reply_markup)
+sticker(sticker, disable_notification, reply_to_message_id, reply_markup)
+video(video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup)
+voice(voice, duration, disable_notification, reply_to_message_id, reply_markup)
+location(latitude, longitude, disable_notification, reply_to_message_id, reply_markup)
+venue(latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup)
+contact(phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup)
+chatAction(action)
+
+inlineQuery(inline_query_id, results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter)
+callbackQuery(callback_query_id, text, show_alert)
+```
+
+```js
 objSrv
     .use(function(bot) {
-        const params = {
-            "parse_mode":   "markdown", // <-- text,
-            "caption":      "myCaption" // <-- photo
-        };
-        
         bot
             .answer() // <-- Builder + Queue
 
             .chatAction("typing") // <-- Element
 
-            .text("https://google.com", params) // <-- Element
-            //.parseMode("markdown") <-- params.parse_mode
+            .text("https://google.com", "markdown") // <-- Element
+            //.parseMode("markdown")
             .disableWebPagePreview() // <-- Modifier (for the last element)
             .keyboard([["X"], ["Y"]]) // <-- Modifier
+            
+            .markdown("*text*") // <-- Element
+            .html("<a>text</a>")
 
             .chatAction("upload_photo")
             
-            .photo("https://www.google.ru/images/logos/ps_logo2.png", params)
+            .photo("https://www.google.ru/images/logos/ps_logo2.png", "myCaption")
             .caption("#2EASY") // <-- Modifier
             .keyboard("old")
             .keyboard("new", "selective") // <-- Uses: bot.mid (selective)
@@ -669,10 +648,11 @@ rBot.keyboard.inline.numpad();
 //------------------------------
 
 rBot.keyboard(buttons[, params])
-rBot.inline(buttons)
+rBot.inline(inlButtons, isVertically)
 
-buttons: `string`, `array of array` or `false`
-params: "resize once selective"
+buttons:    `string`, `array of array` or `false`
+inlButtons: `string`, `array of array` or `object`
+params:     "resize once selective"
 
 v - vertically; h - horizontally;
 
@@ -767,7 +747,9 @@ gBot
         */
 
         bot
-            .answer(results)
+            .answer()
+            .inlineQuery(results)
+            .send()
             .then(console.info, console.error);
     });
 
@@ -934,6 +916,17 @@ npm test
 | venue         | string, buffer, json                  | Format: "60.0 60.0", [60, 60], {"latitude": 60, "longitude": 60}  |
 | contact       | string, buffer                        |                                                                   |
 | chatAction    | string, buffer                        |                                                                   |
+|               | -                                     |                                                                   |
+| inlineQuery   | (results)                             |                                                                   |
+| callbackQuery | ([message])                           |                                                                   |
+|               | -                                     |                                                                   |
+| render        | (data)                                |                                                                   |
+| keyboard      | (buttons[, params])                   |                                                                   |
+| inlineKeyboard| (buttons[, isVertically])             |                                                                   |
+|               | -                                     |                                                                   |
+| isReply       | ([flag])                              |                                                                   |
+| send          | ([callback])                          |                                                                   |
+
 
 
 #### Methods: polling
@@ -989,32 +982,19 @@ npm test
 | qid               | string                | bot.qid = bot.inlineQuery.id                           |
 | cid               | number                | bot.cid = bot.message.chat.id                          |
 | mid               | number                | bot.mid = bot.message.message_id                       |
-| from              | number                | bot.from = bot.message.chat.id                         |
-| to                | number                | bot.to = undefined                                     |
+|                   | -                     |                                                        |
+| from              | object                | bot.from = bot.message.from; (!) persistent            |
 |                   | -                     |                                                        |
 | message           | object                | Incoming message                                       |
 | inlineQuery       | object                | Incoming inline query                                  |
 | chosenInlineResult| object                | The result of an inline query that was chosen          |
 | callbackQuery     | object                | Incoming callback query                                |
 |                   | -                     |                                                        |
-| answer            | function(isReply)     | Response Builder; Uses: cid, mid                       |
-| answer            | function(result)      | inlineQuery; Uses: qid                                 |
-| answer            | function(result)      | callbackQuery; Uses: cqid                              |
+| answer            | function()            | Response Builder; message; Uses: cid, mid              |
+| answer            | function()            | Response Builder; inlineQuery; Uses: qid               |
+| answer            | function()            | Response Builder; callbackQuery; Uses: cqid            |
 |                   | -                     |                                                        |
-| forward           | function(params, cb)  | Uses: mid, from, to                                    |
 | render            | function(tmpl, in, cb)| Uses: cid                                              |
-|                   | -                     |                                                        |
-| sendMessage       | function              |                                                        |
-| sendPhoto         | function              |                                                        |
-| sendAudio         | function              |                                                        |
-| sendDocument      | function              |                                                        |
-| sendSticker       | function              |                                                        |
-| sendVideo         | function              |                                                        |
-| sendVoice         | function              |                                                        |
-| sendLocation      | function              |                                                        |
-| sendVenue         | function              |                                                        |
-| sendContact       | function              |                                                        |
-| sendChatAction    | function              |                                                        |
 
 
 #### Events: use / on

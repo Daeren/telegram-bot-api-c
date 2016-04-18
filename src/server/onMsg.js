@@ -10,9 +10,7 @@
 //-----------------------------------------------------
 
 const rUtil             = require("./../util"),
-      rParseCmd         = require("./../parseCmd"),
-
-      rResponseBuilder  = require("./responseBuilder");
+      rParseCmd         = require("./../parseCmd");
 
 //-----------------------------------------------------
 
@@ -101,40 +99,31 @@ function onIncomingCallbackQuery(srvBot, input, callback) {
     //------------]>
 
     function createReqCtx() {
-        const result = Object.create(srvBot.ctx);
-        const botApi = srvBot.instance.api;
+        const ctx           = Object.create(srvBot.ctx);
+
+        const message       = input.message;
+
+        const msgChat       = message && message.chat;
+
+        const isGroup        = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
+              isReply        = !!(message && message.reply_to_message);
 
         //---------]>
 
-        result.cqid = input.id;
-        result.qid = input.inline_message_id;
-        result.callbackQuery = input;
+        ctx.callbackQuery = input;
+        ctx.from = input.from;
 
-        result.answer = answer;
+        ctx.cqid = input.id;
+        ctx.qid = input.inline_message_id;
+        ctx.cid = msgChat && msgChat.id;
+        ctx.mid = message && message.message_id;
+
+        ctx.isGroup = isGroup;
+        ctx.isReply = isReply;
 
         //---------]>
 
-        return result;
-
-        //---------]>
-
-        function answer(result, callback) {
-            /*jshint validthis:true */
-
-            let data;
-
-            if(typeof(result) === "function") {
-                callback = result;
-                result = null;
-            }
-
-            if(result) {
-                data = typeof(result) === "string" ? {"text": result} : Object.create(result);
-                data.callback_query_id = data.callback_query_id || this.cqid;
-            }
-
-            return botApi.answerCallbackQuery(data, callback);
-        }
+        return ctx;
     }
 }
 
@@ -144,16 +133,18 @@ function onIncomingChosenInlineResult(srvBot, input, callback) {
     //------------]>
 
     function createReqCtx() {
-        const result = Object.create(srvBot.ctx);
+        const ctx = Object.create(srvBot.ctx);
 
         //---------]>
 
-        result.qid = input.inline_message_id;
-        result.chosenInlineResult = input;
+        ctx.chosenInlineResult = input;
+        ctx.from = input.from;
+
+        ctx.qid = input.inline_message_id;
 
         //---------]>
 
-        return result;
+        return ctx;
     }
 }
 
@@ -163,39 +154,18 @@ function onIncomingInlineQuery(srvBot, input, callback) {
     //------------]>
 
     function createReqCtx() {
-        const result = Object.create(srvBot.ctx);
-        const botApi = srvBot.instance.api;
+        const ctx           = Object.create(srvBot.ctx);
 
         //---------]>
 
-        result.qid = input.id;
+        ctx.inlineQuery = input;
+        ctx.from = input.from;
 
-        result.inlineQuery = input;
-        result.answer = answer;
-
-        //---------]>
-
-        return result;
+        ctx.qid = input.id;
 
         //---------]>
 
-        function answer(results, callback) {
-            /*jshint validthis:true */
-
-            let data;
-
-            if(typeof(results) === "function") {
-                callback = results;
-                results = null;
-            }
-
-            if(results) {
-                data = Array.isArray(results) ? {"results": results} : Object.create(results);
-                data.inline_query_id = data.inline_query_id || this.qid;
-            }
-
-            return botApi.answerInlineQuery(data, callback);
-        }
+        return ctx;
     }
 }
 
@@ -227,31 +197,22 @@ function onIncomingMessage(srvBot, input, callback) {
     //------------]>
 
     function createReqCtx() {
-        const result = Object.create(srvBot.ctx);
+        const ctx = Object.create(srvBot.ctx);
 
         //---------]>
 
-        result.isGroup = isGroup;
-        result.isReply = isReply;
+        ctx.message = input;
+        ctx.from = input.from;
 
-        result.from = result.cid = msgChat.id;
-        result.mid = input.message_id;
+        ctx.cid = msgChat.id;
+        ctx.mid = input.message_id;
 
-        result.message = input;
-        result.answer = answer;
-
-        //---------]>
-
-        return result;
+        ctx.isGroup = isGroup;
+        ctx.isReply = isReply;
 
         //---------]>
 
-        function answer(isReply) {
-            const answer = new rResponseBuilder(result, botInstance);
-            answer.isReply = !!isReply;
-
-            return answer;
-        }
+        return ctx;
     }
 }
 
@@ -358,7 +319,7 @@ function runAction(ingDataType, queue, events, input, reqCtx, evName, dataField,
         }
         else {
             const evType = cmdParams ? cmdParams.cmd : (evName || ingDataType);
-            queue = events && events[state ? (evType + ":" + state) : evType];
+            queue = events && (events[state ? (evType + ":" + state) : evType] || events[evType]);
 
             if(queue) {
                 runAction(ingDataType, queue, null, input, reqCtx, evName, dataField, callback);

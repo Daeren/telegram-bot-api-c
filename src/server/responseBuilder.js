@@ -22,6 +22,7 @@ const gModifiers = [
 
     "disable_web_page_preview", "disable_notification",
     "show_alert",
+    "cache_time", "next_offset", "switch_pm_text", "switch_pm_parameter",
 
     "phone_number", "first_name", "last_name",
     "parse_mode", "reply_markup",
@@ -42,7 +43,7 @@ function CMain(botReqCtx, botInstance) {
     this.queue          = null;
     this.lastElement    = null;
 
-    this.isReply        = false;
+    this.enabledReply   = false;
 }
 
 CMain.prototype = Object.create(null);
@@ -52,17 +53,35 @@ CMain.prototype = Object.create(null);
 (function createElements() {
     rAPIProto.genSendMethodsFor(addElementMethod);
 
-    function addElementMethod(alias, original, baseDataField) {
-        CMain.prototype[alias] = function(input, params) {
+    addElementMethod("inlineQuery", "answerInlineQuery");
+    addElementMethod("callbackQuery", "answerCallbackQuery");
+
+    addElementMethod("markdown", "sendMessage", {"parse_mode": "markdown"});
+    addElementMethod("html", "sendMessage", {"parse_mode": "html"});
+
+    //-------]>
+
+    function addElementMethod(alias, original, defaultParams) {
+        const argsTable = Array.prototype.slice.call(rAPIProto.args[original], 1);
+
+        CMain.prototype[alias] = function() {
             const lastElement   = this.lastElement,
-                  elem          = params ? Object.create(params) : {};
+                  elem          = defaultParams ? Object.create(defaultParams) : {};
+
+            let argsLen         = arguments.length;
 
             //--------]>
 
             elem.__method__ = original;
 
-            if(input !== null && typeof(input) !== "undefined" && !rAPIProto.dataModifierForSendMethod(original, input, elem)) {
-                elem[baseDataField] = input;
+            //--------]>
+
+            while(argsLen--) {
+                const input = arguments[argsLen];
+
+                if(input !== null && typeof(input) !== "undefined" && !rAPIProto.dataModifierForSendMethod(original, input, elem)) {
+                    elem[argsTable[argsLen]] = input;
+                }
             }
 
             if(lastElement) {
@@ -79,7 +98,7 @@ CMain.prototype = Object.create(null);
 
             //-----)>
 
-            if(this.isReply) {
+            if(this.enabledReply) {
                 elem.reply_to_message_id = this.botReqCtx.mid;
             }
 
@@ -117,6 +136,11 @@ gModifiers
 
 //----)>
 
+CMain.prototype.isReply = function(t) {
+    this.enabledReply = typeof(t) === "undefined" ? true : !!t;
+    return this;
+};
+
 CMain.prototype.keyboard = function(data, params) {
     const lastElement = this.lastElement;
 
@@ -144,10 +168,8 @@ CMain.prototype.keyboard = function(data, params) {
     return this;
 };
 
-CMain.prototype.inlineKeyboard = function(data) {
-    const lastElement = this.lastElement;
-    lastElement.reply_markup = Array.isArray(data) ? {"inline_keyboard": data} : (typeof(data) === "object" ? data : this.botInstance.keyboard.inline(data));
-
+CMain.prototype.inlineKeyboard = function(data, isVertically) {
+    this.lastElement.reply_markup = this.botInstance.keyboard.inline(data, isVertically);
     return this;
 };
 
@@ -180,11 +202,14 @@ CMain.prototype.render = function(data) {
 //-----[Exec]-----}>
 
 CMain.prototype.send = function(callback) {
-    const botInstance   = this.botInstance,
-          chatId        = this.botReqCtx.cid;
+    const botInstance       = this.botInstance,
 
-    const queue         = this.queue,
-          lastElement   = this.lastElement;
+          chatId            = this.botReqCtx.cid,
+          inlineQueryId     = this.botReqCtx.qid,
+          callbackQueryId   = this.botReqCtx.cqid;
+
+    const queue             = this.queue,
+          lastElement       = this.lastElement;
 
     //-------]>
 
@@ -224,8 +249,16 @@ CMain.prototype.send = function(callback) {
         function iterElements(next, elem, index) {
             const apiMethod = botInstance.api[elem.__method__];
 
-            if(!elem.chat_id) {
+            if(chatId) {
                 elem.chat_id = chatId;
+            }
+
+            if(callbackQueryId) {
+                elem.callback_query_id = callbackQueryId;
+            }
+
+            if(inlineQueryId) {
+                elem.inline_query_id = inlineQueryId;
             }
 
             apiMethod(elem, function(error, result) {

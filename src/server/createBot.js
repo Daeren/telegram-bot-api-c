@@ -9,13 +9,7 @@
 
 //-----------------------------------------------------
 
-const rEvents       = require("events");
-
-const rAPIProto     = require("./../api/proto");
-
-//-----------------------------------------------------
-
-const gMaxListeners = 100;
+const rResponseBuilder  = require("./responseBuilder");
 
 //-----------------------------------------------------
 
@@ -26,14 +20,9 @@ module.exports = main;
 function main(bot, onMsg) {
     /*jshint validthis:true */
 
-    const ctx   = Object.create(bot),
-          ev    = new rEvents();
+    const ctx = Object.create(bot);
 
     let result;
-
-    //---------]>
-
-    ev.setMaxListeners(gMaxListeners);
 
     //---------]>
 
@@ -65,36 +54,7 @@ function main(bot, onMsg) {
     //-----)>
 
     ctx.render  = ctxRender;
-    ctx.forward = ctxForward;
-
-    //-----[Send methods]-----}>
-
-    rAPIProto.genSendMethodsFor(function(alias, original, baseDataField) {
-        const apiMethod = bot.api[original];
-
-        //-----------]>
-
-        ctx[original] = function(input, params, callback) {
-            if(typeof(params) === "function") {
-                callback = params;
-                params = undefined;
-            }
-
-            //-----------]>
-
-            const data = params ? Object.create(params) : {};
-
-            data.chat_id = params && params.chat_id || this.cid;
-
-            if(input !== null && typeof(input) !== "undefined" && !rAPIProto.dataModifierForSendMethod(original, input, data)) {
-                data[baseDataField] = input;
-            }
-
-            //-----------]>
-
-            return apiMethod(data, callback);
-        };
-    });
+    ctx.answer  = ctxAnswer;
 
     //--------------]>
 
@@ -116,23 +76,8 @@ function main(bot, onMsg) {
         return bot.api.sendMessage(data, callback);
     }
 
-    function ctxForward(params, callback) {
-        if(typeof(params) === "function") {
-            callback = params;
-            params = {};
-        }
-        else if(params) {
-            params = Object.create(params);
-        }
-        else {
-            params = {};
-        }
-
-        params.chat_id      = params.chat_id || this.to;
-        params.from_chat_id = params.from_chat_id || this.from;
-        params.message_id   = params.message_id || this.mid;
-
-        return bot.api.forwardMessage(params, callback);
+    function ctxAnswer() {
+        return new rResponseBuilder(this, bot);
     }
 
     //-----)>

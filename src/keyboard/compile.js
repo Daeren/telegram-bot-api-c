@@ -74,8 +74,24 @@ function main(input) {
 
     //----------]>
 
-    function inlineKeyboardBuilder(buttons) {
-        return typeof(buttons) === "string" ? {"inline_keyboard": buttons.split(/\s+/).map(text => [{text, "callback_data": text}])} : buttons;
+    function inlineKeyboardBuilder(buttons, isV) {
+        if(typeof(buttons) === "string") {
+            buttons = buttons.split(/\s+/).map(text => {
+                text = {text, "callback_data": text};
+                return isV ? [text] : text;
+            });
+
+            buttons = {
+                "inline_keyboard": isV ? buttons : [buttons]
+            }
+        }
+        else if(Array.isArray(buttons)) {
+            buttons = {
+                "inline_keyboard": buttons
+            }
+        }
+
+        return buttons;
     }
 
     function keyboardBuilder(buttons, params) {
