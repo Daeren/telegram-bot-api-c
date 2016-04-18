@@ -410,9 +410,7 @@ for(let name in gProtoTable) {
 
     if(sendMethodMatch) {
         const shortName = sendMethodMatch[1][0].toLowerCase() + sendMethodMatch[1].substr(1),
-
-              alias     = getAliasByShortMethod(shortName),
-              dataField = getBaseDataFieldByShortMethod(shortName);
+              alias     = getAliasByShortMethod(shortName);
 
         //----]>
 
@@ -470,15 +468,5 @@ function getAliasByShortMethod(shortMethod) {
         case "message": return "text";
 
         default:        return shortMethod;
-    }
-}
-
-function getBaseDataFieldByShortMethod(shortMethod) {
-    switch(shortMethod) {
-        case "message":     return "text";
-        case "contact":     return "phone_number";
-        case "chatAction":  return "action";
-
-        default:            return shortMethod;
     }
 }
