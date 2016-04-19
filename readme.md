@@ -498,7 +498,7 @@ objSrv
             next();
         }
     })
-    .use("text", function(bot /*, next*/) { // Filter by `type`
+    .use("text", function(bot) {
         console.log("F:Sync | Type: text");
 
         bot.user = {};
@@ -538,8 +538,6 @@ objSrv
 objSrv
     .on("text:room.menu", function(bot, data) {
     });
-    
-// Does not work with: regEx
 ```
 
 
@@ -553,7 +551,6 @@ gBot
         const result = yield send(bot);
         console.info(result);
 
-        //x / 0;
         yield error();
     })
     .catch(function* (error) {
@@ -563,10 +560,10 @@ gBot
     .use(function* (bot) {
         yield auth("D", "13");
     })
-    .use("text", function* (bot) {
+    .use("text", function* (bot, data) {
         yield save();
 
-        if(bot.message.text === "key") {
+        if(data === "key") {
             return "eventYield";
         }
     })
