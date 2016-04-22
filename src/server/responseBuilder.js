@@ -62,7 +62,7 @@ CMain.prototype = Object.create(null);
     //-------]>
 
     function addElementMethod(alias, original, defaultParams) {
-        const argsTable = Array.prototype.slice.call(rAPIProto.args[original], 1);
+        const argsList = rAPIProto.args[original].slice(1);
 
         CMain.prototype[alias] = function() {
             const lastElement   = this.lastElement,
@@ -74,7 +74,7 @@ CMain.prototype = Object.create(null);
 
             for(let i = 0, offset = 0; i < argsLen && offset < argsLen; i++) {
                 const input = arguments[i],
-                      name  = argsTable[i + offset];
+                      name  = argsList[i + offset];
 
                 if(defaultParams && hasOwnProperty.call(defaultParams, name)) {
                     i--;

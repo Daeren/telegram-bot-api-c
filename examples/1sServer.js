@@ -148,7 +148,9 @@ objSrv
 
 //------]>
 
-function onNotFound(bot, cmd) {
+function onNotFound(bot) {
+    const cmd = bot.command;
+
     if(cmd) {
         expect(cmd).to.be.a("object");
 

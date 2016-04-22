@@ -43,8 +43,6 @@ const objSrv = objBot.http(objSrvOptions);
 
 //-----------]>
 
-objMyBot.enable("onMsg.sanitize"); // <-- Sanitize Incoming message
-
 objSrv
     .bot(objMyBot, "/myBot")
     .logger(cbBotLogger)
@@ -72,7 +70,9 @@ function cbBotLogger(error, data) {
 
 //--------)>
 
-function cbMsg(bot, cmd) {
+function cbMsg(bot) {
+    const cmd = bot.command;
+
     if(cmd) {
         expect(cmd).to.be.a("object");
 

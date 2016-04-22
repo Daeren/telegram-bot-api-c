@@ -24,7 +24,8 @@ module.exports = {
     createReadStreamByUrl,
     getFilenameByMime,
 
-    forEachAsync
+    forEachAsync,
+    executeGenerator
 };
 
 //-----------------------------------------------------
@@ -124,6 +125,54 @@ function forEachAsync(data, iter, cbEnd) {
             }
         } else {
             run();
+        }
+    }
+}
+
+function executeGenerator(generator, callback) {
+    if(!generator || !generator[Symbol.iterator]) {
+        return false;
+    }
+
+    callback = callback || pushException;
+
+    //---------]>
+
+    (function execute(input) {
+        let next;
+
+        try {
+            next = generator.next(input);
+        } catch(e) {
+            callback(e);
+            return;
+        }
+
+        if(!next.done) {
+            next.value.then(execute, onGenError);
+        }
+        else {
+            callback(null, next.value);
+        }
+    })();
+
+    //---------]>
+
+    return true;
+
+    //---------]>
+
+    function pushException(error) {
+        if(error) {
+            setImmediate(function() { throw error; });
+        }
+    }
+
+    function onGenError(error) {
+        try {
+            generator.throw(error);
+        } catch(e) {
+            callback(e);
         }
     }
 }

@@ -73,7 +73,9 @@ function cbLogger(error, data) {
     }
 }
 
-function cbMsg(bot, cmd) {
+function cbMsg(bot) {
+    const cmd = bot.command;
+
     if(cmd) {
         expect(cmd).to.be.a("object");
 

@@ -28,11 +28,11 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
-* New: [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
+* New: [field bot.command](#refFieldsSrvBot), field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
 * Added: events, error handling, full support for generators
 * Rewritten: server.onMsg, bot.answer
 * Improved: `Response Builder`, srv.createBot
-* Removed: srv.forward, srv.send[_], bot.send, bot.broadcast, srv.on(*), srv.on(/)
+* Removed: srv.forward, srv.send[_], bot.send, bot.broadcast
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -362,23 +362,26 @@ objBot.http(cbMsg);
 #### Response Builder
 
 ```
-html(text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
-markdown(text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
-
-text(text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup)
-photo(photo, caption, disable_notification, reply_to_message_id, reply_markup)
-audio(audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup)
-document(document, caption, disable_notification, reply_to_message_id, reply_markup)
-sticker(sticker, disable_notification, reply_to_message_id, reply_markup)
-video(video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup)
-voice(voice, duration, disable_notification, reply_to_message_id, reply_markup)
-location(latitude, longitude, disable_notification, reply_to_message_id, reply_markup)
-venue(latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup)
-contact(phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup)
-chatAction(action)
-
-inlineQuery(inline_query_id, results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter)
-callbackQuery(callback_query_id, text, show_alert)
+| Name              | Args                                                                                                          |
+|-------------------|---------------------------------------------------------------------------------------------------------------|
+|                   | -                                                                                                             |
+| html              |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
+| markdown          |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
+|                   | -                                                                                                             |
+| text              |  text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup          |
+| photo             |  photo, caption, disable_notification, reply_to_message_id, reply_markup                                      |
+| audio             |  audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup                   |
+| document          |  document, caption, disable_notification, reply_to_message_id, reply_markup                                   |
+| sticker           |  sticker, disable_notification, reply_to_message_id, reply_markup                                             |
+| video             |  video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup             |
+| voice             |  voice, duration, disable_notification, reply_to_message_id, reply_markup                                     |
+| location          |  latitude, longitude, disable_notification, reply_to_message_id, reply_markup                                 |
+| venue             |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
+| contact           |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |
+| chatAction        |  action                                                                                                       |
+|                   | -                                                                                                             |
+| inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
+| callbackQuery     |  text, show_alert                                                                                             |
 ```
 
 ```js
@@ -927,39 +930,25 @@ npm test
 | contact       |                                       |                                                                   |
 | chatAction    |                                       |                                                                   |
 
-#### Methods: polling
+#### Methods: Server
 
 | Name          | Arguments                                     | Return                                    |
 |---------------|-----------------------------------------------|-------------------------------------------|
+|               | -                                             |                                           |
+|               | POLLING                                       |                                           |
 |               | -                                             |                                           |
 | start         |                                               | this                                      |
 | stop          |                                               | this                                      |
-|               | -                                             |                                           |
-| logger        | callback(error, buffer)                       | this                                      |
-| catch         | callback(error)                               | this                                      |
-| use           | [type], callback(bot[, data, next])           | this                                      |
-| on            | type[, params], callback(data, params[, next])| this                                      |
-| off           | [type][, callback]                            | this                                      |
-
-#### Methods: http
-
-| Name          | Arguments                                     | Return                                    |
-|---------------|-----------------------------------------------|-------------------------------------------|
+|               | HTTP                                          |                                           |
 |               | -                                             |                                           |
 | bot           | bot, path[, callback(json, request)]          | srv                                       |
 |               | -                                             |                                           |
-| logger        | callback(error, buffer)                       | this                                      |
-| catch         | callback(error)                               | this                                      |
-| use           | [type], callback(bot[, data, next])           | this                                      |
-| on            | type[, params], callback(data, params[, next])| this                                      |
-| off           | [type][, callback]                            | this                                      |
-
-#### Methods: virtual
-
-| Name          | Arguments                                     | Return                                    |
-|---------------|-----------------------------------------------|-------------------------------------------|
+|               | VIRTUAL                                       |                                           |
+|               | -                                             |                                           |
 | input         | error, data                                   |                                           |
 | middleware    |                                               |                                           |
+|               | -                                             |                                           |
+|               | ALL                                           |                                           |
 |               | -                                             |                                           |
 | logger        | callback(error, buffer)                       | this                                      |
 | catch         | callback(error)                               | this                                      |
@@ -983,6 +972,7 @@ npm test
 | mid               | number                | bot.mid = bot.message.message_id                       |
 |                   | -                     |                                                        |
 | from              | object                | bot.from = bot.message.from; (!) persistent            |
+| command           | object                | Incoming command                                       |
 |                   | -                     |                                                        |
 | message           | object                | Incoming message                                       |
 | inlineQuery       | object                | Incoming inline query                                  |
@@ -1032,10 +1022,11 @@ npm test
 | location          | bot, data[, next]                     |                                           |
 | venue             | bot, data[, next]                     |                                           |
 | contact           | bot, data[, next]                     |                                           |
+| *                 | bot, params[, next]                   |                                           |
+|                   | -                                     |                                           |
+| /[name]           | bot, params[, next]                   | CMD                                       |
 |                   | -                                     |                                           |
 | (regexp)          | bot, params[, next]                   |                                           |
-|                   | -                                     |                                           |
-| /name             | data, params[, next]                  | CMD                                       |
 
 
 ## License

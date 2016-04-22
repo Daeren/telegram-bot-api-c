@@ -37,10 +37,10 @@ gBot
     .use(function* () {
         yield auth("D", "13");
     })
-    .use("text", function* (bot) {
+    .use("text", function* (bot, text) {
         yield save();
 
-        if(bot.message.text === "key") {
+        if(text === "key") {
             return "eventYield";
         }
     })

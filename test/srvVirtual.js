@@ -482,7 +482,9 @@ describe("srv.virtual", function() {
     //-----)>
 
     it("Instance (event: default | cmd)", function(done) {
-        let server = objBot.virtual(function(bot, cmd) {
+        let server = objBot.virtual(function(bot) {
+            const cmd = bot.command;
+
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
@@ -546,23 +548,22 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | base)", function(done) {
-        let server = objBot.virtual(function(bot, cmd, state) {
-            tCheckBaseBotFields(bot);
-            tCheckBaseCmdFields(cmd);
-
-            expect(state).to.be.a("string").and.equal("goto");
-
-            done();
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #5");
         });
 
         server.use(function(bot) {
             return bot.message.text === "/test hello" ? "goto" : "";
         });
 
-        server.on("/", function() {
-            throw new Error("The message passed through the event | #5");
-        });
+        server.on("/", function(bot, params) {
+            expect(bot).to.have.property("command").that.deep.equal(params).that.is.an("object").and.not.equal(null);
 
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(bot.command);
+
+            done();
+        });
 
         server.on("text:goto", function() {
             throw new Error("The message passed through the event | #4");
@@ -582,7 +583,9 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | base-without)", function(done) {
-        let server = objBot.virtual(function(bot, cmd, state) {
+        let server = objBot.virtual(function(bot, state) {
+            const cmd = bot.command;
+
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
@@ -613,7 +616,9 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | default)", function(done) {
-        let server = objBot.virtual(function(bot, cmd, state) {
+        let server = objBot.virtual(function(bot, state) {
+            const cmd = bot.command;
+
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
@@ -654,7 +659,9 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | default-generator)", function(done) {
-        let server = objBot.virtual(function* (bot, cmd, state) {
+        let server = objBot.virtual(function* (bot, state) {
+            const cmd = bot.command;
+
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
