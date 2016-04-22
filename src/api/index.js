@@ -429,7 +429,7 @@ function callAPIJson(token, method, data, callback) {
                 result = JSON.parse(result);
             }
             else {
-                error = new Error("Expected JSON.\r\n\r\nBody:\r\n" + result.toString());
+                error = new Error("Expected JSON.\r\n\r\nBody (" + response.statusCode + "):\r\n" + (result ? result.toString() : "empty"));
                 error.code = rErrors.ERR_FAILED_PARSE_DATA;
             }
         }
