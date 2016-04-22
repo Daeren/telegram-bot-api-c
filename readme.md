@@ -32,7 +32,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * Added: events, error handling, full support for generators
 * Rewritten: server.onMsg, bot.answer
 * Improved: `Response Builder`, srv.createBot
-* Removed: srv.forward, srv.send[_], bot.send, bot.broadcast
+* Removed: srv.forward, srv.send[_], bot.send, bot.broadcast, srv.on(*)
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)

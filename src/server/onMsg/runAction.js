@@ -57,7 +57,7 @@ function main(ingDataType, queue, events, input, reqCtx, evName, dataField, call
             else if(cmdParams && ("/" === plType || cmdParams.cmd === plType)) {
                 plData = cmdParams;
             }
-            else if("*" !== plType && evName !== plType) {
+            else if(evName !== plType) {
                 onNext();
                 return;
             }
@@ -120,7 +120,7 @@ function main(ingDataType, queue, events, input, reqCtx, evName, dataField, call
         else {
             const evType = cmdParams ? cmdParams.cmd : (evName || ingDataType);
 
-            queue = events && (events[state ? (evType + ":" + state) : evType] || events[evType] || cmdParams && events["/"] || !cmdParams && events["*"]);
+            queue = events && (events[state ? (evType + ":" + state) : evType] || events[evType] || cmdParams && events["/"]);
 
             if(queue) {
                 main(ingDataType, queue, null, input, reqCtx, evName, dataField, callback);
