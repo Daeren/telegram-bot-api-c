@@ -145,7 +145,7 @@ gBot
     .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
 
 
-function onDefault(bot, cmd, gotoState) { }
+function onDefault(bot, gotoState) { }
 function onError(error) { }
 
 function onCmdStart_1(bot, params, next) { next(); } // <-- Async
@@ -165,7 +165,7 @@ function onTextRegExp(bot, data) { }
   bot                               | gBot -> Sugar -> CtxPerRequest
   bot instanceof gBot.constructor   | true
   
-  cmd.type                          | common or private
+  bot.command.type                  | common or private
   
   /start [text]         -> common
   /start@bot [text]     -> private
