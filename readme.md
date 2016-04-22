@@ -28,7 +28,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
-* New: [field bot.command](#refFieldsSrvBot), field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
+* New: [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
 * Added: events, error handling, full support for generators
 * Rewritten: server.onMsg, bot.answer
 * Improved: `Response Builder`, srv.createBot
