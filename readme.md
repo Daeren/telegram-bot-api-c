@@ -361,7 +361,6 @@ objBot.http(cbMsg);
 <a name="refResponseBuilder"></a>
 #### Response Builder
 
-```
 | Name              | Args                                                                                                          |
 |-------------------|---------------------------------------------------------------------------------------------------------------|
 |                   | -                                                                                                             |
@@ -382,7 +381,7 @@ objBot.http(cbMsg);
 |                   | -                                                                                                             |
 | inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
 | callbackQuery     |  text, show_alert                                                                                             |
-```
+
 
 ```js
 objSrv
