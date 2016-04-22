@@ -1021,7 +1021,6 @@ npm test
 | location          | bot, data[, next]                     |                                           |
 | venue             | bot, data[, next]                     |                                           |
 | contact           | bot, data[, next]                     |                                           |
-| *                 | bot, params[, next]                   |                                           |
 |                   | -                                     |                                           |
 | /[name]           | bot, params[, next]                   | CMD                                       |
 |                   | -                                     |                                           |
