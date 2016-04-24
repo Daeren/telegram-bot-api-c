@@ -9,22 +9,25 @@
 
 //-----------------------------------------------------
 
-const rHttps = require("https");
+const rHttps  = require("https");
+
+const rErrors = require("./../errors");
 
 //-----------------------------------------------------
 
 const gKeepAliveAgent  = new rHttps.Agent({"keepAlive": true});
 
-const gReqOptions   = {
-    "path":         null,
-
-    "host":         "api.telegram.org",
-    "port":         443,
-
-    "method":       "POST",
-
-    "agent":        gKeepAliveAgent
-};
+const gReqTimeout   = 1000 * 60 * 2,
+      gReqOptions   = {
+          "path":         null,
+      
+          "host":         "api.telegram.org",
+          "port":         443,
+      
+          "method":       "POST",
+      
+          "agent":        gKeepAliveAgent
+      };
 
 //-----------------------------------------------------
 
@@ -47,9 +50,16 @@ function main(token, method, callback) {
 
     //--------------]>
 
-    return callback ? rHttps.request(gReqOptions, onRequest).on("error", callback) : rHttps.request(gReqOptions);
+    return (callback ? rHttps.request(gReqOptions, onRequest).on("error", callback) : rHttps.request(gReqOptions)).setTimeout(gReqTimeout, onTimeout);
 
     //--------------]>
+
+    function onTimeout() {
+        const error = new Error("Timeout");
+        error.code = rErrors.ERR_REQ_TIMEOUT;
+
+        this.destroy(error);
+    }
 
     function onRequest(response) {
         let firstChunk, chunks;

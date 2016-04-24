@@ -18,7 +18,8 @@ const gErrors = {
     "ERR_INVALID_TOKEN":        401,
     "ERR_NOT_FOUND":            400,
 
-    "ERR_FAILED_PARSE_DATA":    -10000
+    "ERR_FAILED_PARSE_DATA":    -10000,
+    "ERR_REQ_TIMEOUT":          -10001
 };
 
 //-----------------------------------------------------

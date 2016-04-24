@@ -119,6 +119,7 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || da
   gBot.ERR_INVALID_TOKEN
   gBot.ERR_NOT_FOUND
   gBot.ERR_FAILED_PARSE_DATA
+  gBot.ERR_REQ_TIMEOUT
 */
 
 //----------------------------]>

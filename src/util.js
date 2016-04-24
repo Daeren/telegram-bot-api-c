@@ -13,6 +13,8 @@ const rHttp             = require("http"),
       rHttps            = require("https"),
       rUrl              = require("url");
 
+const rErrors           = require("./errors");
+
 //-----------------------------------------------------
 
 const gHttpKeepAliveAgent   = new rHttp.Agent({"keepAlive": true}),
@@ -42,8 +44,10 @@ function createReadStreamByUrl(url, callback) {
 
     //-------]>
 
-    const isHTTPS = urlObj.protocol === "https:";
-    const options = {
+    const isHTTPS   = urlObj.protocol === "https:";
+    const timeout   = 1000 * 60 * 2;
+
+    const options   = {
         "host":         urlObj.hostname,
         "port":         urlObj.port,
         "path":         urlObj.path,
@@ -58,10 +62,20 @@ function createReadStreamByUrl(url, callback) {
 
     //-----------]>
 
-    (isHTTPS ? rHttps : rHttp)
-        .get(options)
-        .on("error", callback)
-        .on("response", response => callback(null, response));
+    (isHTTPS ? rHttps : rHttp).get(options).on("error", callback).on("response", onResponse).setTimeout(timeout, onTimeout);
+
+    //-----------]>
+
+    function onTimeout() {
+        const error = new Error("Timeout");
+        error.code = rErrors.ERR_REQ_TIMEOUT;
+
+        this.destroy(error);
+    }
+
+    function onResponse(response) {
+        callback(null, response)
+    }
 }
 
 function getFilenameByMime(contentType) {
