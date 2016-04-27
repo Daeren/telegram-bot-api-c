@@ -64,7 +64,9 @@ CMain.prototype = Object.create(null);
     function addElementMethod(alias, original, defaultParams) {
         const argsList = rAPIProto.args[original].slice(1);
 
-        CMain.prototype[alias] = function() {
+        CMain.prototype[alias] = mthElement;
+
+        function mthElement() {
             const lastElement   = this.lastElement,
                   elem          = defaultParams ? Object.create(defaultParams) : {};
 
@@ -79,11 +81,8 @@ CMain.prototype = Object.create(null);
                 if(defaultParams && hasOwnProperty.call(defaultParams, name)) {
                     i--;
                     offset++;
-
-                    continue;
                 }
-
-                if(input !== null && typeof(input) !== "undefined") {
+                else if(input !== null && typeof(input) !== "undefined") {
                     elem[name] = input;
                 }
             }
@@ -92,7 +91,7 @@ CMain.prototype = Object.create(null);
                 let queue = this.queue;
 
                 if(!queue) {
-                    this.queue = queue = [];
+                    queue = this.queue = [];
                 }
 
                 queue.push(lastElement);
@@ -110,7 +109,7 @@ CMain.prototype = Object.create(null);
             //--------]>
 
             return this;
-        };
+        }
     }
 })();
 

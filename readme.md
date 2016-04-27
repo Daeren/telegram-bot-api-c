@@ -29,10 +29,10 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
 * New: [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
-* Added: events, error handling, full support for generators
+* Added: srv.events, error handling, full support for generators
 * Rewritten: server.onMsg, bot.answer
 * Improved: `Response Builder`, srv.createBot
-* Removed: srv.forward, srv.send[_], bot.send, bot.broadcast, srv.on(*)
+* Removed: srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -361,29 +361,6 @@ objBot.http(cbMsg);
 
 <a name="refResponseBuilder"></a>
 #### Response Builder
-
-| Name              | Args                                                                                                          |
-|-------------------|---------------------------------------------------------------------------------------------------------------|
-|                   | -                                                                                                             |
-| html              |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
-| markdown          |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
-|                   | -                                                                                                             |
-| text              |  text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup          |
-| photo             |  photo, caption, disable_notification, reply_to_message_id, reply_markup                                      |
-| audio             |  audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup                   |
-| document          |  document, caption, disable_notification, reply_to_message_id, reply_markup                                   |
-| sticker           |  sticker, disable_notification, reply_to_message_id, reply_markup                                             |
-| video             |  video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup             |
-| voice             |  voice, duration, disable_notification, reply_to_message_id, reply_markup                                     |
-| location          |  latitude, longitude, disable_notification, reply_to_message_id, reply_markup                                 |
-| venue             |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
-| contact           |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |
-| chatAction        |  action                                                                                                       |
-|                   | -                                                                                                             |
-| inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
-| callbackQuery     |  text, show_alert                                                                                             |
-
-
 ```js
 objSrv
     .use(function(bot) {
@@ -454,6 +431,27 @@ objSrv
             .send();
     });
 ```
+
+| Name              | Args                                                                                                          |
+|-------------------|---------------------------------------------------------------------------------------------------------------|
+|                   | -                                                                                                             |
+| html              |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
+| markdown          |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
+|                   | -                                                                                                             |
+| text              |  text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup          |
+| photo             |  photo, caption, disable_notification, reply_to_message_id, reply_markup                                      |
+| audio             |  audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup                   |
+| document          |  document, caption, disable_notification, reply_to_message_id, reply_markup                                   |
+| sticker           |  sticker, disable_notification, reply_to_message_id, reply_markup                                             |
+| video             |  video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup             |
+| voice             |  voice, duration, disable_notification, reply_to_message_id, reply_markup                                     |
+| location          |  latitude, longitude, disable_notification, reply_to_message_id, reply_markup                                 |
+| venue             |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
+| contact           |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |
+| chatAction        |  action                                                                                                       |
+|                   | -                                                                                                             |
+| inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
+| callbackQuery     |  text, show_alert                                                                                             |
 
 
 
@@ -651,7 +649,7 @@ rBot.keyboard.inline.numpad();
 //------------------------------
 
 rBot.keyboard(buttons[, params])
-rBot.inline(inlButtons, isVertically)
+rBot.keyboard.inline(inlButtons, isVertically)
 
 buttons:    `string`, `array of array` or `false`
 inlButtons: `string`, `array of array` or `object`
@@ -1047,5 +1045,5 @@ MIT
 [image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=123
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=13
 
-[cod_b]: https://img.shields.io/codacy/88b55f71c45a47838d24ed1e5fd2476c.svg
+[cod_b]: https://img.shields.io/codacy/178f90f3c89945e7acb97b21140da7db.svg
 [cod_l]: https://www.codacy.com/app/daeren/telegram-bot-api-c/dashboard
