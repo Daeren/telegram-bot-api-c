@@ -54,8 +54,8 @@ objSrv = objBot
 //-----[TEST]-----}>
 
 expect(objSrv).to.be.a("object");
-expect(objSrv).to.have.property("start").that.is.an("function");
-expect(objSrv).to.have.property("stop").that.is.an("function");
+expect(objSrv).to.have.property("start").that.is.a("function");
+expect(objSrv).to.have.property("stop").that.is.a("function");
 
 //-----[PLUGIN]-----}>
 
@@ -214,14 +214,14 @@ function tCheckBaseBotFields(bot) {
     expect(msg).to.have.property("chat").that.is.an("object");
     expect(msg).to.have.property("date");
 
-    expect(bot).to.have.property("isGroup").that.is.an("boolean");
-    expect(bot).to.have.property("isReply").that.is.an("boolean");
+    expect(bot).to.have.property("isGroup").that.is.a("boolean");
+    expect(bot).to.have.property("isReply").that.is.a("boolean");
 
     expect(bot).to.have.property("cid").that.equal(msg.chat.id);
     expect(bot).to.have.property("mid").that.equal(msg.message_id);
 
     //----------]>
 
-    expect(bot).to.have.property("answer").that.is.an("function");
-    expect(bot).to.have.property("render").that.is.an("function");
+    expect(bot).to.have.property("answer").that.is.a("function");
+    expect(bot).to.have.property("render").that.is.a("function");
 }

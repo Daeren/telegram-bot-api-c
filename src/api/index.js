@@ -26,7 +26,7 @@ const gCRLF                 = "\r\n";
 const gPipeOptions          = {"end": false};
 const gReIsFilePath         = /[\\\/\.]/;
 
-const gMaxFileSize          = 50 * 1024 * 1024;
+const gMaxFileSize          = 1024 * 1024 * 50;
 
 const gBoundaryUInterval    = 1000 * 60 * 5;
 
@@ -161,77 +161,64 @@ function getReadStreamByUrl(url, data, callback) {
 //--------[PublicMethods]--------}>
 
 function callAPI(token, method, data, callback) {
-    method = method.toLowerCase();
-
-    //-------------------------]>
-
-    const typeOfData = typeof(data),
-          reqMParams = rProto.params[method];
-
-    //--------]>
-
-    if(typeOfData === "function") {
+    if(typeof(data) === "function") {
         callback = data;
         data = null;
     }
 
-    //--------]>
-
-    const dataIsMap = !!(reqMParams && data && data instanceof Map),
-          req       = rRequest(token, method, callback);
-
-    let isStream;
+    method = method.toLowerCase();
 
     //-------------------------]>
 
-    if(reqMParams && data) {
-        let isWritten = false;
+    const reqMthParams  = rProto.params[method];
+
+    const dataIsMap     = !!(reqMthParams && data && data instanceof Map),
+          req           = rRequest(token, method, callback);
+
+    let isStream, isWritten;
+
+    //-------------------------]>
+
+    for(let i = 0, len = (reqMthParams ? reqMthParams.length : 0); data && i < len; i++) {
+        const p     = reqMthParams[i];
+
+        const type  = p[0],
+              field = p[1];
+
+        const value = dataIsMap ? data.get(field) : data[field];
 
         //-------]>
 
-        for(let i = 0, len = reqMParams.length; i < len; i++) {
-            const p     = reqMParams[i];
+        if(typeof(value) === "undefined" || value === null) {
+            continue;
+        }
 
-            const type  = p[0],
-                  field = p[1];
+        if(!isWritten) {
+            isWritten = true;
 
-            const value = dataIsMap ? data.get(field) : data[field];
-
-            //-------]>
-
-            if(typeof(value) === "undefined" || value === null) {
-                continue;
+            if(Date.now() - gBoundaryUDate >= gBoundaryUInterval) {
+                updateBoundary();
             }
 
-            if(!isWritten) {
-                isWritten = true;
-
-                if(Date.now() - gBoundaryUDate >= gBoundaryUInterval) {
-                    updateBoundary();
-                }
-
-                req.setHeader("Content-Type", gHeaderContentType);
-            }
-
-            //-------]>
-
-            req.write(gCRLFBoundaryDiv);
-            req.write("Content-Disposition: form-data; name=\"");
-            req.write(field);
-
-            if(!writeField(type, value) && !writeData(type, value)) {
-                throw new Error("Type not found!");
-            }
+            req.setHeader("Content-Type", gHeaderContentType);
         }
 
         //-------]>
 
-        if(isWritten && !isStream) {
-            req.write(gCRLFBoundaryEnd);
+        req.write(gCRLFBoundaryDiv);
+        req.write("Content-Disposition: form-data; name=\"");
+        req.write(field);
+
+        if(!writeField(type, value) && !writeData(type, value)) {
+            throw new Error("Type not found!");
         }
     }
 
     if(!isStream) {
+        if(isWritten) {
+            req.write(gCRLFBoundaryEnd);
+        }
+
         req.end();
     }
 
@@ -285,7 +272,7 @@ function callAPI(token, method, data, callback) {
                 if(isBuffer || typeof(value) === "string") {
                     req.write(value);
                 }
-                else if(value && typeof(value) === "object") {
+                else if(typeof(value) === "object") {
                     isStream = true;
                     bindStreamEvents(value).pipe(req, gPipeOptions);
                 }
@@ -301,7 +288,6 @@ function callAPI(token, method, data, callback) {
             case "sticker":
             case "video":
             case "voice":
-
             case "certificate":
                 let filename = data.filename;
 
@@ -314,10 +300,7 @@ function callAPI(token, method, data, callback) {
                         isStream = true;
                     }
                     else if(gReIsFilePath.test(value)) {
-                        if(!filename) {
-                            filename = value;
-                        }
-
+                        filename = filename || value;
                         isStream = true;
 
                         writeFileStream(null, rFs.createReadStream(value));
@@ -329,7 +312,7 @@ function callAPI(token, method, data, callback) {
 
                     break;
                 }
-                else if(value && typeof(value) === "object") {
+                else if(typeof(value) === "object") {
                     isStream = true;
 
                     if(value.headers) {
@@ -445,7 +428,7 @@ function callAPIJson(token, method, data, callback) {
 //--------[PrivateMethods]--------}>
 
 function genMethodsFor(bot) {
-    let result = {};
+    const result = {};
 
     //--------------]>
 
@@ -458,7 +441,9 @@ function genMethodsFor(bot) {
     //--------------]>
 
     function setMethod(method) {
-        result[method] = function(data, callback) {
+        result[method] = mthAPI;
+
+        function mthAPI(data, callback) {
             const mdPromise     = bot.mdPromise,
                   apiCallJson   = bot.callJson;
 
@@ -480,19 +465,15 @@ function genMethodsFor(bot) {
             //-------------------------]>
 
             function cbPromise(resolve, reject) {
-                callback = callback || ((error, result) => error ? reject(error) : resolve(result));
-
                 apiCallJson(method, data, function(error, response) {
-                    error = error || genErrorByTgResponse(response) || null;
-
-                    if(!error) {
-                        response = response.result;
-                    }
+                    error       = error || genErrorByTgResponse(response);
+                    response    = error ? null : response.result;
+                    callback    = callback || ((e, r) => error ? reject(e) : resolve(r));
 
                     callback(error, response);
                 });
             }
-        };
+        }
     }
 
     function genErrorByTgResponse(response) {
@@ -502,5 +483,7 @@ function genMethodsFor(bot) {
 
             return error;
         }
+
+        return null;
     }
 }

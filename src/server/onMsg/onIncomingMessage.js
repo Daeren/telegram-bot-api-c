@@ -27,7 +27,7 @@ function main(srvBot, input, callback) {
 
     const msgChat           = input.chat;
 
-    const isGroup           = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
+    const isGroup           = msgChat.type === "group" || msgChat.type === "supergroup",
           isReply           = !!(input.reply_to_message);
 
     const botInstance       = srvBot.instance;

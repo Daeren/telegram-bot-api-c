@@ -48,7 +48,7 @@ describe("srv.http", function() {
 
     it("Instance", function() {
         let servers = [
-            objBot.http(),
+            objBot.http({"ssl": false, "port": 1379}),
             objBot.http(function() { }),
             objBot.http({"ssl": false, "port": 1346}, function() { })
         ];
