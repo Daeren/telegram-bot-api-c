@@ -141,9 +141,9 @@ gBot
     .on("photo document", onPhotoOrDoc)
     .on("pinnedMessage", onPinnedMessage)
 
-    .on(/^id\s+(\d+)/i, onTextRegExp)
-    .on(/^(id)\s+(\d+)/i, "type id", onTextRegExp)
-    .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegExp);
+    .on(/^id\s+(\d+)/i, onTextRegEx)
+    .on(/^(id)\s+(\d+)/i, "type id", onTextRegEx)
+    .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegEx);
 
 
 function onDefault(bot, gotoState) { }
@@ -158,7 +158,7 @@ function onText(bot, text) { }
 function onPhotoOrDoc(bot, data) { }
 function onPinnedMessage(bot, message) { }
 
-function onTextRegExp(bot, data) { }
+function onTextRegEx(bot, data) { }
 
 //-----------]>
 
@@ -180,26 +180,29 @@ function onTextRegExp(bot, data) { }
 #### Polling
 
 ```js
-const objBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
-const objOptions  = {
+const gBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
+
+const gOptions  = {
     "limit":    100,
     "timeout":  0,
     "interval": 2 // <-- Default / Sec.
 };
 
-let objSrv = objBot
-    .polling(objOptions, cbMsg)
-    .on("/stop", cbCmdStop);
+//------------------]>
 
-function cbMsg(bot) {
-    const msg = bot.isGroup && bot.isReply ? ">_>" : "Stop me: /stop";
+const gSrv = gBot
+    .polling(gOptions, onMsg)
+    .on("/stop", onCmdStop);
     
+//------------------]>
+
+function onMsg(bot) {
+    const msg = bot.isGroup && bot.isReply ? ">_>" : "Stop me: /stop";
     bot.answer().isReply().text(msg).send();
 }
 
-function cbCmdStop(bot, params) {
-    objSrv.stop();
-    
+function onCmdStop(bot, params) {
+    gSrv.stop();
     bot.answer().text(JSON.stringify(params)).send();
 }
 ```
@@ -214,8 +217,7 @@ const rBot = require("telegram-bot-api-c");
 
 //-----------------------------------------------------
 
-const objBotFather    = rBot();
-const objSrvOptions   = {
+const gSrvOptions   = {
     // For Self-signed certificate, you need to upload your public key certificate
     // "selfSigned":  "fullPath/stream/buffer",  // <-- If you use Auto-Webhook
 
@@ -234,25 +236,27 @@ const objSrvOptions   = {
 
 //------------------]>
 
-const objMyBot    = rBot(process.env.TG_BOT_TOKEN_MY),
-      objOtherBot = rBot(process.env.TG_BOT_TOKEN_OTHER);
+const gBotFather    = rBot();
 
-let objSrv        = objBotFather.http(objSrvOptions);
+const gMyBot        = rBot(process.env.TG_BOT_TOKEN_MY),
+      gOtherBot     = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-objSrv
-    .bot(objMyBot, "/urlMyBot") // <-- Auto-Webhook
-    .on("/start", cbCmdStart)
-    .on("/stop", cbCmdStop);
+const gSrv          = gBotFather.http(gSrvOptions);
 
-objSrv
-    .bot(objOtherBot, "/urlOtherBot", cbOtherBot);
+gSrv
+    .bot(gMyBot, "/urlMyBot") // <-- Auto-Webhook
+    .on("/start", onCmdStart)
+    .on("/stop", onCmdStop);
+
+gSrv
+    .bot(gOtherBot, "/urlOtherBot", onMsgOtherBot);
     
 //------------------]>
 
-function cbOtherBot(bot) { }
+function onMsgOtherBot(bot) { }
 
-function cbCmdStart(bot, params) { }
-function cbCmdStop(bot, params) { }
+function onCmdStart(bot, params) { }
+function onCmdStop(bot, params) { }
 ```
 
 
@@ -261,8 +265,9 @@ function cbCmdStop(bot, params) { }
 #### Virtual
 
 ```js
-const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
-const objSrv = objBot
+const gBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
+
+const gSrv = gBot
     .virtual(function(bot) {
         bot.answer().text("Not found!").send();
     })
@@ -270,10 +275,10 @@ const objSrv = objBot
 
 //----[Proxy: express]----}>
 
-objBot
+gBot
     .api
     .setWebhook({"url": "https://site.xx/dev-bot"})
-    .then(isOk => {
+    .then(function(isOk) {
         const rExpress      = require("express"),
               rBodyParser   = require("body-parser");
 
@@ -315,16 +320,16 @@ objSrv.input(null, {
 #### mServer
 
 ```js
-const objBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
+const gBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-objBot
+gBot
     .api
     .setWebhook({"url": "https://site.xx/myBot"})
-    .then(isOk => {
+    .then(function(isOk) {
         if(!isOk)
             throw new Error("Oops...problems with webhook...");
 
-        objBot.http(objSrvOptions, cbMsg);
+        gBot.http(objSrvOptions, cbMsg);
     });
 ```
 
@@ -334,8 +339,8 @@ objBot
 #### NGINX + Node.js
 
 ```js
-const objBot          = rBot();
-const objSrvOptions   = {
+const gBot          = rBot();
+const gSrvOptions   = {
     "ssl":          false,
 
     "autoWebhook":  "site.xx:88", // <-- Default: (host + port); `false` - disable
@@ -344,12 +349,12 @@ const objSrvOptions   = {
     "port":         1490
 };
 
-objBot.http(objSrvOptions, cbMsg);
+gBot.http(gSrvOptions, onMsg);
 
 //----[DEFAULT]----}>
 
-objBot.http();
-objBot.http(cbMsg);
+gBot.http();
+gBot.http(onMsg);
 
 // host: localhost
 // port: 1488
@@ -459,26 +464,26 @@ objSrv
 #### Logger 
 
 ```js
-objBot
-    .polling(objOptions, cbMsg)
-    .logger(cbLogger);
+gBot
+    .polling(gOptions, onMsg)
+    .logger(onLogger);
     
-objBot
-    .http(objOptions, cbMsg)
-    .logger(cbLogger);
+gBot
+    .http(gOptions, onMsg)
+    .logger(onLogger);
     
-objBot
-    .http(objOptions)
-    .bot(objMyBot, "/MyBot")
-    .logger(cbLogger);
+gBot
+    .http(gOptions)
+    .bot(gMyBot, "/MyBot")
+    .logger(onLogger);
     
-objBot
-    .virtual(cbMsg)
+gBot
+    .virtual(onMsg)
     .logger(cbLogger);
     
 //----------]>
 
-function cbLogger(error, data) {
+function onLogger(error, data) {
     if(!error) {
         data = data.toString(); // <-- Buffer
     }
@@ -491,7 +496,7 @@ function cbLogger(error, data) {
 #### Plugin 
 
 ```js
-objSrv
+gSrv
     .use(function(bot, data, next) {
         console.log("Async | Type: %s", type);
 
@@ -510,7 +515,7 @@ objSrv
         bot.user.id = 1;
     });
     
-objSrv
+gSrv
     .on("text", function(bot, data) {
         bot.user.id;
     });
@@ -522,7 +527,7 @@ objSrv
 #### Goto 
 
 ```js
-objSrv
+gSrv
     .use(function(bot, data, next) {
         next(data === "room" ? "room.menu" : "");
     })
@@ -530,13 +535,10 @@ objSrv
         console.log("If not the room");
         
         // return "room.menu";
-    });
-
-objSrv
-    .on("text", function(bot, data) {
-    });
+    })
     
-objSrv
+    .on("text", function(bot, data) {
+    })
     .on("text:room.menu", function(bot, data) {
     });
 ```
@@ -590,17 +592,17 @@ function send(bot) {
 #### Render 
 
 ```js
-objBot
+gBot
     .engine(require("ejs"))
     .promise(require("bluebird"));
 
 //--------------]> 
 
-objBot.render("R: <%= value %>", {"value": 13});
+gBot.render("R: <%= value %>", {"value": 13});
 
 //--------------]> 
 
-objBot.polling(bot => {
+gBot.polling(bot => {
     let data;
     
     //-----[DEFAULT]-----}>
@@ -629,16 +631,19 @@ objBot.polling(bot => {
 ```js
 const rBot = require("telegram-bot-api-c");
 
-function cbMsg(bot) {
-    const params = {};
+function onMsg(bot) {
+    const data = {};
     
-    params.reply_markup = bot.keyboard() === bot.keyboard.hide();
-    params.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
+    data.chat_id = bot.cid;
+    data.text = "Hell Word!";
     
-    params.reply_markup = bot.keyboard.hOx();
-    params.reply_markup = bot.keyboard.inline.hOx();
+    data.reply_markup = bot.keyboard() === bot.keyboard.hide();
+    data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
     
-    bot.sendMessage("Hell Word!", params);
+    data.reply_markup = bot.keyboard.hOx();
+    data.reply_markup = bot.keyboard.inline.hOx();
+    
+    bot.api.sendMessage(data);
 }
 
 rBot.keyboard.numpad(true); // <-- Once
@@ -685,18 +690,18 @@ Normal keyboard:
 #### Download
 
 ```js
-objBot.download("file_id", "dir"/*, callback*/);
-objBot.download("file_id", "dir", "name.mp3"/*, callback*/);
+gBot.download("file_id", "dir"/*, callback*/);
+gBot.download("file_id", "dir", "name.mp3"/*, callback*/);
 
 
-objBot
+gBot
     .download("file_id")
     .then(function(info) {
         info.stream.pipe(require("fs").createWriteStream("./" + info.name));
     });
 
 
-objBot
+gBot
     .download("file_id", function(error, info) {
         info.stream.pipe(require("fs").createWriteStream("./myFile"));
     });
@@ -741,11 +746,7 @@ gBot
         ]
             .map((t, i) => { t.id = idx + i; return t; });
 
-        /*
-        results = {
-            "results":          results
-        };
-        */
+        // results = {results};
 
         bot
             .answer()
@@ -950,7 +951,7 @@ npm test
 |               | -                                             |                                           |
 | logger        | callback(error, buffer)                       | this                                      |
 | catch         | callback(error)                               | this                                      |
-| use           | [type], callback(bot[, data, next])           | this                                      |
+| use           | [type], [params], callback(bot[, data, next]) | this                                      |
 | on            | type[, params], callback(data, params[, next])| this                                      |
 | off           | [type][, callback]                            | this                                      |
 
