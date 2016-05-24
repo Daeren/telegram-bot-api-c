@@ -29,9 +29,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
 * New: [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
-* Added: srv.events, error handling, full support for generators
-* Rewritten: server.onMsg, bot.answer
-* Improved: `Response Builder`, srv.createBot
+* Added: editedMessage (event), srv.events, error handling, full support for generators
 * Removed: srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast, logger
 
 ```
@@ -957,6 +955,7 @@ npm test
 |-------------------|---------------------------------------|-------------------------------------------|
 |                   | -                                     |                                           |
 | message           | bot, message[, next]                  |                                           |
+| editedMessage     | bot, message[, next]                  |                                           |
 | inlineQuery       | bot, data[, next]                     |                                           |
 | chosenInlineResult| bot, data[, next]                     |                                           |
 | callbackQuery     | bot, data[, next]                     |                                           |
