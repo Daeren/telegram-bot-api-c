@@ -23,7 +23,7 @@ function main(srvBot, evTypeName, input, callback) {
     //------------]>
 
     function createReqCtx() {
-        const ctx           = Object.create(srvBot.ctx);
+        const ctx = Object.create(srvBot.ctx);
 
         //---------]>
 

@@ -21,6 +21,10 @@ gBot
     .polling()
 
     .on("text", function(bot, data) {
+        bot.api.getChatMember({"chat_id": bot.cid, "user_id": bot.from.id}, function(error, result) {
+            bot.answer().text(JSON.stringify(result)).send();
+        });
+
         bot
             .answer()
             .text(data)
