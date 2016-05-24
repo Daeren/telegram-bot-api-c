@@ -128,6 +128,23 @@ const gProtoTable = {
     ],
 
 
+    "getChat": [
+        ["string", "chat_id"]
+    ],
+
+    "getChatAdministrators": [
+        ["string", "chat_id"]
+    ],
+
+    "getChatMembersCount": [
+        ["string", "chat_id"]
+    ],
+
+    "getChatMember": [
+        ["string", "chat_id"],
+        ["string", "user_id"]
+    ],
+
     "getUserProfilePhotos": [
         ["string", "user_id"],
         ["string", "offset"],
@@ -169,6 +186,10 @@ const gProtoTable = {
         ["boolean", "show_alert"]
     ],
 
+
+    "leaveChat": [
+        ["string",  "chat_id"]
+    ],
 
     "kickChatMember": [
         ["string", "chat_id"],
@@ -321,6 +342,23 @@ const gArgsTable  = {
     ],
 
 
+    "getChat": [
+        "chat_id"
+    ],
+
+    "getChatAdministrators": [
+        "chat_id"
+    ],
+
+    "getChatMembersCount": [
+        "chat_id"
+    ],
+
+    "getChatMember": [
+        "chat_id",
+        "user_id"
+    ],
+
     "getUserProfilePhotos": [
         "user_id",
         "offset",
@@ -359,6 +397,10 @@ const gArgsTable  = {
         "show_alert"
     ],
 
+
+    "leaveChat": [
+        "chat_id"
+    ],
 
     "kickChatMember": [
         "chat_id",
@@ -446,12 +488,12 @@ module.exports = {
 
     //------[METHODS]------}>
 
-    genSendMethodsFor
+    genAliasesSendMethodsFor
 };
 
 //-----------------------------------------------------
 
-function genSendMethodsFor(iter) {
+function genAliasesSendMethodsFor(iter) {
     const aliases = gAliasesSendMethods;
 
     //--------]>

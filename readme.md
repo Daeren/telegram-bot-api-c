@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3] and [Bot API 2.0][100]
+[Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1
 
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * KeepAlive (+50% to the speed of requests): +
@@ -32,7 +32,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * Added: srv.events, error handling, full support for generators
 * Rewritten: server.onMsg, bot.answer
 * Improved: `Response Builder`, srv.createBot
-* Removed: srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast
+* Removed: srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast, logger
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -56,7 +56,6 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * [Goto](#refGoto)
 * [JS Generators](#refJSGenerators)
 * [Render](#refRender)
-* [Logger](#refLogger)
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
 * [InlineQuery](#refInlineQuery)
@@ -457,38 +456,6 @@ objSrv
 |                   | -                                                                                                             |
 | inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
 | callbackQuery     |  text, show_alert                                                                                             |
-
-
-
-<a name="refLogger"></a>
-#### Logger 
-
-```js
-gBot
-    .polling(gOptions, onMsg)
-    .logger(onLogger);
-    
-gBot
-    .http(gOptions, onMsg)
-    .logger(onLogger);
-    
-gBot
-    .http(gOptions)
-    .bot(gMyBot, "/MyBot")
-    .logger(onLogger);
-    
-gBot
-    .virtual(onMsg)
-    .logger(cbLogger);
-    
-//----------]>
-
-function onLogger(error, data) {
-    if(!error) {
-        data = data.toString(); // <-- Buffer
-    }
-}
-```
 
 
 
@@ -949,7 +916,6 @@ npm test
 |               | -                                             |                                           |
 |               | ALL                                           |                                           |
 |               | -                                             |                                           |
-| logger        | callback(error, buffer)                       | this                                      |
 | catch         | callback(error)                               | this                                      |
 | use           | [type], [params], callback(bot[, data, next]) | this                                      |
 | on            | type[, params], callback(data, params[, next])| this                                      |
@@ -1043,7 +1009,7 @@ MIT
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [100]: https://core.telegram.org/bots/2-0-intro
 
-[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=123
+[image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=15
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=13
 
 [cod_b]: https://img.shields.io/codacy/178f90f3c89945e7acb97b21140da7db.svg

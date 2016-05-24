@@ -35,13 +35,7 @@ function main(botFather, callback) {
     //----------------]>
 
     function input(error, data) {
-        if(objBot.cbLogger) {
-            objBot.cbLogger(error, data);
-        }
-
-        if(!error) {
-            rOnMsg(objBot, data);
-        }
+        rOnMsg(error, objBot, data);
     }
 
     function middleware(request, response) {

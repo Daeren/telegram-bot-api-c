@@ -17,8 +17,8 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, input, callback) {
-    rRunAction("inlineQuery", srvBot.plugins, srvBot.events, input, createReqCtx(), null, null, callback);
+function main(srvBot, evTypeName, input, callback) {
+    rRunAction(evTypeName, srvBot.plugins, srvBot.events, input, createReqCtx(), null, null, callback);
 
     //------------]>
 

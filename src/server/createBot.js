@@ -33,7 +33,6 @@ function main(bot, onMsg) {
         "plugins":      [],
         "events":       {},
 
-        "cbLogger":     null,
         "cbCatch":      null,
 
         //-----)>
@@ -43,7 +42,6 @@ function main(bot, onMsg) {
         "on":           srvEvOn,
         "off":          srvEvOff,
 
-        "logger":       srvLogger,
         "catch":        srvCatch,
 
         //-----)>
@@ -151,11 +149,6 @@ function main(bot, onMsg) {
             }
         }
 
-        return this;
-    }
-
-    function srvLogger(callback) {
-        result.cbLogger = callback;
         return this;
     }
 

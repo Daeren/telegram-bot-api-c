@@ -18,8 +18,13 @@ const onIncomingMessage             = require("./onIncomingMessage"),
 
 //-----------------------------------------------------
 
-const gUpdatesFields    = ["inline_query", "message", "callback_query", "chosen_inline_result"];
-const gIncomeEvList     = [onIncomingInlineQuery, onIncomingMessage, onIncomingCallbackQuery, onIncomingChosenInlineResult];
+const gIncomeEv = [
+    ["inline_query",            "inlineQuery",          onIncomingInlineQuery],
+    ["message",                 "message",              onIncomingMessage],
+    ["edited_message",          "editedMessage",        onIncomingMessage],
+    ["callback_query",          "callbackQuery",        onIncomingCallbackQuery],
+    ["chosen_inline_result",    "chosenInlineResult",   onIncomingChosenInlineResult]
+];
 
 //-----------------------------------------------------
 
@@ -27,13 +32,17 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, data) {
-    if(data && typeof(data) === "object") {
-        for(let input, i = 0, len = gUpdatesFields.length; i < len; i++) {
-            input = data[gUpdatesFields[i]];
+function main(error, srvBot, data) {
+    if(error) {
+        onError(error);
+    }
+    else if(data && typeof(data) === "object") {
+        for(let ev, input, i = 0, len = gIncomeEv.length; i < len; i++) {
+            ev = gIncomeEv[i];
+            input = data[ev[0]];
 
             if(input && typeof(input) === "object") {
-                gIncomeEvList[i](srvBot, input, onEnd);
+                ev[2](srvBot, ev[1], input, onEnd);
                 break;
             }
         }
@@ -46,12 +55,6 @@ function main(srvBot, data) {
             onError(error);
         }
         else if(reqCtx) {
-            onDefault();
-        }
-
-        //-------]>
-
-        function onDefault() {
             let onMsg = srvBot.onMsg;
 
             if(onMsg) {
@@ -64,18 +67,18 @@ function main(srvBot, data) {
                 rUtil.executeGenerator(onMsg, onError);
             }
         }
+    }
 
-        function onError(error) {
-            if(error) {
-                let cbCatch = srvBot.cbCatch;
+    function onError(error) {
+        if(error) {
+            let cbCatch = srvBot.cbCatch;
 
-                if(cbCatch) {
-                    cbCatch = cbCatch(error);
-                    rUtil.executeGenerator(cbCatch);
-                }
-                else {
-                    throw error;
-                }
+            if(cbCatch) {
+                cbCatch = cbCatch(error);
+                rUtil.executeGenerator(cbCatch);
+            }
+            else {
+                throw error;
             }
         }
     }

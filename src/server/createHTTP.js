@@ -94,24 +94,20 @@ function main(botFather, params, callback) {
             }
         }
 
-        //------)>
+        //---------]>
 
-        const options = {
-            "key":    optKey,
-            "cert":   optCert,
-            "ca":     optCa,
+        srv = rHttps.createServer({
+            "key":                  optKey,
+            "cert":                 optCert,
+            "ca":                   optCa,
 
-            "ciphers": gCiphers,
+            "ciphers":              gCiphers,
 
             "honorCipherOrder":     true,
 
             "requestCert":          true,
             "rejectUnauthorized":   false
-        };
-
-        //---------]>
-
-        srv = rHttps.createServer(options, cbServer);
+        }, cbServer);
     }
     else {
         srv = rHttp.createServer(cbServer);
@@ -137,17 +133,19 @@ function main(botFather, params, callback) {
             return response();
         }
 
+        //----------]>
+
         let firstChunk, chunks;
 
         //----------]>
 
         req
-            .on("data", onData)
-            .on("end", onEnd);
+            .on("data", onRequestData)
+            .on("end", onRequestEnd);
 
         //----------]>
 
-        function onData(chunk) {
+        function onRequestData(chunk) {
             if(!firstChunk) {
                 firstChunk = chunk;
             }
@@ -157,16 +155,15 @@ function main(botFather, params, callback) {
             }
         }
 
-        function onEnd() {
+        function onRequestEnd() {
             response();
 
             //--------]>
 
-            const objBot      = srvBots && srvBots[req.url] || srvBotDefault,
-                  cbLogger    = objBot.cbLogger;
+            const srvBot    = srvBots && srvBots[req.url] || srvBotDefault;
 
-            let data    = chunks ? Buffer.concat(chunks) : firstChunk,
-                error   = null;
+            let data        = chunks ? Buffer.concat(chunks) : firstChunk,
+                error       = null;
 
             //--------]>
 
@@ -174,21 +171,12 @@ function main(botFather, params, callback) {
                 data = JSON.parse(data);
             } catch(e) {
                 error = e;
+                data = null;
             }
 
             //--------]>
 
-            if(cbLogger) {
-                cbLogger(error, data);
-            }
-
-            if(error) {
-                return;
-            }
-
-            //--------]>
-
-            rOnMsg(objBot, data);
+            rOnMsg(error, srvBot, data);
         }
 
         //-------)>
@@ -254,8 +242,11 @@ function main(botFather, params, callback) {
 
         if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
             if(params.autoWebhook || params.host) {
-                const url = (params.autoWebhook || (params.host + ":" + params.port)) + path;
-                const data = {"url": url, "certificate": params.selfSigned};
+                const url   = (params.autoWebhook || (params.host + ":" + params.port)) + path;
+                const data  = {
+                    "url":          url,
+                    "certificate":  params.selfSigned
+                };
 
                 bot.callJson("setWebhook", data, function(error, isOk) {
                     if(isOk) {

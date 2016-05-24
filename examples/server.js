@@ -19,7 +19,6 @@ const rBot      = require("./../index");
 
 //-----------------------------------------------------
 
-const objBot          = rBot();
 const objSrvOptions   = {
     "certDir":   "/www/site",
 
@@ -36,39 +35,25 @@ const objSrvOptions   = {
 
 //------------------]>
 
+const objBot        = rBot();
+
 const objMyBot      = rBot(process.env.TG_BOT_TOKEN_MY),
       objOtherBot   = rBot(process.env.TG_BOT_TOKEN_OTHER);
 
-const objSrv = objBot.http(objSrvOptions);
+const objSrv        = objBot.http(objSrvOptions);
 
 //-----------]>
 
 objSrv
     .bot(objMyBot, "/myBot")
-    .logger(cbBotLogger)
 
     .on("/start", cbCmdStart)
     .on("/stop", cbCmdStop);
 
 objSrv
-    .bot(objOtherBot, "/myOtherBot", cbMsg)
-    .logger(cbBotLogger);
+    .bot(objOtherBot, "/myOtherBot", cbMsg);
 
 //-----------]>
-
-function cbBotLogger(error, data) {
-    if(error)
-        expect(error).to.be.an.instanceof(Error);
-    else {
-        expect(error).to.be.null;
-        expect(data).to.be.a("object");
-
-        expect(data).to.have.property("update_id").that.is.an("number");
-        expect(data).to.have.property("message").that.is.an("object");
-    }
-}
-
-//--------)>
 
 function cbMsg(bot) {
     const cmd = bot.command;

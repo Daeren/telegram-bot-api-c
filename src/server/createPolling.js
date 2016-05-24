@@ -43,11 +43,7 @@ function main(botFather, params, callback) {
 
     //------)>
 
-    if(params.firstLoad) {
-        load();
-    } else {
-        runTimer();
-    }
+    load();
 
     //----------------]>
 
@@ -82,57 +78,36 @@ function main(botFather, params, callback) {
 
     //----------------]>
 
-    function load() {
-        botFather.callJson("getUpdates", pollingParams, function(error, data) {
-            if(srvBot.cbLogger) {
-                srvBot.cbLogger(error, data);
-            }
-
-            if(error) {
-                runTimer();
-            }
-            else {
-                onLoadSuccess(data);
-            }
-        });
-    }
-
     function runTimer() {
         if(!isStopped) {
             tmPolling = setTimeout(load, tmInterval);
         }
     }
 
-    //-------)>
-
-    function onLoadSuccess(data) {
-        if(!data.ok) {
-            if(data.error_code === rErrors.ERR_USED_WEBHOOK) {
-                botFather.callJson("setWebhook", null, load);
+    function load() {
+        botFather.api.getUpdates(pollingParams, function(error, data) {
+            if(error) {
+                if(error.code === rErrors.ERR_USED_WEBHOOK) {
+                    botFather.callJson("setWebhook", null, load);
+                }
+                else {
+                    rOnMsg(error, srvBot, null);
+                    runTimer();
+                }
             }
             else {
-                runTimer();
+                if(data.length > 0) {
+                    data.forEach(onMsg);
+                    load();
+                } else {
+                    runTimer();
+                }
             }
-        }
-        else {
-            const result = data.result;
+        });
+    }
 
-            if(result.length > 0) {
-                result.forEach(onMsg);
-                load();
-            } else {
-                runTimer();
-            }
-        }
-
-        //------------]>
-
-        function onMsg(data) {
-            pollingParams.offset = data.update_id + 1;
-
-            //--------]>
-
-            rOnMsg(srvBot, data);
-        }
+    function onMsg(data) {
+        pollingParams.offset = data.update_id + 1;
+        rOnMsg(null, srvBot, data)
     }
 }

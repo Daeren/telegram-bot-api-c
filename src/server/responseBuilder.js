@@ -51,7 +51,7 @@ CMain.prototype = Object.create(null);
 //-----[Elements]-----}>
 
 (function createElements() {
-    rAPIProto.genSendMethodsFor(addElementMethod);
+    rAPIProto.genAliasesSendMethodsFor(addElementMethod);
 
     addElementMethod("inlineQuery", "answerInlineQuery");
     addElementMethod("callbackQuery", "answerCallbackQuery");

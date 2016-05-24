@@ -644,6 +644,22 @@ describe("Instance: bot", function() {
 
     describe("API", function() {
 
+        it("forwardMessage | callback", function(done) {
+            api.forwardMessage({
+                "chat_id":      chatId,
+                "from_chat_id": chatId,
+                "message_id":   msgId
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("forward_from").that.is.an("object");
+
+                done();
+            });
+        });
+
+        //--)>
+
         it("sendMessage | callback", function(done) {
             let data = {
                 "chat_id":      chatId,
@@ -687,20 +703,6 @@ describe("Instance: bot", function() {
                 expect(result).to.have.property("text").that.is.an("string");
 
                 midEditText = result.message_id;
-
-                done();
-            });
-        });
-
-        it("forwardMessage | callback", function(done) {
-            api.forwardMessage({
-                "chat_id":      chatId,
-                "from_chat_id": chatId,
-                "message_id":   msgId
-            }, function(error, data) {
-                checkBaseFields(error, data);
-
-                expect(data).to.have.property("forward_from").that.is.an("object");
 
                 done();
             });
@@ -886,6 +888,8 @@ describe("Instance: bot", function() {
             });
         });
 
+        //-----)>
+
         it("editMessageText | callback", function(done) {
             const text = "EDITED";
 
@@ -969,7 +973,7 @@ describe("Instance: bot", function() {
             });
         });
 
-        //-----)>
+        //--)>
 
         it("getFile | callback", function(done) {
             api.getFile({
@@ -984,7 +988,7 @@ describe("Instance: bot", function() {
             });
         });
 
-        //-----)>
+        //--)>
 
         it("getMe | callback", function(done) {
             api.getMe(function(error, data) {

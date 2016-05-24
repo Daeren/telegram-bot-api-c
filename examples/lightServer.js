@@ -49,8 +49,6 @@ objBot
 
         objBot
             .http(objSrvOptions, cbMsg)
-            .logger(cbLogger)
-
             .on("/start", cbCmdStart);
     }, function(error) {
         expect(error).to.be.an.instanceof(Error);
@@ -59,19 +57,6 @@ objBot
     });
 
 //------------------]>
-
-function cbLogger(error, data) {
-    if(error) {
-        expect(error).to.be.an.instanceof(Error);
-    }
-    else {
-        expect(error).to.be.null;
-        expect(data).to.be.a("object");
-
-        expect(data).to.have.property("update_id").that.is.an("number");
-        expect(data).to.have.property("message").that.is.an("object");
-    }
-}
 
 function cbMsg(bot) {
     const cmd = bot.command;

@@ -21,7 +21,7 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, input, callback) {
+function main(srvBot, evTypeName, input, callback) {
     const msgType           = getMessageDataField(input),
           evName            = getEventNameByMsgField(msgType);
 
@@ -44,7 +44,7 @@ function main(srvBot, input, callback) {
 
     //------------]>
 
-    rRunAction("message", srvBot.plugins, srvBot.events, input, createReqCtx(), evName, msgType, callback);
+    rRunAction(evTypeName, srvBot.plugins, srvBot.events, input, createReqCtx(), evName, msgType, callback);
 
     //------------]>
 
