@@ -18,14 +18,14 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(ingDataType, queue, events, input, reqCtx, evName, dataField, callback) {
-    const data = dataField ? input[dataField] : null;
+function main(updateSubType, eventType, eventSubType, queue, events, input, reqCtx, callback) {
+    const data = updateSubType ? input[updateSubType] : null;
 
     let cmdParams = reqCtx.command;
 
     //------------]>
 
-    if(cmdParams !== null && evName === "text") {
+    if(cmdParams !== null && eventSubType === "text") {
         cmdParams = reqCtx.command = rParseCmd(data);
     }
 
@@ -51,13 +51,13 @@ function main(ingDataType, queue, events, input, reqCtx, evName, dataField, call
         //----------]>
 
         if(isPlWithFilter) {
-            if(ingDataType === plType) {
+            if(eventType === plType) {
                 plData = input;
             }
             else if(cmdParams && ("/" === plType || cmdParams.cmd === plType)) {
                 plData = cmdParams;
             }
-            else if(evName !== plType) {
+            else if(eventSubType !== plType) {
                 onNext();
                 return;
             }
@@ -118,12 +118,12 @@ function main(ingDataType, queue, events, input, reqCtx, evName, dataField, call
             callback(state, reqCtx);
         }
         else {
-            const evType = cmdParams ? cmdParams.cmd : (evName || ingDataType);
+            const evType = cmdParams ? cmdParams.cmd : (eventSubType || eventType);
 
             queue = events && (events[state ? (evType + ":" + state) : evType] || events[evType] || cmdParams && events["/"]);
 
             if(queue) {
-                main(ingDataType, queue, null, input, reqCtx, evName, dataField, callback);
+                main(updateSubType, eventType, eventSubType, queue, null, input, reqCtx, callback);
             }
             else {
                 callback(null, events ? reqCtx : null, state);

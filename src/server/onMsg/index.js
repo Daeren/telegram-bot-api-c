@@ -45,12 +45,16 @@ function main(error, srvBot, data) {
         onError(error);
     }
     else {
-        for(let ev, input, i = 0, len = gIncomeEv.length; i < len; i++) {
+        for(let ev, updateType, eventType, input, i = 0, len = gIncomeEv.length; i < len; i++) {
             ev = gIncomeEv[i];
-            input = data[ev[0]];
+
+            updateType = ev[0];
+            eventType = ev[1];
+
+            input = data[updateType];
 
             if(input && typeof(input) === "object") {
-                ev[2](srvBot, ev[1], input, onEnd);
+                ev[2](srvBot, updateType, eventType, input, onEnd);
                 break;
             }
         }

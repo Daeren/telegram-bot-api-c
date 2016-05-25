@@ -17,8 +17,13 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, evTypeName, input, callback) {
-    rRunAction(evTypeName, srvBot.plugins, srvBot.events, input, createReqCtx(), null, null, callback);
+function main(srvBot, updateType, eventType, input, callback) {
+    const updateSubType     = null,
+          eventSubType      = null;
+
+    //------------]>
+
+    rRunAction(updateSubType, eventType, eventSubType, srvBot.plugins, srvBot.events, input, createReqCtx(), callback);
 
     //------------]>
 
@@ -29,13 +34,22 @@ function main(srvBot, evTypeName, input, callback) {
 
         const msgChat       = message && message.chat;
 
-        const isGroup        = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
-              isReply        = !!(message && message.reply_to_message);
+        const isGroup       = !!(msgChat && (msgChat.type === "group" || msgChat.type === "supergroup")),
+              isReply       = !!(message && message.reply_to_message);
 
         //---------]>
 
-        ctx.callbackQuery = input;
+        ctx.updateType = updateType;
+        ctx.updateSubType = updateSubType;
+
+        ctx.eventType = eventType;
+        ctx.eventSubType = eventSubType;
+
         ctx.from = input.from;
+
+        ctx[eventType] = input;
+
+        //---)>
 
         ctx.cqid = input.id;
         ctx.qid = input.inline_message_id;

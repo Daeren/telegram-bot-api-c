@@ -106,16 +106,18 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || da
 /*
   e.code           - gApi.sendMessage( ...
   data.error_code  - callJson("sendMessage" ...
- 
+
   rTgBot or gBot
- 
+
   gBot.ERR_INTERNAL_SERVER
+  gBot.ERR_NOT_FOUND
+  gBot.ERR_FORBIDDEN
   gBot.ERR_MESSAGE_LIMITS
   gBot.ERR_USED_WEBHOOK
-  gBot.ERR_FORBIDDEN
   gBot.ERR_INVALID_TOKEN
-  gBot.ERR_NOT_FOUND
+
   gBot.ERR_FAILED_PARSE_DATA
+  gBot.ERR_BAD_REQUEST
   gBot.ERR_REQ_TIMEOUT
 */
 
@@ -932,8 +934,14 @@ npm test
 | cid               | number                | bot.cid = bot.message.chat.id                          |
 | mid               | number                | bot.mid = bot.message.message_id                       |
 |                   | -                     |                                                        |
-| from              | object                | bot.from = bot.message.from; (!) persistent            |
 | command           | object                | Incoming command                                       |
+|                   | -                     |                                                        |
+| updateType        | object                |                                                        |
+| updateSubType     | object                |                                                        |
+| eventType         | object                |                                                        |
+| eventSubType      | object                |                                                        |
+|                   | -                     |                                                        |
+| from              | object                | Persistent                                             |
 |                   | -                     |                                                        |
 | message           | object                | Incoming message                                       |
 | inlineQuery       | object                | Incoming inline query                                  |

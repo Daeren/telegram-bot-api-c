@@ -292,34 +292,6 @@ describe("srv.virtual", function() {
 
     //-----)>
 
-    it("Instance (event: text | filterBotName)", function(done) {
-        objBot
-            .virtual(function(bot) {
-                tCheckBaseBotFields(bot);
-
-                expect(bot.message.text).to.be.a("string").and.equal("Hello");
-
-                done();
-            })
-            .use("text", function(bot) {
-                expect(bot.message.text).to.be.a("string").and.equal("Hello");
-            })
-            .use("text", function(bot, data, next) {
-                expect(bot.message.text).to.be.a("string").and.equal("Hello");
-
-                next();
-            })
-            .use(function(bot) {
-                expect(bot.message.text).to.be.a("string").and.equal("Hello");
-            })
-            .use(function(bot, data, next) {
-                expect(bot.message.text).to.be.a("string").and.equal("Hello");
-
-                next();
-            })
-            .input(null, inputSrvMessageWithBotName);
-    });
-
     it("Instance (event: text)", function(done) {
         let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #1");

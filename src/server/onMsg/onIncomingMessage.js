@@ -13,38 +13,22 @@ const rRunAction = require("./runAction");
 
 //-----------------------------------------------------
 
-const gReReplaceBotName = /^@\w{5,32}\s+|^@\w{5,32}$/;
-
-//-----------------------------------------------------
-
 module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, evTypeName, input, callback) {
-    const msgType           = getMessageDataField(input),
-          evName            = getEventNameByMsgField(msgType);
+function main(srvBot, updateType, eventType, input, callback) {
+    const updateSubType     = getMessageDataField(input),
+          eventSubType      = getEventNameByDataField(updateSubType);
 
     const msgChat           = input.chat;
 
     const isGroup           = msgChat.type === "group" || msgChat.type === "supergroup",
           isReply           = !!(input.reply_to_message);
 
-    const botInstance       = srvBot.instance;
-
-    //-----[Filter: botName]----}>
-
-    if(isGroup && !isReply && evName === "text" && input.text[0] === "@" && botInstance.disabled("onMsg.skipFilterBotName")) {
-        input.text = input.text.replace(gReReplaceBotName, "");
-
-        if(!input.text) {
-            return;
-        }
-    }
-
     //------------]>
 
-    rRunAction(evTypeName, srvBot.plugins, srvBot.events, input, createReqCtx(), evName, msgType, callback);
+    rRunAction(updateSubType, eventType, eventSubType, srvBot.plugins, srvBot.events, input, createReqCtx(), callback);
 
     //------------]>
 
@@ -53,8 +37,17 @@ function main(srvBot, evTypeName, input, callback) {
 
         //---------]>
 
-        ctx.message = input;
+        ctx.updateType = updateType;
+        ctx.updateSubType = updateSubType;
+
+        ctx.eventType = eventType;
+        ctx.eventSubType = eventSubType;
+
         ctx.from = input.from;
+
+        ctx[eventType] = input;
+
+        //---)>
 
         ctx.cid = msgChat.id;
         ctx.mid = input.message_id;
@@ -70,7 +63,7 @@ function main(srvBot, evTypeName, input, callback) {
 
 //---------]>
 
-function getEventNameByMsgField(field) {
+function getEventNameByDataField(field) {
     /*jshint maxcomplexity:50 */
 
     switch(field) {

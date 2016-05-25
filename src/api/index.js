@@ -90,17 +90,15 @@ function getReadStreamByUrl(url, data, callback) {
     }
 
     function onResponse(error, response) {
-        if(!error) {
-            const statusCode = response.statusCode;
+        const statusCode = response ? response.statusCode : 0;
 
-            if(statusCode < 200 || statusCode > 399) {
-                error = new Error("statusCode: " + statusCode);
-            }
+        if(!error && (statusCode < 200 || statusCode > 399)) {
+            error = new Error("statusCode: " + statusCode);
+        }
 
-            if(error) {
-                end();
-                return;
-            }
+        if(error) {
+            end();
+            return;
         }
 
         //--------------]>
@@ -151,6 +149,9 @@ function getReadStreamByUrl(url, data, callback) {
                 }
 
                 response = null;
+
+                error.code = rErrors.ERR_BAD_REQUEST;
+                error.statusCode = statusCode;
             }
 
             callback(error, response);
