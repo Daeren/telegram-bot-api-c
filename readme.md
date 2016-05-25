@@ -502,10 +502,8 @@ gSrv
         // return "room.menu";
     })
     
-    .on("text", function(bot, data) {
-    })
-    .on("text:room.menu", function(bot, data) {
-    });
+    .on("text", function(bot, data) { })
+    .on("text:room.menu", function(bot, data) { });
 ```
 
 
@@ -547,7 +545,7 @@ function auth(login, password) {
 }
 
 function send(bot) {
-    return bot.sendMessage("Ok, let's go...");
+    return bot.answer().text("Ok, let's go...").send();
 }
 ```
 
@@ -567,7 +565,7 @@ gBot.render("R: <%= value %>", {"value": 13});
 
 //--------------]> 
 
-gBot.polling(bot => {
+gBot.polling(function(bot) {
     let data;
     
     //-----[DEFAULT]-----}>

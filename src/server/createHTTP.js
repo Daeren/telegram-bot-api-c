@@ -16,6 +16,8 @@ const rHttp         = require("http"),
 const rCreateBot    = require("./createBot"),
       rOnMsg        = require("./onMsg");
 
+const rErrors       = require("./../errors");
+
 //-----------------------------------------------------
 
 const gCiphers = [
@@ -171,6 +173,10 @@ function main(botFather, params, callback) {
                 data = JSON.parse(data);
             } catch(e) {
                 error = e;
+
+                error.code = rErrors.ERR_FAILED_PARSE_DATA;
+                error.data = data;
+
                 data = null;
             }
 

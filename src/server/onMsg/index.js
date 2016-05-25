@@ -9,7 +9,8 @@
 
 //-----------------------------------------------------
 
-const rUtil                         = require("./../../util");
+const rUtil                         = require("./../../util"),
+      rErrors                       = require("./../../errors");
 
 const onIncomingMessage             = require("./onIncomingMessage"),
       onIncomingInlineQuery         = require("./onIncomingInlineQuery"),
@@ -33,10 +34,17 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(error, srvBot, data) {
+    if(!error && (!data || typeof(data) !== "object")) {
+        error = new Error("Expected [Object].");
+
+        error.code = rErrors.ERR_FAILED_PARSE_DATA;
+        error.data = data;
+    }
+
     if(error) {
         onError(error);
     }
-    else if(data && typeof(data) === "object") {
+    else {
         for(let ev, input, i = 0, len = gIncomeEv.length; i < len; i++) {
             ev = gIncomeEv[i];
             input = data[ev[0]];
