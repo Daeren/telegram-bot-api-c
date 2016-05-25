@@ -324,7 +324,7 @@ gBot
     .setWebhook({"url": "https://site.xx/myBot"})
     .then(function(isOk) {
         if(!isOk)
-            throw new Error("Oops...problems with webhook...");
+            throw new Error("Oops...problem with the webhook...");
 
         gBot.http(objSrvOptions, cbMsg);
     });
@@ -475,8 +475,6 @@ gSrv
         bot.user = {};
     })
     .use(function(bot) {
-        console.log("Sync | Type: %s", type);
-        
         bot.user.id = 1;
     });
     
@@ -600,7 +598,7 @@ function onMsg(bot) {
     data.chat_id = bot.cid;
     data.text = "Hell Word!";
     
-    data.reply_markup = bot.keyboard() === bot.keyboard.hide();
+    data.reply_markup = bot.keyboard() // Or: bot.keyboard.hide();
     data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
     
     data.reply_markup = bot.keyboard.hOx();
@@ -619,18 +617,20 @@ rBot.keyboard.inline.numpad();
 rBot.keyboard(buttons[, params])
 rBot.keyboard.inline(inlButtons, isVertically)
 
-buttons:    `string`, `array of array` or `false`
-inlButtons: `string`, `array of array` or `object`
-params:     "resize once selective"
-
-v - vertically; h - horizontally;
-
-vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
-abcd, numpad, hide
-
-Normal keyboard:
- vOx(once, selective)
- numpad(once, selective)
+/*
+  buttons:    `string`, `array of array` or `false`
+  inlButtons: `string`, `array of array` or `object`
+  params:     "resize once selective"
+  
+  v - vertically; h - horizontally;
+  
+  vOx, hOx, vPn, hPn, vLr, hLr, vGb, hGb
+  abcd, numpad, hide
+  
+  Normal keyboard:
+   vOx(once, selective)
+   numpad(once, selective)
+*/
 ```
 
 | Name              | Note                                 |
@@ -903,7 +903,7 @@ npm test
 | stop          |                                               | this                                      |
 |               | HTTP                                          |                                           |
 |               | -                                             |                                           |
-| bot           | bot, path[, callback(json, request)]          | srv                                       |
+| bot           | bot, path[, callback(json, request)]          | new srvInstance                           |
 |               | -                                             |                                           |
 |               | VIRTUAL                                       |                                           |
 |               | -                                             |                                           |
@@ -919,7 +919,7 @@ npm test
 
 
 <a name="refFieldsSrvBot"></a>
-#### Fields: bot (srv.on("*", bot => 0)
+#### Fields: bot | srv.on('', bot => 0)
 
 | Name              | Type                  | Note                                                   |
 |-------------------|-----------------------|--------------------------------------------------------|
@@ -927,7 +927,7 @@ npm test
 | isGroup           | boolean               | bot.isGroup = bot.message.chat.type === [super]group   |
 | isReply           | boolean               | bot.isReply = !!bot.message.reply_to_message           |
 |                   | -                     |                                                        |
-| cqid              | string                | bot.qid = bot.callbackQuery.id                         |
+| cqid              | string                | bot.cqid = bot.callbackQuery.id                        |
 | qid               | string                | bot.qid = bot.inlineQuery.id                           |
 | cid               | number                | bot.cid = bot.message.chat.id                          |
 | mid               | number                | bot.mid = bot.message.message_id                       |
