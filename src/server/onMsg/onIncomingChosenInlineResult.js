@@ -17,37 +17,27 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, updateType, eventType, input, callback) {
+function main(ctx, plugins, events, updateType, eventType, input, callback) {
     const updateSubType     = null,
           eventSubType      = null;
 
     //------------]>
 
-    rRunAction(updateSubType, eventType, eventSubType, srvBot.plugins, srvBot.events, input, createReqCtx(), callback);
+    ctx.updateType = updateType;
+    ctx.updateSubType = updateSubType;
+
+    ctx.eventType = eventType;
+    ctx.eventSubType = eventSubType;
+
+    ctx.from = input.from;
+
+    ctx[eventType] = input;
+
+    //---)>
+
+    ctx.qid = input.inline_message_id;
 
     //------------]>
 
-    function createReqCtx() {
-        const ctx = Object.create(srvBot.ctx);
-
-        //---------]>
-
-        ctx.updateType = updateType;
-        ctx.updateSubType = updateSubType;
-
-        ctx.eventType = eventType;
-        ctx.eventSubType = eventSubType;
-
-        ctx.from = input.from;
-
-        ctx[eventType] = input;
-
-        //---)>
-
-        ctx.qid = input.inline_message_id;
-
-        //---------]>
-
-        return ctx;
-    }
+    rRunAction(updateSubType, eventType, eventSubType, plugins, events, input, ctx, callback);
 }

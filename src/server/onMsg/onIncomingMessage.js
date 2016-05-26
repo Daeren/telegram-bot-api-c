@@ -17,7 +17,7 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(srvBot, updateType, eventType, input, callback) {
+function main(ctx, plugins, events, updateType, eventType, input, callback) {
     const updateSubType     = getMessageDataField(input),
           eventSubType      = getEventNameByDataField(updateSubType);
 
@@ -28,37 +28,27 @@ function main(srvBot, updateType, eventType, input, callback) {
 
     //------------]>
 
-    rRunAction(updateSubType, eventType, eventSubType, srvBot.plugins, srvBot.events, input, createReqCtx(), callback);
+    ctx.updateType = updateType;
+    ctx.updateSubType = updateSubType;
+
+    ctx.eventType = eventType;
+    ctx.eventSubType = eventSubType;
+
+    ctx.from = input.from;
+
+    ctx[eventType] = input;
+
+    //---)>
+
+    ctx.cid = msgChat.id;
+    ctx.mid = input.message_id;
+
+    ctx.isGroup = isGroup;
+    ctx.isReply = isReply;
 
     //------------]>
 
-    function createReqCtx() {
-        const ctx = Object.create(srvBot.ctx);
-
-        //---------]>
-
-        ctx.updateType = updateType;
-        ctx.updateSubType = updateSubType;
-
-        ctx.eventType = eventType;
-        ctx.eventSubType = eventSubType;
-
-        ctx.from = input.from;
-
-        ctx[eventType] = input;
-
-        //---)>
-
-        ctx.cid = msgChat.id;
-        ctx.mid = input.message_id;
-
-        ctx.isGroup = isGroup;
-        ctx.isReply = isReply;
-
-        //---------]>
-
-        return ctx;
-    }
+    rRunAction(updateSubType, eventType, eventSubType, plugins, events, input, ctx, callback);
 }
 
 //---------]>
