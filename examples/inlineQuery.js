@@ -19,8 +19,13 @@ const gBot      = rTgBot(process.env.TELEGRAM_BOT_TOKEN);
 
 gBot
     .polling()
+    .catch(function(error) {
+        console.log(error);
+    })
 
     .on("text", function(bot, data) {
+        console.log(bot);
+
         bot.api.getChatMember({"chat_id": bot.cid, "user_id": bot.from.id}, function(error, result) {
             bot.answer().text(JSON.stringify(result)).send();
         });

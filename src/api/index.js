@@ -24,11 +24,12 @@ const rUtil             = require("./../util"),
 const gCRLF                 = "\r\n";
 
 const gPipeOptions          = {"end": false};
-const gReIsFilePath         = /[\\\/\.]/;
 
-const gMaxFileSize          = 1024 * 1024 * 50;
+const gReIsFilePath         = /[\\\/\.]/,
+      gReIsHttpSUri         = /^https?:\/\//;
 
-const gBoundaryUInterval    = 1000 * 60 * 5;
+const gMaxFileSize          = 1024 * 1024 * 50,
+      gBoundaryUInterval    = 1000 * 60 * 5;
 
 let gBoundaryKey, gBoundaryUDate, gHeaderContentType,
     gBoundaryDiv, gBoundaryEnd,
@@ -67,15 +68,13 @@ function updateBoundary() {
 function getReadStreamByUrl(url, data, callback) {
     /*jshint -W069 */
 
-    if(!(/^https?:\/\//).test(url)) {
+    if(!(gReIsHttpSUri).test(url)) {
         return false;
     }
 
     //--------------]>
 
     let redirectCount = 3;
-
-    //------]>
 
     createStream();
 
@@ -97,7 +96,7 @@ function getReadStreamByUrl(url, data, callback) {
         }
 
         if(error) {
-            end();
+            onEnd(error, response);
             return;
         }
 
@@ -127,35 +126,31 @@ function getReadStreamByUrl(url, data, callback) {
 
             createStream();
         }
-        else if(contentLength) {
-            const paramsMaxSize = Math.min(Math.max(parseInt(data.maxSize, 10) || gMaxFileSize, gMaxFileSize), gMaxFileSize);
-
-            if(contentLength > paramsMaxSize) {
-                error = new Error("maxSize: " + paramsMaxSize);
-            }
-
-            end();
-        }
         else {
-            end();
-        }
+            if(contentLength) {
+                const paramsMaxSize = Math.min(Math.max(parseInt(data.maxSize, 10) || gMaxFileSize, gMaxFileSize), gMaxFileSize);
 
-        //--------------]>
-
-        function end() {
-            if(error) {
-                if(response) {
-                    response.destroy();
+                if(contentLength > paramsMaxSize) {
+                    error = new Error("maxSize: " + paramsMaxSize);
                 }
-
-                response = null;
-
-                error.code = rErrors.ERR_BAD_REQUEST;
-                error.statusCode = statusCode;
             }
 
-            callback(error, response);
+            onEnd(error, response);
         }
+    }
+
+    function onEnd(error, response) {
+        if(error) {
+            if(response) {
+                response.destroy();
+            }
+
+            response = null;
+
+            error.code = rErrors.ERR_BAD_REQUEST;
+        }
+
+        callback(error, response);
     }
 }
 
@@ -447,18 +442,13 @@ function genMethodsFor(bot) {
         result[method] = mthAPI;
 
         function mthAPI(data, callback) {
-            const mdPromise     = bot.mdPromise,
-                  apiCallJson   = bot.callJson;
-
-            //-------]>
-
             if(typeof(data) === "function") {
                 callback = data;
                 data = null;
             }
 
             if(!callback) {
-                return new mdPromise(cbPromise);
+                return new bot.mdPromise(cbPromise);
             }
 
             //-------------------------]>
@@ -468,21 +458,23 @@ function genMethodsFor(bot) {
             //-------------------------]>
 
             function cbPromise(resolve, reject) {
-                apiCallJson(method, data, function(error, response) {
-                    error       = error || genErrorByTgResponse(response);
-                    response    = error ? null : response.result;
+                bot.callJson(method, data, onEnd);
+
+                function onEnd(error, data) {
+                    error       = error || genErrorByTgResponse(data);
+                    data        = error ? null : data.result;
                     callback    = callback || ((e, r) => error ? reject(e) : resolve(r));
 
-                    callback(error, response);
-                });
+                    callback(error, data);
+                }
             }
         }
     }
 
-    function genErrorByTgResponse(response) {
-        if(response && !response.ok) {
-            const error = new Error(response.description);
-            error.code = response.error_code;
+    function genErrorByTgResponse(data) {
+        if(data && !data.ok) {
+            const error = new Error(data.description);
+            error.code = data.error_code;
 
             return error;
         }

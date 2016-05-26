@@ -91,15 +91,15 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e |
 
 // e    - Error: request/JSON.parse
 // data - JSON: response or null
-// res  - Class: http.IncomingMessage
+// res  - Class: http.IncomingMessage or null
 
 //-------]>
 
 gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
 
 // e    - Error: request
-// data - Buffer: response or undefined
-// res  - Class: http.IncomingMessage
+// data - Buffer: response or null
+// res  - Class: http.IncomingMessage or null
 
 //------------]>
 
@@ -118,7 +118,6 @@ gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || da
 
   gBot.ERR_FAILED_PARSE_DATA
   gBot.ERR_BAD_REQUEST
-  gBot.ERR_REQ_TIMEOUT
 */
 
 //----------------------------]>

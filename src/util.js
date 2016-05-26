@@ -38,7 +38,7 @@ function createReadStreamByUrl(url, callback) {
     //-------]>
 
     if(!urlObj.protocol || !(/^http/).test(urlObj.protocol)) {
-        callback(new Error("Use the links only with HTTP/HTTPS protocol"));
+        onError(new Error("Use the links only with HTTP/HTTPS protocol."));
         return;
     }
 
@@ -62,15 +62,17 @@ function createReadStreamByUrl(url, callback) {
 
     //-----------]>
 
-    (isHTTPS ? rHttps : rHttp).get(options).on("error", callback).on("response", onResponse).setTimeout(timeout, onTimeout);
+    (isHTTPS ? rHttps : rHttp).get(options).on("error", onError).on("response", onResponse).setTimeout(timeout, onTimeout);
 
     //-----------]>
 
-    function onTimeout() {
-        const error = new Error("Timeout");
-        error.code = rErrors.ERR_REQ_TIMEOUT;
+    function onError(error) {
+        error.code = rErrors.ERR_BAD_REQUEST;
+        callback(error, null)
+    }
 
-        this.destroy(error);
+    function onTimeout() {
+        this.destroy(new Error("Timeout."));
     }
 
     function onResponse(response) {

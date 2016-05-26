@@ -50,18 +50,20 @@ function main(token, method, callback) {
 
     //--------------]>
 
-    return (callback ? rHttps.request(gReqOptions, onRequest).on("error", callback) : rHttps.request(gReqOptions)).setTimeout(gReqTimeout, onTimeout);
+    return (callback ? rHttps.request(gReqOptions, onResponse).on("error", onError) : rHttps.request(gReqOptions)).setTimeout(gReqTimeout, onTimeout);
 
     //--------------]>
 
-    function onTimeout() {
-        const error = new Error("Timeout");
-        error.code = rErrors.ERR_REQ_TIMEOUT;
-
-        this.destroy(error);
+    function onError(error) {
+        error.code = rErrors.ERR_BAD_REQUEST;
+        callback(error, null, null);
     }
 
-    function onRequest(response) {
+    function onTimeout() {
+        this.destroy(new Error("Timeout."));
+    }
+
+    function onResponse(response) {
         let firstChunk, chunks;
 
         //--------]>
