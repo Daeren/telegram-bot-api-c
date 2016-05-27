@@ -50,30 +50,6 @@ const inputSrvMessage = {
     }
 };
 
-const inputSrvMessageWithBotName = {
-    "update_id": 13,
-
-    "message": {
-        "message_id": msgId,
-
-        "from": {
-            "id": chatId,
-            "first_name": "D",
-            "username": ""
-        },
-
-        "chat": {
-            "id": -1,
-            "first_name": "D",
-            "username": "",
-            "type": "group"
-        },
-
-        "date": Date.now(),
-        "text": "@test5 Hello"
-    }
-};
-
 const inputSrvMessageCmd = {
     "update_id": 13,
 
