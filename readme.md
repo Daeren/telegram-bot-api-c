@@ -30,7 +30,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * Analytics: [tgb-pl-botanio][4]
 * New: [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
 * Added: editedMessage (event), srv.events, error handling, full support for generators
-* Removed: srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast, logger
+* Removed: srv.render, srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast, logger
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -554,35 +554,22 @@ function send(bot) {
 #### Render 
 
 ```js
-gBot
-    .engine(require("ejs"))
-    .promise(require("bluebird"));
+gBot.promise(require("bluebird"));
 
-//--------------]> 
+//-----[EJS]-----}>
 
-gBot.render("R: <%= value %>", {"value": 13});
+gBot.engine(require("ejs"))
 
-//--------------]> 
+data = {"x": "H", "y": "i"};
+bot.render("EJS | Text: <%= x %> + <%= y %>", data);
 
-gBot.polling(function(bot) {
-    let data;
-    
-    //-----[DEFAULT]-----}>
+//-----[DEFAULT]-----}>
 
-    data = ["H", "i"];
-    bot.render("Array | Text: {0} + {1}", data).then(console.log);
+data = ["H", "i"];
+bot.render("Array | Text: {0} + {1}", data);
 
-    data = {"x": "H", "y": "i"};
-    bot.render("Hashtable | Text: {x} + {y}", data, (e, r) => console.log(e || r));
-
-    //-----[EJS]-----}>
-
-    data = {};
-    data.input = {"x": "H", "y": "i"};
-    data.reply_markup = bot.keyboard.hGb();
-
-    bot.render("EJS | Text: <%= x %> + <%= y %>", data);
-});
+data = {"x": "H", "y": "i"};
+bot.render("Hashtable | Text: {x} + {y}", data);
 ```
 
 
@@ -950,8 +937,7 @@ npm test
 | answer            | function()            | Response Builder; message; Uses: cid, mid              |
 | answer            | function()            | Response Builder; inlineQuery; Uses: qid               |
 | answer            | function()            | Response Builder; callbackQuery; Uses: cqid            |
-|                   | -                     |                                                        |
-| render            | function(tmpl, in, cb)| Uses: cid                                              |
+
 
 
 #### Events: use / on

@@ -51,7 +51,6 @@ function main(bot, onMsg) {
 
     //-----)>
 
-    ctx.render  = ctxRender;
     ctx.answer  = ctxAnswer;
 
     //--------------]>
@@ -59,20 +58,6 @@ function main(bot, onMsg) {
     return result;
 
     //--------------]>
-
-    function ctxRender(template, data, callback) {
-        template    = bot.render(template, data && hasOwnProperty.call(data, "input") ? data.input : data);
-        data        = data ? Object.create(data) : {};
-
-        //------]>
-
-        data.chat_id    = data.chat_id || this.cid;
-        data.text       = template;
-
-        //------]>
-
-        return bot.api.sendMessage(data, callback);
-    }
 
     function ctxAnswer() {
         return new rResponseBuilder(this, bot);
