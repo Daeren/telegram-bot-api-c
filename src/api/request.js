@@ -15,18 +15,17 @@ const rErrors = require("./../errors");
 
 //-----------------------------------------------------
 
-const gKeepAliveAgent  = new rHttps.Agent({"keepAlive": true});
+const gKeepAliveAgent   = new rHttps.Agent({"keepAlive": true});
 
-const gReqTimeout   = 1000 * 60 * 2,
-      gReqOptions   = {
-          "path":         null,
+const gReqTimeout       = 1000 * 60 * 2,
+      gReqOptions       = {
+          "path":   null,
+          "method": "POST",
+
+          "host":   "api.telegram.org",
+          "port":   443,
       
-          "host":         "api.telegram.org",
-          "port":         443,
-      
-          "method":       "POST",
-      
-          "agent":        gKeepAliveAgent
+          "agent":  gKeepAliveAgent
       };
 
 //-----------------------------------------------------
@@ -37,14 +36,14 @@ module.exports = main;
 
 function main(token, method, callback) {
     if(!token) {
-        throw new Error("request: `token` was not specified");
+        throw new Error("request: `token` was not specified.");
     }
 
     if(!method) {
-        throw new Error("request: `method` was not specified");
+        throw new Error("request: `method` was not specified.");
     }
 
-    //------)>
+    //------]>
 
     gReqOptions.path = "/bot" + token + "/" + method;
 
@@ -69,6 +68,7 @@ function main(token, method, callback) {
         //--------]>
 
         response
+            .on("error", onError)
             .on("data", onResponseData)
             .on("end", onResponseEnd);
 

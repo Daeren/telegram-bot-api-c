@@ -76,6 +76,10 @@ const gBot      = rTgBot(process.env.TELEGRAM_BOT_TOKEN),
 
 //----------------------------]>
 
+gBot.promise(require("bluebird"));
+
+//----------------------------]>
+
 gApi
     .sendMessage({"chat_id": "0"})
     .then(console.info, console.error);
@@ -282,13 +286,13 @@ gBot
 
         rExpress()
             .use(rBodyParser.json())
-            .post("/dev-bot", objSrv.middleware)
+            .post("/dev-bot", gSrv.middleware)
             .listen(3000, "localhost");
     });
     
 //----[Stress Tests]----}>
 
-objSrv.input(null, {
+gSrv.input(null, {
     "update_id": 0,
     "message": {
         "message_id": 0,
@@ -554,8 +558,6 @@ function send(bot) {
 #### Render 
 
 ```js
-gBot.promise(require("bluebird"));
-
 //-----[EJS]-----}>
 
 gBot.engine(require("ejs"))
@@ -586,7 +588,7 @@ function onMsg(bot) {
     data.chat_id = bot.cid;
     data.text = "Hell Word!";
     
-    data.reply_markup = bot.keyboard() // Or: bot.keyboard.hide();
+    data.reply_markup = bot.keyboard(); // Or: bot.keyboard.hide()
     data.reply_markup = bot.keyboard([["1", "2"], ["3"]]);
     
     data.reply_markup = bot.keyboard.hOx();

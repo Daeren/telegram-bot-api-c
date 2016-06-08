@@ -226,23 +226,18 @@ function callAPI(token, method, data, callback) {
                 value = value ? "1" : "0";
 
                 req.write("\"\r\n\r\n");
-
                 break;
 
             case "string":
                 value = typeof(value) === "string" || Buffer.isBuffer(value) ? value : (value + "");
 
                 req.write("\"\r\n\r\n");
-
                 break;
 
             case "json":
-                if(typeof(value) !== "string" && !Buffer.isBuffer(value)) {
-                    value = JSON.stringify(value) || "";
-                }
+                value = typeof(value) === "string" || Buffer.isBuffer(value) ? value : (JSON.stringify(value) || "");
 
                 req.write("\"\r\nContent-Type: application/json\r\n\r\n");
-
                 break;
 
             default:
@@ -270,7 +265,7 @@ function callAPI(token, method, data, callback) {
                 }
                 else if(typeof(value) === "object") {
                     isStream = true;
-                    bindStreamEvents(value).pipe(req, gPipeOptions);
+                    pipeStream(value);
                 }
                 else {
                     req.write(value + "");
@@ -285,65 +280,52 @@ function callAPI(token, method, data, callback) {
             case "video":
             case "voice":
             case "certificate":
-                let filename = data.filename;
-
-                //-------]>
-
-                if(isBuffer) {
-                }
-                else if(typeof(value) === "string") {
+                if(!isBuffer && typeof(value) === "string") {
                     if(getReadStreamByUrl(value, data, writeFileStream)) {
                         isStream = true;
                     }
                     else if(gReIsFilePath.test(value)) {
-                        filename = filename || value;
                         isStream = true;
 
                         writeFileStream(null, rFs.createReadStream(value));
                     }
                     else {
                         req.write("\"\r\n\r\n");
+                    }
+                }
+                else {
+                    let filename = data.filename;
+
+                    if(!isBuffer && typeof(value) === "object") {
+                         isStream = true;
+
+                         if(!filename) {
+                             if(value.headers) {
+                                 const reqPath = value.req.path,
+                                       reqCt   = value.headers["content-type"];
+
+                                 const ext     = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
+
+                                 filename = ext.length > 1 ? (rPath.parse(reqPath).name + ext) : reqPath;
+                             }
+                             else {
+                                 filename = value.path || "file";
+                             }
+                         }
+                    }
+
+                    //-------]>
+
+                    req.write("\"; filename=\"");
+                    req.write(rPath.basename(filename));
+                    req.write("\"\r\nContent-Type: application/octet-stream\r\n\r\n");
+
+                    if(isStream) {
+                        pipeStream(value);
+                    }
+                    else if(isBuffer) {
                         req.write(value);
                     }
-
-                    break;
-                }
-                else if(typeof(value) === "object") {
-                    isStream = true;
-
-                    if(value.headers) {
-                        if(!filename) {
-                            const reqPath   = value.req.path,
-                                  reqCt     = value.headers["content-type"];
-
-                            const ext       = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
-
-                            if(ext.length > 1) {
-                                filename = rPath.parse(reqPath).name + ext;
-                            }
-                            else {
-                                filename = reqPath;
-                            }
-                        }
-                    }
-                    else {
-                        filename = value.path || "file";
-                    }
-                }
-
-                filename = rPath.basename(filename);
-
-                //-------]>
-
-                req.write("\"; filename=\"");
-                req.write(filename);
-                req.write("\"\r\nContent-Type: application/octet-stream\r\n\r\n");
-
-                if(isStream) {
-                    bindStreamEvents(value).pipe(req, gPipeOptions);
-                }
-                else if(isBuffer) {
-                    req.write(value);
                 }
 
                 break;
@@ -371,20 +353,23 @@ function callAPI(token, method, data, callback) {
                 writeData(type, input);
             }
         }
-    }
 
-    function bindStreamEvents(s) {
-        return s.on("error", onEnd).on("end", onEnd);
+        function pipeStream(s) {
+            s
+                .on("error", onEnd)
+                .on("end", onEnd)
+                .pipe(req, gPipeOptions);
 
-        //------]>
+            //------]>
 
-        function onEnd(error) {
-            if(error) {
-                req.destroy(error);
-            }
-            else {
-                req.write(gCRLFBoundaryEnd);
-                req.end();
+            function onEnd(error) {
+                if(error) {
+                    req.destroy(error);
+                }
+                else {
+                    req.write(gCRLFBoundaryEnd);
+                    req.end();
+                }
             }
         }
     }
