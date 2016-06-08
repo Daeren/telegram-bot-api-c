@@ -763,7 +763,7 @@ describe("Instance: bot", function() {
             }, function(error, data) {
                 checkBaseFields(error, data);
 
-                expect(data).to.have.property("photo").that.is.an("object");
+                expect(data).to.have.property("photo").that.is.an("array");
 
                 done();
             });

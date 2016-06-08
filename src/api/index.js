@@ -157,6 +157,16 @@ function getReadStreamByUrl(url, data, callback) {
 //--------[PublicMethods]--------}>
 
 function callAPI(token, method, data, callback) {
+    if(!token) {
+        throw new Error("callAPI: `token` was not specified.");
+    }
+
+    if(!method) {
+        throw new Error("callAPI: `method` was not specified.");
+    }
+
+    //-------------------------]>
+
     if(typeof(data) === "function") {
         callback = data;
         data = null;
@@ -390,11 +400,18 @@ function callAPIJson(token, method, data, callback) {
 
     function cbCallAPI(error, result, response) {
         if(!error) {
-            if(response.headers["content-type"] === "application/json") {
-                result = JSON.parse(result);
+            const isJson = response.headers["content-type"] === "application/json";
+
+            if(isJson) {
+                try {
+                    result = JSON.parse(result);
+                } catch(e) {
+                    error = e;
+                }
             }
-            else {
-                error = new Error("Expected JSON (" + response.statusCode + ").");
+
+            if(!isJson || error) {
+                error = error || new Error("Expected JSON (" + response.statusCode + ").");
 
                 error.code = rErrors.ERR_FAILED_PARSE_DATA;
                 error.data = result;
@@ -433,11 +450,11 @@ function genMethodsFor(bot) {
                 data = null;
             }
 
+            //-------------------------]>
+
             if(!callback) {
                 return new bot.mdPromise(cbPromise);
             }
-
-            //-------------------------]>
 
             cbPromise();
 

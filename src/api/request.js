@@ -35,16 +35,6 @@ module.exports = main;
 //-----------------------------------------------------
 
 function main(token, method, callback) {
-    if(!token) {
-        throw new Error("request: `token` was not specified.");
-    }
-
-    if(!method) {
-        throw new Error("request: `method` was not specified.");
-    }
-
-    //------]>
-
     gReqOptions.path = "/bot" + token + "/" + method;
 
     //--------------]>

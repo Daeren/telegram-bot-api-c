@@ -41,6 +41,14 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 - certificate:                              buffer, stream, path, url
 ```
 
+
+#### Goals:
+1. High stability;
+2. Low memory usage;
+3. Maximum performance;
+4. Flexibility.
+
+
 #### Index
 
 * [Start](#refStart)
