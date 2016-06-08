@@ -28,7 +28,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
 * KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
-* New: [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), a mechanism of events, [Response Builder](#refResponseBuilder) takes all parameters for a API method
+* New: [field bot.gotoState](#refFieldsSrvBot), [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), [Response Builder](#refResponseBuilder) takes all parameters for a API method
 * Added: editedMessage (event), srv.events, error handling, full support for generators
 * Removed: srv.render, srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast, logger
 
@@ -156,7 +156,7 @@ gBot
     .on(/^(login)\s+(\w+)/i, ["type", "login"], onTextRegEx);
 
 
-function onDefault(bot, gotoState) { }
+function onDefault(bot) { }
 function onError(error) { }
 
 function onCmdStart_1(bot, params, next) { next(); } // <-- Async
@@ -932,10 +932,11 @@ npm test
 |                   | -                     |                                                        |
 | command           | object                | Incoming command                                       |
 |                   | -                     |                                                        |
-| updateType        | object                |                                                        |
-| updateSubType     | object                |                                                        |
-| eventType         | object                |                                                        |
-| eventSubType      | object                |                                                        |
+| updateType        | string                |                                                        |
+| updateSubType     | string                |                                                        |
+| eventType         | string                |                                                        |
+| eventSubType      | string                |                                                        |
+| gotoState         | string                |                                                        |
 |                   | -                     |                                                        |
 | from              | object                | Persistent                                             |
 |                   | -                     |                                                        |

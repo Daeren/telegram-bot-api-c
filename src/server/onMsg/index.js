@@ -64,16 +64,16 @@ function main(error, srvBot, data) {
 
     //--------]>
 
-    function onEnd(error, reqCtx, gotoState) {
+    function onEnd(error, reqCtx) {
         if(error) {
             onError(error);
         }
-        else if(reqCtx) {
+        else {
             let onMsg = srvBot.onMsg;
 
             if(onMsg) {
                 try {
-                    onMsg = onMsg(reqCtx, gotoState);
+                    onMsg = onMsg(reqCtx);
                 } catch(e) {
                     onError(e);
                 }

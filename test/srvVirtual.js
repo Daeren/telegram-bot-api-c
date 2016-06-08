@@ -512,13 +512,13 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | base-without)", function(done) {
-        let server = objBot.virtual(function(bot, state) {
+        let server = objBot.virtual(function(bot) {
             const cmd = bot.command;
 
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
-            expect(state).to.be.a("string").and.equal("goto");
+            expect(bot.gotoState).to.be.a("string").and.equal("goto");
 
             done();
         });
@@ -545,13 +545,13 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | default)", function(done) {
-        let server = objBot.virtual(function(bot, state) {
+        let server = objBot.virtual(function(bot) {
             const cmd = bot.command;
 
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
-            expect(state).to.be.a("string").and.equal("goto");
+            expect(bot.gotoState).to.be.a("string").and.equal("goto");
 
             done();
         });
@@ -588,13 +588,13 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | default-generator)", function(done) {
-        let server = objBot.virtual(function* (bot, state) {
+        let server = objBot.virtual(function* (bot) {
             const cmd = bot.command;
 
             tCheckBaseBotFields(bot);
             tCheckBaseCmdFields(cmd);
 
-            expect(state).to.be.a("string").and.equal("goto");
+            expect(bot.gotoState).to.be.a("string").and.equal("goto");
 
             yield new Promise(x => setTimeout(x));
 
