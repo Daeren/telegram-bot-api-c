@@ -756,6 +756,19 @@ describe("Instance: bot", function() {
             });
         });
 
+        it("sendPhoto(file_id) | callback", function(done) {
+            api.sendPhoto({
+                "chat_id":      chatId,
+                "photo":        "AgADAgAD1qcxG2_R8AbjPe6-AjgFdozGWSoABAE2Gi-3QnhSD7wBAAEC"
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("photo").that.is.an("object");
+
+                done();
+            });
+        });
+
         //--)>
 
         it("sendAudio(url) | callback", function(done) {

@@ -291,6 +291,7 @@ function callAPI(token, method, data, callback) {
                     }
                     else {
                         req.write("\"\r\n\r\n");
+                        req.write(value);
                     }
                 }
                 else {
