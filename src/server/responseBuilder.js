@@ -19,6 +19,7 @@ const gModifiers = [
 
     "latitude", "longitude",
     "caption", "duration", "performer", "title", "width", "height",
+    "game_short_name",
 
     "disable_web_page_preview", "disable_notification",
     "show_alert",

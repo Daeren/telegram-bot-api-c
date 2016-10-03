@@ -93,6 +93,7 @@ function getMessageDataField(m) {
         hasOwnProperty.call(m, t = "location") ||
         hasOwnProperty.call(m, t = "venue") ||
         hasOwnProperty.call(m, t = "contact") ||
+        hasOwnProperty.call(m, t = "game") ||
 
         hasOwnProperty.call(m, t = "new_chat_member") ||
         hasOwnProperty.call(m, t = "left_chat_member") ||

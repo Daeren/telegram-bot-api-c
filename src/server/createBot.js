@@ -22,11 +22,7 @@ function main(bot, onMsg) {
 
     const ctx = Object.create(bot);
 
-    let result;
-
-    //---------]>
-
-    result = {
+    const result = {
         "instance":     bot,
         "ctx":          ctx,
 
@@ -49,7 +45,7 @@ function main(bot, onMsg) {
         "onMsg":        onMsg
     };
 
-    //-----)>
+    //--------------]>
 
     ctx.answer  = ctxAnswer;
 

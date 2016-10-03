@@ -23,14 +23,10 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1
+[Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, [Telegram Gaming Platform][5]
 
 * Support [Map][10] as a data source (.call, .callJson, .api[method]): +
-* KeepAlive (+50% to the speed of requests): +
 * Analytics: [tgb-pl-botanio][4]
-* New: [field bot.gotoState](#refFieldsSrvBot), [field bot.command](#refFieldsSrvBot), [field bot.from](#refFieldsSrvBot), [Response Builder](#refResponseBuilder) takes all parameters for a API method
-* Added: editedMessage (event), srv.events, error handling, full support for generators
-* Removed: srv.render, srv.forward, srv.send[_], srv.on(*), bot.send, bot.broadcast, logger
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -254,12 +250,12 @@ const gMyBot        = rBot(process.env.TG_BOT_TOKEN_MY),
 const gSrv          = gBotFather.http(gSrvOptions);
 
 gSrv
-    .bot(gMyBot, "/urlMyBot") // <-- Auto-Webhook
+    .bot(gMyBot)                                    // <-- Auto-Webhook: "/tg_bot_<sha256(token)>"
     .on("/start", onCmdStart)
     .on("/stop", onCmdStop);
 
 gSrv
-    .bot(gOtherBot, "/urlOtherBot", onMsgOtherBot);
+    .bot(gOtherBot, "/urlOtherBot", onMsgOtherBot); // <-- Auto-Webhook
     
 //------------------]>
 
@@ -464,6 +460,7 @@ objSrv
 | venue             |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
 | contact           |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |
 | chatAction        |  action                                                                                                       |
+| game              |  game_short_name, disable_notification, reply_to_message_id, reply_markup                                     |
 |                   | -                                                                                                             |
 | inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
 | callbackQuery     |  text, show_alert                                                                                             |
@@ -889,6 +886,7 @@ npm test
 | venue         |                                       |                                                                   |
 | contact       |                                       |                                                                   |
 | chatAction    |                                       |                                                                   |
+| game          |                                       |                                                                   |
 
 #### Methods: Server
 
@@ -901,7 +899,7 @@ npm test
 | stop          |                                               | this                                      |
 |               | HTTP                                          |                                           |
 |               | -                                             |                                           |
-| bot           | bot, path[, callback(json, request)]          | new srvInstance                           |
+| bot           | bot[, path][, onMsg(json, request)]           | new srvInstance                           |
 |               | -                                             |                                           |
 |               | VIRTUAL                                       |                                           |
 |               | -                                             |                                           |
@@ -988,6 +986,7 @@ npm test
 | location          | bot, data[, next]                     |                                           |
 | venue             | bot, data[, next]                     |                                           |
 | contact           | bot, data[, next]                     |                                           |
+| game              | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
 | /[name]           | bot, params[, next]                   | CMD                                       |
 |                   | -                                     |                                           |
@@ -1007,6 +1006,7 @@ MIT
 [2]: https://telegram.me/io666
 [3]: https://core.telegram.org/bots/api
 [4]: https://npmjs.com/package/tgb-pl-botanio
+[5]: https://core.telegram.org/bots/games
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [100]: https://core.telegram.org/bots/2-0-intro
 

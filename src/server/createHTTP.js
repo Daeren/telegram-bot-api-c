@@ -11,6 +11,7 @@
 
 const rHttp         = require("http"),
       rHttps        = require("https"),
+      rCrypto       = require("crypto"),
       rFs           = require("fs");
 
 const rCreateBot    = require("./createBot"),
@@ -239,22 +240,39 @@ function main(botFather, params, callback) {
 
     //-----------------]>
 
-    function addBot(bot, path, callback) {
-        if(srvBots[path]) {
-            throw new Error("Path '" + path + "' has already been used");
+    function addBot(bot, path, onMsg) {
+        if(typeof(path) === "function") {
+            onMsg = path;
+            path = null;
+        }
+
+        if(!path) {
+            if(!bot.token()) {
+                throw new Error("`path` and `token` not specified");
+            }
+
+            path = "/tg_bot_" + rCrypto.createHash("sha256").update(bot.token()).digest("hex");
         }
 
         //-------------]>
 
-        if(typeof(params.autoWebhook) === "undefined" || typeof(params.autoWebhook) === "string" && params.autoWebhook) {
-            if(params.autoWebhook || params.host) {
+        if(params.autoWebhook !== false) {
+            if(params.autoWebhook || params.host && params.port) {
+                if(!bot.token()) {
+                    throw new Error("`token` not specified");
+                }
+
+                //---------]>
+
                 const url   = (params.autoWebhook || (params.host + ":" + params.port)) + path;
                 const data  = {
                     "url":          url,
                     "certificate":  params.selfSigned
                 };
 
-                bot.callJson("setWebhook", data, function(error, isOk) {
+                //---------]>
+
+                bot.api.setWebhook(data, function(error, isOk) {
                     if(isOk) {
                         return;
                     }
@@ -271,12 +289,18 @@ function main(botFather, params, callback) {
                 });
             }
             else {
-                console.log("[!] Warning | `autoWebhook` and `host` not specified, AutoWebhook not working");
+                console.log("[!] Warning | `autoWebhook` and `host` not specified, webhook not working");
             }
         }
 
         //-------------]>
 
-        return (srvBots[path] = rCreateBot(bot, callback));
+        if(srvBots[path]) {
+            throw new Error("Path '" + path + "' has already been used");
+        }
+
+        //-------------]>
+
+        return (srvBots[path] = rCreateBot(bot, onMsg));
     }
 }

@@ -461,15 +461,13 @@ function genMethodsFor(bot) {
             //-------------------------]>
 
             function cbPromise(resolve, reject) {
-                bot.callJson(method, data, onEnd);
-
-                function onEnd(error, data) {
+                bot.callJson(method, data, function(error, data) {
                     error       = error || genErrorByTgResponse(data);
                     data        = error ? null : data.result;
                     callback    = callback || ((e, r) => error ? reject(e) : resolve(r));
 
                     callback(error, data);
-                }
+                });
             }
         }
     }

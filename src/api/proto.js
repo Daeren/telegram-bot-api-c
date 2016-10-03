@@ -127,6 +127,14 @@ const gProtoTable = {
         ["string", "action"]
     ],
 
+    "sendGame": [
+        ["string", "chat_id"],
+        ["string", "game_short_name"],
+        ["boolean", "disable_notification"],
+        ["string", "reply_to_message_id"],
+        ["json", "reply_markup"]
+    ],
+
 
     "getChat": [
         ["string", "chat_id"]
@@ -163,10 +171,26 @@ const gProtoTable = {
 
     "getMe": null,
 
+    "getGameHighScores": [
+        ["string", "user_id"],
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"]
+    ],
+
 
     "setWebhook": [
         ["string", "url"],
         ["certificate", "certificate"]
+    ],
+
+    "setGameScore": [
+        ["string", "user_id"],
+        ["string", "score"],
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"],
+        ["boolean", "edit_message"]
     ],
 
 
@@ -341,6 +365,14 @@ const gArgsTable  = {
         "action"
     ],
 
+    "sendGame": [
+        "chat_id",
+        "game_short_name",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
 
     "getChat": [
         "chat_id"
@@ -375,9 +407,26 @@ const gArgsTable  = {
         "file_id"
     ],
 
+    "getGameHighScores": [
+        "user_id",
+        "chat_id",
+        "message_id",
+        "inline_message_id"
+    ],
+
+
     "setWebhook": [
         "url",
         "certificate"
+    ],
+
+    "setGameScore": [
+        "user_id",
+        "score",
+        "chat_id",
+        "message_id",
+        "inline_message_id",
+        "edit_message"
     ],
 
 
