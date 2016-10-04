@@ -450,7 +450,8 @@ const gArgsTable  = {
     "answerCallbackQuery": [
         "callback_query_id",
         "text",
-        "show_alert"
+        "show_alert",
+        "url"
     ],
 
 

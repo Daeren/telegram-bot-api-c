@@ -88,17 +88,17 @@ gBot.promise(require("bluebird"));
 //----------------------------]>
 
 gApi
-    .sendMessage({"chat_id": "0"})
+    .sendMessage(["0", "Hi"])
     .then(console.info, console.error);
     
-gApi.sendMessage({"chat_id": "0", "text":"Hi"}, (e, data) => console.log(e || data));
+gApi.sendMessage(["0", "Hi"], (e, data) => console.log(e || data));
 
 // e    - Error: request/JSON.parse/response.ok
 // data - JSON: response.result or null
 
 //-------]>
 
-gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
+gBot.callJson("sendMessage", ["0", "Hi"], (e, data, res) => console.log(e || data));
 
 // e    - Error: request/JSON.parse
 // data - JSON: response or null
@@ -106,7 +106,7 @@ gBot.callJson("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e |
 
 //-------]>
 
-gBot.call("sendMessage", {"chat_id": "0"}, (e, data, res) => console.log(e || data));
+gBot.call("sendMessage", ["0", "Hi"], (e, data, res) => console.log(e || data));
 
 // e    - Error: request
 // data - Buffer: response or null
