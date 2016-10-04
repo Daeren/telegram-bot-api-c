@@ -7,7 +7,7 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 
 
 ```js
-require("telegram-bot-api-c").call("TOKEN", "sendMessage", {chat_id: 0, text: "+"})
+require("telegram-bot-api-c").call("TOKEN", "sendMessage", [0, "+"])
 ```
 
 ```js
@@ -25,8 +25,11 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 
 [Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, [Telegram Gaming Platform][5]
 
-* Support [Map][10] as a data source (.call, .callJson, .api[method]): +
+* Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
 * Analytics: [tgb-pl-botanio][4]
+* Added: tgBot.api[sendMethod] => error.retryAfter
+* Added: `caption` fields to sendAudio, sendVoice
+* New method `getWebhookInfo`
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -451,11 +454,11 @@ objSrv
 |                   | -                                                                                                             |
 | text              |  text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup          |
 | photo             |  photo, caption, disable_notification, reply_to_message_id, reply_markup                                      |
-| audio             |  audio, performer, title, duration, disable_notification, reply_to_message_id, reply_markup                   |
+| audio             |  audio, performer, title, duration, caption, disable_notification, reply_to_message_id, reply_markup          |
 | document          |  document, caption, disable_notification, reply_to_message_id, reply_markup                                   |
 | sticker           |  sticker, disable_notification, reply_to_message_id, reply_markup                                             |
 | video             |  video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup             |
-| voice             |  voice, duration, disable_notification, reply_to_message_id, reply_markup                                     |
+| voice             |  voice, duration, caption, disable_notification, reply_to_message_id, reply_markup                            |
 | location          |  latitude, longitude, disable_notification, reply_to_message_id, reply_markup                                 |
 | venue             |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
 | contact           |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |

@@ -248,7 +248,7 @@ function main(botFather, params, callback) {
 
         if(!path) {
             if(!bot.token()) {
-                throw new Error("`path` and `token` not specified");
+                throw new Error("`path` and `token` not specified.");
             }
 
             path = "/tg_bot_" + rCrypto.createHash("sha256").update(bot.token()).digest("hex");
@@ -259,7 +259,7 @@ function main(botFather, params, callback) {
         if(params.autoWebhook !== false) {
             if(params.autoWebhook || params.host && params.port) {
                 if(!bot.token()) {
-                    throw new Error("`token` not specified");
+                    throw new Error("`token` not specified.");
                 }
 
                 //---------]>
@@ -289,14 +289,14 @@ function main(botFather, params, callback) {
                 });
             }
             else {
-                console.log("[!] Warning | `autoWebhook` and `host` not specified, webhook not working");
+                console.log("[!] Warning | `autoWebhook` and `host` not specified, webhook not working.");
             }
         }
 
         //-------------]>
 
         if(srvBots[path]) {
-            throw new Error("Path '" + path + "' has already been used");
+            throw new Error("Path '" + path + "' has already been used.");
         }
 
         //-------------]>

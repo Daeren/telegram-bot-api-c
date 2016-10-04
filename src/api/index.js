@@ -157,6 +157,10 @@ function getReadStreamByUrl(url, data, callback) {
 //--------[PublicMethods]--------}>
 
 function callAPI(token, method, data, callback) {
+    let isWritten;
+
+    //-------------------------]>
+
     if(!token) {
         throw new Error("callAPI: `token` was not specified.");
     }
@@ -165,11 +169,18 @@ function callAPI(token, method, data, callback) {
         throw new Error("callAPI: `method` was not specified.");
     }
 
-    //-------------------------]>
-
     if(typeof(data) === "function") {
         callback = data;
         data = null;
+    }
+
+    //-------------------------]>
+
+    const req = rRequest(token, method, callback);
+
+    if(!data) {
+        onReqMthEnd();
+        return;
     }
 
     method = method.toLowerCase();
@@ -178,25 +189,35 @@ function callAPI(token, method, data, callback) {
 
     const reqMthParams  = rProto.params[method];
 
-    const dataIsMap     = !!(reqMthParams && data && data instanceof Map),
-          req           = rRequest(token, method, callback);
+    const dataIsMap     = data instanceof Map,
+          dataIsArray   = dataIsMap ? false : Array.isArray(data);
 
-    let isStream, isWritten;
+    const dataLen       = (dataIsArray ? data.length : 0);
 
     //-------------------------]>
 
-    for(let i = 0, len = (reqMthParams ? reqMthParams.length : 0); data && i < len; i++) {
-        const p     = reqMthParams[i];
+    rUtil.forEachAsync(reqMthParams, iterReqMthParams, onReqMthEnd);
 
-        const type  = p[0],
-              field = p[1];
+    //-------------------------]>
 
-        const value = dataIsMap ? data.get(field) : data[field];
+    function iterReqMthParams(next, param, index) {
+        if(dataIsArray && index >= dataLen) {
+            next(null, null, true);
+            return;
+        }
+
+        //-------]>
+
+        const type  = param[0],
+              field = param[1];
+
+        const value = dataIsMap ? data.get(field) : dataIsArray ? data[index] : data[field];
 
         //-------]>
 
         if(typeof(value) === "undefined" || value === null) {
-            continue;
+            next();
+            return;
         }
 
         if(!isWritten) {
@@ -215,22 +236,27 @@ function callAPI(token, method, data, callback) {
         req.write("Content-Disposition: form-data; name=\"");
         req.write(field);
 
-        if(!writeField(type, value) && !writeData(type, value)) {
+        if(!writeFieldParam(type, value, next) && !writeFieldData(type, value, next)) {
             throw new Error("Type not found!");
         }
     }
 
-    if(!isStream) {
-        if(isWritten) {
-            req.write(gCRLFBoundaryEnd);
+    function onReqMthEnd(error) {
+        if(error) {
+            req.destroy(error);
         }
+        else {
+            if(isWritten) {
+                req.write(gCRLFBoundaryEnd);
+            }
 
-        req.end();
+            req.end();
+        }
     }
 
     //-------------------------]>
 
-    function writeField(type, value) {
+    function writeFieldParam(type, value, next) {
         switch(type) {
             case "boolean":
                 value = value ? "1" : "0";
@@ -257,28 +283,30 @@ function callAPI(token, method, data, callback) {
         //------]>
 
         req.write(value);
+        process.nextTick(next);
 
         //------]>
 
         return true;
     }
 
-    function writeData(type, value) {
+    function writeFieldData(type, value, next) {
         const isBuffer = value && Buffer.isBuffer(value);
 
         switch(type) {
             case "message":
                 req.write("\"\r\n\r\n");
 
-                if(isBuffer || typeof(value) === "string") {
-                    req.write(value);
-                }
-                else if(typeof(value) === "object") {
-                    isStream = true;
-                    pipeStream(value);
+                if(!isBuffer && typeof(value) === "object") {
+                    value.on("error", next).on("end", next).pipe(req, gPipeOptions);
                 }
                 else {
-                    req.write(value + "");
+                    if(!isBuffer && typeof(value) !== "string") {
+                        value += "";
+                    }
+
+                    req.write(value);
+                    process.nextTick(next);
                 }
 
                 break;
@@ -290,39 +318,44 @@ function callAPI(token, method, data, callback) {
             case "video":
             case "voice":
             case "certificate":
-                if(!isBuffer && typeof(value) === "string") {
-                    if(getReadStreamByUrl(value, data, writeFileStream)) {
-                        isStream = true;
+                if(typeof(value) === "string") {
+                    if(getReadStreamByUrl(value, data, function(error, src) {
+                            if(error || !src) {
+                                process.nextTick(next, error);
+                            }
+                            else {
+                                writeFieldData(type, src, next);
+                            }
+                        }))
+                    {
                     }
                     else if(gReIsFilePath.test(value)) {
-                        isStream = true;
-
-                        writeFileStream(null, rFs.createReadStream(value));
+                        writeFieldData(type, rFs.createReadStream(value), next);
                     }
                     else {
                         req.write("\"\r\n\r\n");
                         req.write(value);
+
+                        process.nextTick(next);
                     }
                 }
                 else {
                     let filename = data.filename;
 
-                    if(!isBuffer && typeof(value) === "object") {
-                         isStream = true;
+                    //-------]>
 
-                         if(!filename) {
-                             if(value.headers) {
-                                 const reqPath = value.req.path,
-                                       reqCt   = value.headers["content-type"];
+                    if(!filename && !isBuffer && typeof(value) === "object") {
+                        if(value.headers) {
+                            const reqPath = value.req.path,
+                                reqCt   = value.headers["content-type"];
 
-                                 const ext     = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
+                            const ext     = reqCt ? rPath.extname(rUtil.getFilenameByMime(reqCt)) : "";
 
-                                 filename = ext.length > 1 ? (rPath.parse(reqPath).name + ext) : reqPath;
-                             }
-                             else {
-                                 filename = value.path || "file";
-                             }
-                         }
+                            filename = ext.length > 1 ? (rPath.parse(reqPath).name + ext) : reqPath;
+                        }
+                        else {
+                            filename = value.path || "file";
+                        }
                     }
 
                     //-------]>
@@ -331,11 +364,12 @@ function callAPI(token, method, data, callback) {
                     req.write(rPath.basename(filename));
                     req.write("\"\r\nContent-Type: application/octet-stream\r\n\r\n");
 
-                    if(isStream) {
-                        pipeStream(value);
-                    }
-                    else if(isBuffer) {
+                    if(isBuffer) {
                         req.write(value);
+                        process.nextTick(next);
+                    }
+                    else {
+                        value.on("error", next).on("end", next).pipe(req, gPipeOptions);
                     }
                 }
 
@@ -348,41 +382,6 @@ function callAPI(token, method, data, callback) {
         //---------]>
 
         return true;
-
-        //---------]>
-
-        function writeFileStream(error, input) {
-            if(error) {
-                req.destroy(error);
-            }
-            else if(!input) {
-                req.write("\"\r\n\r\n");
-                req.write(gCRLFBoundaryEnd);
-                req.end();
-            }
-            else {
-                writeData(type, input);
-            }
-        }
-
-        function pipeStream(s) {
-            s
-                .on("error", onEnd)
-                .on("end", onEnd)
-                .pipe(req, gPipeOptions);
-
-            //------]>
-
-            function onEnd(error) {
-                if(error) {
-                    req.destroy(error);
-                }
-                else {
-                    req.write(gCRLFBoundaryEnd);
-                    req.end();
-                }
-            }
-        }
     }
 }
 
@@ -475,7 +474,12 @@ function genMethodsFor(bot) {
     function genErrorByTgResponse(data) {
         if(data && !data.ok) {
             const error = new Error(data.description);
+
             error.code = data.error_code;
+
+            if(data.parameters) {
+                error.retryAfter = data.retry_after;
+            }
 
             return error;
         }

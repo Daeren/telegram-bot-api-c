@@ -710,12 +710,12 @@ describe("Instance: bot", function() {
 
         //--)>
 
-        it("sendPhoto(file) | callback", function(done) {
-            api.sendPhoto({
-                "chat_id":      chatId,
-                "photo":        __dirname + "/data/MiElPotato.jpg",
-                "caption":      "MiElPotato"
-            }, function(error, result) {
+        it("sendPhoto(file) | array | callback", function(done) {
+            api.sendPhoto([
+                chatId,
+                __dirname + "/data/MiElPotato.jpg",
+                "MiElPotato"
+            ], function(error, result) {
                 checkBaseFields(error, result);
 
                 expect(result).to.have.property("photo").that.is.an("array");
@@ -1016,15 +1016,13 @@ describe("Instance: bot", function() {
             });
         });
 
-        it("getMe | promise", function(done) {
+        it("getWebhookInfo | promise", function(done) {
             api
-                .getMe()
+                .getWebhookInfo()
                 .then(function(data) {
                     expect(data).to.be.an("object").and.not.equal(null);
 
-                    expect(data).to.have.property("id").that.is.an("number");
-                    expect(data).to.have.property("first_name").that.is.an("string");
-                    expect(data).to.have.property("username").that.is.an("string");
+                    expect(data).to.have.property("url").that.is.an("string");
 
                     done();
                 }, function(error) {

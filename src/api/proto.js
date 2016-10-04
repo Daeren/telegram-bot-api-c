@@ -25,70 +25,72 @@ const gProtoTable = {
 
     "sendMessage": [
         ["string",  "chat_id"],
+        ["message", "text"],
         ["string",  "parse_mode"],
         ["boolean", "disable_web_page_preview"],
         ["boolean", "disable_notification"],
         ["string",  "reply_to_message_id"],
-        ["json",    "reply_markup"],
-        ["message", "text"]
+        ["json",    "reply_markup"]
     ],
 
     "sendPhoto": [
         ["string", "chat_id"],
+        ["photo", "photo"],
         ["string", "caption"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
-        ["photo", "photo"]
+        ["json", "reply_markup"]
     ],
 
     "sendAudio": [
         ["string", "chat_id"],
+        ["audio", "audio"],
+        ["string", "caption"],
         ["string", "duration"],
         ["string", "performer"],
         ["string", "title"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
-        ["audio", "audio"]
+        ["json", "reply_markup"]
     ],
 
     "sendDocument": [
         ["string", "chat_id"],
+        ["document", "document"],
         ["string", "caption"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
-        ["document", "document"]
+        ["json", "reply_markup"]
     ],
 
     "sendSticker": [
         ["string", "chat_id"],
+        ["sticker", "sticker"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
-        ["sticker", "sticker"]
+        ["json", "reply_markup"]
     ],
 
     "sendVideo": [
         ["string", "chat_id"],
+        ["video", "video"],
         ["string", "duration"],
         ["string", "width"],
         ["string", "height"],
         ["string", "caption"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
-        ["video", "video"]
+        ["json", "reply_markup"]
     ],
 
     "sendVoice": [
         ["string", "chat_id"],
+        ["voice", "voice"],
+        ["string", "caption"],
         ["string", "duration"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
-        ["json", "reply_markup"],
-        ["voice", "voice"]
+        ["json", "reply_markup"]
     ],
 
     "sendLocation": [
@@ -171,6 +173,8 @@ const gProtoTable = {
 
     "getMe": null,
 
+    "getWebhookInfo": null,
+
     "getGameHighScores": [
         ["string", "user_id"],
         ["string", "chat_id"],
@@ -207,7 +211,8 @@ const gProtoTable = {
     "answerCallbackQuery": [
         ["string", "callback_query_id"],
         ["string", "text"],
-        ["boolean", "show_alert"]
+        ["boolean", "show_alert"],
+        ["string", "url"]
     ],
 
 
@@ -286,6 +291,7 @@ const gArgsTable  = {
         "performer",
         "title",
         "duration",
+        "caption",
         "disable_notification",
         "reply_to_message_id",
         "reply_markup"
@@ -324,6 +330,7 @@ const gArgsTable  = {
         "chat_id",
         "voice",
         "duration",
+        "caption",
         "disable_notification",
         "reply_to_message_id",
         "reply_markup"

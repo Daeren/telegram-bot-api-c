@@ -103,6 +103,16 @@ function getFilenameByMime(contentType) {
 //-------------[HELPERS]--------------}>
 
 function forEachAsync(data, iter, cbEnd) {
+    if(!data) {
+        if(cbEnd) {
+            cbEnd();
+        }
+
+        return;
+    }
+
+    //---------]>
+
     const len   = data.length;
 
     let i       = 0;
@@ -124,8 +134,8 @@ function forEachAsync(data, iter, cbEnd) {
         iter(cbNext, data[i], i);
     }
 
-    function cbNext(error, result) {
-        if(error) {
+    function cbNext(error, result, stopped) {
+        if(error || stopped) {
             if(cbEnd) {
                 cbEnd(error, result, i);
             }
@@ -137,7 +147,7 @@ function forEachAsync(data, iter, cbEnd) {
 
         if(i >= len) {
             if(cbEnd) {
-                cbEnd(error, result, i);
+                cbEnd(null, result, i);
             }
         } else {
             run();
