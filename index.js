@@ -67,8 +67,8 @@ function main(token) {
         engine(t)                           { this.mdEngine = t; return this; },
         promise(t)                          { this.mdPromise = t; return this; },
 
-        call(method, data, callback)        { rTgApi.call(token, method, data, callback); },
-        callJson(method, data, callback)    { rTgApi.callJson(token, method, data, callback); },
+        call(method, data, callback)        { rTgApi.call(token, method, data, callback, this._optProxy); },
+        callJson(method, data, callback)    { rTgApi.callJson(token, method, data, callback, this._optProxy); },
 
         polling(params, callback)           { return rServer.polling(this, params, callback); },
         http(params, callback)              { return rServer.http(this, params, callback); },
@@ -76,6 +76,28 @@ function main(token) {
 
         "render":       mthCMainRender,
         "download":     mthCMainDownload,
+
+        proxy(t) {
+            if(!t) {
+                this._optProxy = null;
+                return this;
+            }
+
+            this._optProxy = this._optProxy || {};
+
+            if(typeof(t) === "string") {
+                t = t.split(":");
+
+                this._optProxy.host = t[0];
+                this._optProxy.port = t[1];
+            }
+            else {
+                this._optProxy.host = t.host;
+                this._optProxy.port = t.port;
+            }
+
+            return this;
+        },
 
         token(t) {
             if(!arguments.length) {

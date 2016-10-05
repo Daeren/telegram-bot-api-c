@@ -25,6 +25,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 
 [Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, [Telegram Gaming Platform][5]
 
+* Proxy: +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
 * Analytics: [tgb-pl-botanio][4]
 * Added: tgBot.api[sendMethod] => error.retryAfter
@@ -51,6 +52,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 #### Index
 
 * [Start](#refStart)
+* [Proxy](#refProxy)
 * [Polling](#refPolling)
 * [HTTP](#refHTTP)
 * [Virtual](#refVirtual)
@@ -181,6 +183,46 @@ function onTextRegEx(bot, data) { }
   /start@bot [text]     -> private
   @bot /start [text]    -> private
 */
+```
+
+
+
+<a name="refProxy"></a>
+#### Proxy
+
+```js
+const gBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
+
+const gProxyStr = "127.0.0.1:1337",
+      gProxyObj = {
+          "host": "127.0.0.1",
+          "port": 1337
+      };
+
+//------------------]>
+
+function getMe(callback) { gBot.api.getMe(callback); }
+
+//------------------]>
+
+gBot.proxy(gProxyObj);
+
+getMe(t => {
+    objBot.proxy(gProxyStr);
+
+    getMe(t => {
+        objBot.proxy(); // <-- Remove
+        getMe();
+    });
+});
+
+rBot.callJson({
+    "token":    process.env.TELEGRAM_BOT_TOKEN,
+    "method":   "getMe",
+    "proxy":    gProxyStr
+}, null, (e, d) => {});
+
+rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", null, (e, d) => {}, gProxyObj);
 ```
 
 
@@ -824,8 +866,10 @@ npm test
 | keyboard          | buttons[, params]                                                   | return: object; buttons: string/array; params: "resize once selective"    |
 | parseCmd          | text[, strict]                                                      | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore |
 |                   | -                                                                   |                                                                           |
-| call              | token, method[, data][, callback(error, buffer, response)]          |                                                                           |
-| callJson          | token, method[, data][, callback(error, json, response)]            |                                                                           |
+| call              | token, method[, data][, callback(error, buffer, response)][, proxy] |                                                                           |
+| call              | options{token, method, proxy}[, data][, callback]                   |                                                                           |
+| callJson          | token, method[, data][, callback(error, json, response)][, proxy]   |                                                                           |
+| callJson          | options{token, method, proxy}[, data][, callback]                   |                                                                           |
 
 
 #### Instance
@@ -851,6 +895,7 @@ npm test
 | engine            | instance                                                              | this                              |
 | promise           | instance                                                              | this                              |
 | token             | [token]                                                               | this or token                     |
+| proxy             | [proxy]                                                               | this                              |
 |                   | -                                                                     |                                   |
 | call              | method[, data][, callback(error, buffer, response)]                   |                                   |
 | callJson          | method[, data][, callback(error, json, response)]                     |                                   |

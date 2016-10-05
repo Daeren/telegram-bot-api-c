@@ -156,10 +156,20 @@ function getReadStreamByUrl(url, data, callback) {
 
 //--------[PublicMethods]--------}>
 
-function callAPI(token, method, data, callback) {
-    let isWritten;
+function callAPI(token, method, data, callback, proxy) {
+    let isWritten, req;
 
     //-------------------------]>
+
+    if(token && typeof(token) === "object") {
+        callback = data;
+
+        data = method;
+
+        method = token.method;
+        proxy = token.proxy;
+        token = token.token;
+    }
 
     if(!token) {
         throw new Error("callAPI: `token` was not specified.");
@@ -176,19 +186,6 @@ function callAPI(token, method, data, callback) {
 
     //-------------------------]>
 
-    const req = rRequest(token, method, callback);
-
-    if(!data) {
-        onReqMthEnd();
-        return;
-    }
-
-    method = method.toLowerCase();
-
-    //-------------------------]>
-
-    const reqMthParams  = rProto.params[method];
-
     const dataIsMap     = data instanceof Map,
           dataIsArray   = dataIsMap ? false : Array.isArray(data);
 
@@ -196,7 +193,16 @@ function callAPI(token, method, data, callback) {
 
     //-------------------------]>
 
-    rUtil.forEachAsync(reqMthParams, iterReqMthParams, onReqMthEnd);
+    rRequest(proxy, token, method, callback, function onReqInit(request) {
+        req = request;
+
+        if(data) {
+            rUtil.forEachAsync(rProto.params[method.toLowerCase()], iterReqMthParams, onReqMthEnd);
+        }
+        else {
+            onReqMthEnd();
+        }
+    });
 
     //-------------------------]>
 
@@ -385,7 +391,17 @@ function callAPI(token, method, data, callback) {
     }
 }
 
-function callAPIJson(token, method, data, callback) {
+function callAPIJson(token, method, data, callback, proxy) {
+    if(token && typeof(token) === "object") {
+        callback = data;
+
+        data = method;
+
+        method = token.method;
+        proxy = token.proxy;
+        token = token.token;
+    }
+
     if(typeof(data) === "function") {
         callback = data;
         data = null;
@@ -393,7 +409,7 @@ function callAPIJson(token, method, data, callback) {
 
     //-----------]>
 
-    callAPI(token, method, data, callback ? cbCallAPI : null);
+    callAPI(token, method, data, callback ? cbCallAPI : null, proxy);
 
     //-----------]>
 

@@ -9,23 +9,45 @@
 
 //-----------------------------------------------------
 
-const rHttps  = require("https");
+const rHttp   = require("http"),
+      rHttps  = require("https");
 
 const rErrors = require("./../errors");
 
 //-----------------------------------------------------
 
-const gKeepAliveAgent   = new rHttps.Agent({"keepAlive": true});
+const gKeepAliveAgentHTTP    = new rHttp.Agent({"keepAlive": true});
+const gKeepAliveAgentHTTPS   = new rHttps.Agent({"keepAlive": true});
 
 const gReqTimeout       = 1000 * 60 * 2,
+
       gReqOptions       = {
           "path":   null,
           "method": "POST",
 
           "host":   "api.telegram.org",
           "port":   443,
-      
-          "agent":  gKeepAliveAgent
+
+          "agent":  gKeepAliveAgentHTTPS
+      },
+
+      gReqProxyTunOptions = {
+          "host":     null,
+          "port":     null,
+
+          "method":   "CONNECT",
+          "path":     "api.telegram.org:443",
+
+          "agent":    gKeepAliveAgentHTTP
+      },
+      gReqProxyOptions  = {
+          "path":   null,
+          "method": "POST",
+
+          "host":   "api.telegram.org",
+          "port":   443,
+
+          "agent":  false
       };
 
 //-----------------------------------------------------
@@ -34,14 +56,63 @@ module.exports = main;
 
 //-----------------------------------------------------
 
-function main(token, method, callback) {
-    gReqOptions.path = "/bot" + token + "/" + method;
+function main(proxy, token, method, callback, onInit) {
+    const path = "/bot" + token + "/" + method;
 
     //--------------]>
 
-    return (callback ? rHttps.request(gReqOptions, onResponse).on("error", onError) : rHttps.request(gReqOptions)).setTimeout(gReqTimeout, onTimeout);
+    if(proxy) {
+        if(typeof(proxy) === "string") {
+            proxy = proxy.split(":");
+            proxy = {
+                "host": proxy[0],
+                "port": proxy[1]
+            };
+        }
+
+        gReqProxyTunOptions.host = proxy.host;
+        gReqProxyTunOptions.port = proxy.port;
+
+        //-------]>
+
+        const req = rHttp.request(gReqProxyTunOptions);
+
+        //-------]>
+
+        if(callback) {
+            req.on("error", onError);
+        }
+
+        req
+            .on("connect", function(response, socket, head) {
+                const statusCode = response.statusCode;
+
+                if(statusCode === 200) {
+                    gReqProxyOptions.path = path;
+                    gReqProxyOptions.socket = socket;
+
+                    onInit(buildRequest(gReqProxyOptions));
+                }
+                else {
+                    socket.destroy(new Error("Proxy | connect.statusCode: " + statusCode))
+                }
+            })
+            .setTimeout(gReqTimeout, onTimeout)
+            .end();
+    }
+    else {
+        gReqOptions.path = path;
+
+        onInit(buildRequest(gReqOptions));
+    }
 
     //--------------]>
+
+    function buildRequest(opt) {
+        return (callback ? rHttps.request(opt, onResponse).on("error", onError) : rHttps.request(opt)).setTimeout(gReqTimeout, onTimeout);
+    }
+
+    //----)>
 
     function onError(error) {
         error.code = rErrors.ERR_BAD_REQUEST;
