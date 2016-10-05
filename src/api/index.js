@@ -179,6 +179,11 @@ function callAPI(token, method, data, callback, proxy) {
         throw new Error("callAPI: `method` was not specified.");
     }
 
+    if(callback && typeof(callback) !== "function") {
+        proxy = callback;
+        callback = null;
+    }
+
     if(typeof(data) === "function") {
         callback = data;
         data = null;
@@ -402,6 +407,11 @@ function callAPIJson(token, method, data, callback, proxy) {
         method = token.method;
         proxy = token.proxy;
         token = token.token;
+    }
+
+    if(callback && typeof(callback) !== "function") {
+        proxy = callback;
+        callback = null;
     }
 
     if(typeof(data) === "function") {
