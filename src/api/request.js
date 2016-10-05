@@ -64,14 +64,14 @@ function main(proxy, token, method, callback, onInit) {
     if(proxy) {
         if(typeof(proxy) === "string") {
             proxy = proxy.split(":");
-            proxy = {
-                "host": proxy[0],
-                "port": proxy[1]
-            };
-        }
 
-        gReqProxyTunOptions.host = proxy.host;
-        gReqProxyTunOptions.port = proxy.port;
+            gReqProxyTunOptions.host = proxy[0];
+            gReqProxyTunOptions.port = proxy[1];
+        }
+        else {
+            gReqProxyTunOptions.host = proxy.host;
+            gReqProxyTunOptions.port = proxy.port;
+        }
 
         //-------]>
 
