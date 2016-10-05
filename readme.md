@@ -129,8 +129,9 @@ gBot.call("sendMessage", ["0", "Hi"], (e, data, res) => console.log(e || data));
   gBot.ERR_USED_WEBHOOK
   gBot.ERR_INVALID_TOKEN
 
-  gBot.ERR_FAILED_PARSE_DATA
   gBot.ERR_BAD_REQUEST
+  gBot.ERR_BAD_PROXY
+  gBot.ERR_FAILED_PARSE_DATA
 */
 
 //----------------------------]>
@@ -193,7 +194,7 @@ function onTextRegEx(bot, data) { }
 ```js
 const gBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-const gProxyStr = "127.0.0.1:1337",
+const gProxyStr = "127.0.0.1:1337", // <-- Only HTTPS
       gProxyObj = {
           "host": "127.0.0.1",
           "port": 1337
@@ -220,9 +221,9 @@ rBot.callJson({
     "token":    process.env.TELEGRAM_BOT_TOKEN,
     "method":   "getMe",
     "proxy":    gProxyStr
-}, null, (e, d) => {});
+}, (e, d) => {});
 
-rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", null, (e, d) => {}, gProxyObj);
+rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, d) => {}, gProxyObj);
 ```
 
 

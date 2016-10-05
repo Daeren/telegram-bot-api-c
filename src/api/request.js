@@ -84,7 +84,7 @@ function main(proxy, token, method, callback, onInit) {
         }
 
         req
-            .on("connect", function(response, socket, head) {
+            .on("connect", function(response, socket) {
                 const statusCode = response.statusCode;
 
                 if(statusCode === 200) {
@@ -94,7 +94,10 @@ function main(proxy, token, method, callback, onInit) {
                     onInit(buildRequest(gReqProxyOptions));
                 }
                 else {
-                    socket.destroy(new Error("Proxy | connect.statusCode: " + statusCode))
+                    const e = new Error("Proxy | connect.statusCode: " + statusCode);
+                    e.code = rErrors.ERR_BAD_PROXY;
+
+                    socket.destroy(e);
                 }
             })
             .setTimeout(gReqTimeout, onTimeout)
@@ -115,7 +118,10 @@ function main(proxy, token, method, callback, onInit) {
     //----)>
 
     function onError(error) {
-        error.code = rErrors.ERR_BAD_REQUEST;
+        if(error.code != rErrors.ERR_BAD_PROXY) {
+            error.code = rErrors.ERR_BAD_REQUEST;
+        }
+
         callback(error, null, null);
     }
 

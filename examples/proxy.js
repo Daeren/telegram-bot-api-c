@@ -38,10 +38,10 @@ getMe(t => {
                 "token":    process.env.TELEGRAM_BOT_TOKEN,
                 "method":   "getMe",
                 "proxy":    gProxyStr
-            }, null, (e, data, res) => {
+            }, (e, data, res) => {
                 console.log(e || data);
 
-                rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", null, (e, data, res) => console.log(e || data), gProxyObj);
+                rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, data, res) => console.log(e || data), gProxyObj);
             });
         });
     });

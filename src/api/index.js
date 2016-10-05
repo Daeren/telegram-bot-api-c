@@ -193,7 +193,11 @@ function callAPI(token, method, data, callback, proxy) {
 
     //-------------------------]>
 
-    rRequest(proxy, token, method, callback, function onReqInit(request) {
+    rRequest(proxy, token, method, callback, onReqInit);
+
+    //-------------------------]>
+
+    function onReqInit(request) {
         req = request;
 
         if(data) {
@@ -202,9 +206,7 @@ function callAPI(token, method, data, callback, proxy) {
         else {
             onReqMthEnd();
         }
-    });
-
-    //-------------------------]>
+    }
 
     function iterReqMthParams(next, param, index) {
         if(dataIsArray && index >= dataLen) {

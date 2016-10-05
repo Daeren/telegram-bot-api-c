@@ -18,7 +18,8 @@ const gErrors = {
     "ERR_INVALID_TOKEN":        401,
 
     "ERR_BAD_REQUEST":          -10000,
-    "ERR_FAILED_PARSE_DATA":    -10001
+    "ERR_BAD_PROXY":            -10001,
+    "ERR_FAILED_PARSE_DATA":    -10002
 
 };
 
