@@ -52,13 +52,13 @@ gBot
 
 //----------------]>
 
-function auth(bot) {
+function auth() {
     console.log("auth", arguments);
 
     return new Promise(x => setTimeout(x, 1000));
 }
 
-function save(bot) {
+function save() {
     console.log("save", arguments);
 
     return new Promise(x => setTimeout(x, 1000));

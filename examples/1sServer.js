@@ -111,10 +111,10 @@ objSrv
     });
 
 objSrv
-    .use("text", function(bot) {
+    .use("text", function() {
         console.log("F:Sync | Type: text");
     })
-    .use("photo", function(bot) {
+    .use("photo", function() {
         console.log("F:Sync | Type: photo");
     });
 

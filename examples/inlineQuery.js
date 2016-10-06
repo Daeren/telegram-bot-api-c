@@ -38,7 +38,7 @@ gBot
             .then(console.info, console.error);
     })
 
-    .on("chosenInlineResult", function(bot, data) {
+    .on("chosenInlineResult", function() {
     })
 
     .on("callbackQuery", function(bot, query) {

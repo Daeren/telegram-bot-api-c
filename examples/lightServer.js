@@ -94,6 +94,8 @@ function cbMsg(bot) {
 function cbCmdStart(bot, params) {
     tCheckBaseBotFields(bot);
 
+    expect(params).to.be.an("object");
+	
     //----------]>
 
     bot.answer().text("CMD: /start").send();

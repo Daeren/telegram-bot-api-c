@@ -27,21 +27,21 @@ const gProxyStr = "87.255.70.228:3128",
 
 gBot.proxy(gProxyObj);
 
-getMe(t => {
+getMe(() => {
     gBot.proxy(gProxyStr);
 
-    getMe(t => {
+    getMe(() => {
         gBot.proxy();
 
-        getMe(t => {
+        getMe(() => {
             rBot.callJson({
                 "token":    process.env.TELEGRAM_BOT_TOKEN,
                 "method":   "getMe",
                 "proxy":    gProxyStr
-            }, (e, data, res) => {
+            }, (e, data) => {
                 console.log(e || data);
 
-                rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, data, res) => console.log(e || data), gProxyObj);
+                rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, data) => console.log(e || data), gProxyObj);
             });
         });
     });

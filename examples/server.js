@@ -70,13 +70,6 @@ function cbMsg(bot) {
 
     tCheckBaseBotFields(bot);
 
-    //----------]>
-
-    let msg         = bot.message;
-
-    let msgChat     = msg.chat,
-        msgText     = msg.text;
-
     //----------------]>
 
     bot.api
@@ -101,6 +94,8 @@ function cbMsg(bot) {
 function cbCmdStart(bot, params) {
     tCheckBaseBotFields(bot);
 
+    expect(params).to.be.an("object");
+	
     //----------]>
 
     bot.answer().text("Hello").send().then(console.log, console.error);
@@ -121,7 +116,7 @@ function cbCmdStop(bot, params) {
 //-------------]>
 
 function tCheckBaseBotFields(bot) {
-    expect(bot).to.be.a("object");
+    expect(bot).to.be.an("object");
     expect(bot).to.have.property("message").that.is.an("object");
 
     //----------]>
