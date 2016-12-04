@@ -211,15 +211,13 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.on(/(\w+)/, function(bot, params, next) {
+        server.on(/(\w+)/, function(bot, params) {
             expect(params).to.be.a("array");
             expect(params[0]).to.be.a("string").and.equal(bot.message.text);
             expect(params[1]).to.be.a("string").and.equal(bot.message.text);
 
             tCheckBaseBotFields(bot);
             done();
-
-            next;
         });
 
         server.on("*", function() {
@@ -411,7 +409,11 @@ describe("srv.virtual", function() {
     //-----)>
 
     it("Instance (event: default | cmd)", function(done) {
-        let server = objBot.virtual(function(bot) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+        server.on("/", function(bot) {
             const cmd = bot.command;
 
             tCheckBaseBotFields(bot);
@@ -512,7 +514,17 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | base-without)", function(done) {
-        let server = objBot.virtual(function(bot) {
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #1");
+        });
+
+
+        server.use("text", function() {
+            return "goto";
+        });
+
+
+        server.on("/", function(bot) {
             const cmd = bot.command;
 
             tCheckBaseBotFields(bot);
@@ -521,10 +533,6 @@ describe("srv.virtual", function() {
             expect(bot.gotoState).to.be.a("string").and.equal("goto");
 
             done();
-        });
-
-        server.use("text", function() {
-            return "goto";
         });
 
         server.on("text:goto", function() {
@@ -545,15 +553,8 @@ describe("srv.virtual", function() {
     });
 
     it("Instance (event: cmd | goto | default)", function(done) {
-        let server = objBot.virtual(function(bot) {
-            const cmd = bot.command;
-
-            tCheckBaseBotFields(bot);
-            tCheckBaseCmdFields(cmd);
-
-            expect(bot.gotoState).to.be.a("string").and.equal("goto");
-
-            done();
+        let server = objBot.virtual(function() {
+            throw new Error("The message passed through the event | #6");
         });
 
         server.use("text", function() {
@@ -582,13 +583,7 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #2");
         });
 
-        //------]>
-
-        server.input(null, inputSrvMessageCmd);
-    });
-
-    it("Instance (event: cmd | goto | default-generator)", function(done) {
-        let server = objBot.virtual(function* (bot) {
+        server.on("/", function(bot) {
             const cmd = bot.command;
 
             tCheckBaseBotFields(bot);
@@ -596,9 +591,18 @@ describe("srv.virtual", function() {
 
             expect(bot.gotoState).to.be.a("string").and.equal("goto");
 
-            yield new Promise(x => setTimeout(x));
-
             done();
+        });
+
+        //------]>
+
+        server.input(null, inputSrvMessageCmd);
+    });
+
+    it("Instance (event: cmd | goto | default-generator)", function(done) {
+        let server = objBot.virtual(function(bot) {
+            throw new Error("The message passed through the event | #6");
+
         });
 
         server.use("text", function* () {
@@ -625,6 +629,19 @@ describe("srv.virtual", function() {
 
         server.on("*", function() {
             throw new Error("The message passed through the event | #2");
+        });
+
+        server.on("/", function* (bot) {
+            const cmd = bot.command;
+
+            tCheckBaseBotFields(bot);
+            tCheckBaseCmdFields(cmd);
+
+            expect(bot.gotoState).to.be.a("string").and.equal("goto");
+
+            yield new Promise(x => setTimeout(x));
+
+            done();
         });
 
         //------]>

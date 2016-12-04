@@ -164,7 +164,8 @@ const gProtoTable = {
     "getUpdates": [
         ["string", "offset"],
         ["string", "limit"],
-        ["string", "timeout"]
+        ["string", "timeout"],
+        ["json", "allowed_updates"]
     ],
 
     "getFile": [
@@ -185,16 +186,19 @@ const gProtoTable = {
 
     "setWebhook": [
         ["string", "url"],
-        ["certificate", "certificate"]
+        ["certificate", "certificate"],
+        ["string", "max_connections"],
+        ["json", "allowed_updates"]
     ],
 
     "setGameScore": [
         ["string", "user_id"],
         ["string", "score"],
+        ["boolean", "force"],
+        ["boolean", "disable_edit_message"],
         ["string", "chat_id"],
         ["string", "message_id"],
-        ["string", "inline_message_id"],
-        ["boolean", "edit_message"]
+        ["string", "inline_message_id"]
     ],
 
 
@@ -212,7 +216,8 @@ const gProtoTable = {
         ["string", "callback_query_id"],
         ["string", "text"],
         ["boolean", "show_alert"],
-        ["string", "url"]
+        ["string", "url"],
+        ["string", "cache_time"]
     ],
 
 
@@ -254,7 +259,10 @@ const gProtoTable = {
         ["string", "message_id"],
         ["string", "inline_message_id"],
         ["json", "reply_markup"]
-    ]
+    ],
+
+
+    "deleteWebhook": null
 };
 
 const gArgsTable  = {
@@ -407,7 +415,8 @@ const gArgsTable  = {
     "getUpdates": [
         "offset",
         "limit",
-        "timeout"
+        "timeout",
+        "allowed_updates"
     ],
 
     "getFile": [
@@ -424,16 +433,19 @@ const gArgsTable  = {
 
     "setWebhook": [
         "url",
-        "certificate"
+        "certificate",
+        "max_connections",
+        "allowed_updates"
     ],
 
     "setGameScore": [
         "user_id",
         "score",
+        "force",
+        "disable_edit_message",
         "chat_id",
         "message_id",
-        "inline_message_id",
-        "edit_message"
+        "inline_message_id"
     ],
 
 
@@ -451,7 +463,8 @@ const gArgsTable  = {
         "callback_query_id",
         "text",
         "show_alert",
-        "url"
+        "url",
+        "cache_time"
     ],
 
 

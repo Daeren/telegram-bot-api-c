@@ -23,50 +23,38 @@ function main(input) {
     //----------]>
 
     for(let name in input.bin) {
-        if(!input.bin.hasOwnProperty(name)) {
-            continue;
+        if(input.bin.hasOwnProperty(name)) {
+            const kb = input.bin[name];
+
+            name = name[0].toUpperCase() + name.substr(1);
+
+            map["v" + name] = kb.map(x => [x]);
+            map["h" + name] = [kb];
         }
-
-        const kb = input.bin[name];
-
-        //----]>
-
-        name = name[0].toUpperCase() + name.substr(1);
-
-        map["v" + name] = kb.map(x => [x]);
-        map["h" + name] = [kb];
     }
 
     for(let name in input.norm) {
-        if(!input.norm.hasOwnProperty(name)) {
-            continue;
+        if(input.norm.hasOwnProperty(name)) {
+            const kb = input.norm[name];
+
+            keyboardBuilder[name] = genFKB("keyboard", kb, false);
+            inlineKeyboardBuilder[name] = genFKB("inline_keyboard", kb, false, true);
         }
-
-        const kb = input.norm[name];
-
-        //----]>
-
-        keyboardBuilder[name] = genFKB("keyboard", kb, false);
-        inlineKeyboardBuilder[name] = genFKB("inline_keyboard", kb, false, true);
     }
 
     for(let name in map) {
-        if(!map.hasOwnProperty(name)) {
-            continue;
+        if(map.hasOwnProperty(name)) {
+            const kb = map[name];
+
+            keyboardBuilder[name] = genFKB("keyboard", kb, true);
+            inlineKeyboardBuilder[name] = genFKB("inline_keyboard", kb, true, true);
         }
-        
-        const kb = map[name];
-
-        //----]>
-
-        keyboardBuilder[name] = genFKB("keyboard", kb, true);
-        inlineKeyboardBuilder[name] = genFKB("inline_keyboard", kb, true, true);
     }
 
     //-----)>
 
     keyboardBuilder.inline = inlineKeyboardBuilder;
-    keyboardBuilder.hide = genFKB("hide_keyboard");
+    keyboardBuilder.hide = genFKB("remove_keyboard");
 
     //----------]>
 
@@ -96,7 +84,7 @@ function main(input) {
 
     function keyboardBuilder(buttons, params) {
         buttons = typeof(buttons) === "string" ? buttons.split(/\s+/).map(x => [x]) : buttons;
-        buttons = buttons === false || !arguments.length ? {"hide_keyboard": true} : {"keyboard": buttons};
+        buttons = buttons === false || !arguments.length ? {"remove_keyboard": true} : {"keyboard": buttons};
 
         if(!params) {
             return buttons;

@@ -27,7 +27,7 @@ function main(bot, onMsg) {
         "ctx":          ctx,
 
         "plugins":      [],
-        "events":       {},
+        "events":       new Map(),
 
         "cbCatch":      null,
 
@@ -104,7 +104,12 @@ function main(bot, onMsg) {
         }
 
         type = event.type;
-        (result.events[type] = result.events[type] || []).push(event.result);
+
+        if(!result.events.has(type)) {
+            result.events.set(type, []);
+        }
+
+        result.events.get(type).push(event.result);
 
         //--------]>
 
@@ -113,12 +118,12 @@ function main(bot, onMsg) {
 
     function srvEvOff(type, callback) {
         const evProto   = buildEvent(type, null, callback),
-              events    = evProto && result.events[evProto.type];
+              events    = evProto && result.events.get(evProto.type);
 
         if(events) {
-            const target    = evProto.result;
+            const target = evProto.result;
 
-            let len         = events.length;
+            let len = events.length;
 
             while(len--) {
                 const event = events[len];

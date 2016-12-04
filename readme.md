@@ -23,14 +23,19 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, [Telegram Gaming Platform][5]
+[Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, Bot API 2.2 ([Telegram Gaming Platform][5]), Bot API 2.3, Bot API 2.3.1
 
 * Proxy: +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
 * Analytics: [tgb-pl-botanio][4]
 * Added: tgBot.api[sendMethod] => error.retryAfter
-* Added: `caption` fields to sendAudio, sendVoice
-* New method `getWebhookInfo`
+* Added: "channelPost" and "editedChannelPost"
+* Added: "force" and "disable_edit_message" (setGameScore)
+* Added: example "channelPost"
+* Added: [tgUrlUpload](#refTgUpload)
+
+
+
 
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
@@ -59,6 +64,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * [mServer](#refMServer)
 * [Nginx + Node.js](#refExampleNginxNodejs)
 * [Response Builder](#refResponseBuilder)
+* [Tg Upload](#refTgUpload)
 * [Plugin](#refPlugin)
 * [Goto](#refGoto)
 * [JS Generators](#refJSGenerators)
@@ -66,6 +72,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 * [Keyboard](#refKeyboard)
 * [Download](#refDownload)
 * [InlineQuery](#refInlineQuery)
+* [Send file as Buffer](#refSendFileAsBuffer)
 * [CLI](#refCLI)
 * [Test](#refTest)
 
@@ -513,6 +520,27 @@ objSrv
 
 
 
+<a name="refTgUpload"></a>
+#### Tg Upload 
+
+```js
+gBot.enable("tgUrlUpload");
+
+gBot
+    .polling()
+    .on("text", function(bot, url) {
+        bot.answer().photo(url).send();
+    });
+    
+/*
+Added the option to specify an HTTP URL for a file in all methods where InputFile or file_id can be used (except voice messages).
+Telegram will get the file from the specified URL and send it to the user.
+Files must be smaller than 5 MB for photos and smaller than 20 MB for all other types of content.
+*/
+```
+
+
+
 <a name="refPlugin"></a>
 #### Plugin 
 
@@ -772,7 +800,7 @@ bot
 
 
 <a name="refSendFileAsBuffer"></a>
-#### Send file as Buffer 
+#### Send file as Buffer
 
 ```js
 
@@ -861,16 +889,16 @@ npm test
 
 #### Module 
 
-| Method            | Arguments                                                           | Note                                                                      |
-|-------------------|---------------------------------------------------------------------|---------------------------------------------------------------------------|
-|                   | -                                                                   |                                                                           |
-| keyboard          | buttons[, params]                                                   | return: object; buttons: string/array; params: "resize once selective"    |
-| parseCmd          | text[, strict]                                                      | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore |
-|                   | -                                                                   |                                                                           |
-| call              | token, method[, data][, callback(error, buffer, response)][, proxy] |                                                                           |
-| call              | options{token, method, proxy}[, data][, callback]                   |                                                                           |
-| callJson          | token, method[, data][, callback(error, json, response)][, proxy]   |                                                                           |
-| callJson          | options{token, method, proxy}[, data][, callback]                   |                                                                           |
+| Method            | Arguments                                                                             | Note                                                                      |
+|-------------------|---------------------------------------------------------------------------------------|---------------------------------------------------------------------------|
+|                   | -                                                                                     |                                                                           |
+| keyboard          | buttons[, params]                                                                     | return: object; buttons: string/array; params: "resize once selective"    |
+| parseCmd          | text[, strict]                                                                        | return: {type, name, text, cmd}; strict: maxLen32 + alphanum + underscore |
+|                   | -                                                                                     |                                                                           |
+| call              | token, method[, data][, callback(error, buffer, response)][, proxy][, tgUrlUpload]    |                                                                           |
+| call              | options{token, method, proxy, tgUrlUpload}[, data][, callback]                        |                                                                           |
+| callJson          | token, method[, data][, callback(error, json, response)][, proxy][, tgUrlUpload]      |                                                                           |
+| callJson          | options{token, method, proxy, tgUrlUpload}[, data][, callback]                        |                                                                           |
 
 
 #### Instance
@@ -1005,6 +1033,10 @@ npm test
 |                   | -                                     |                                           |
 | message           | bot, message[, next]                  |                                           |
 | editedMessage     | bot, message[, next]                  |                                           |
+|                   | -                                     |                                           |
+| channelPost       | bot, post[, next]                     |                                           |
+| editedChannelPost | bot, post[, next]                     |                                           |
+|                   | -                                     |                                           |
 | inlineQuery       | bot, data[, next]                     |                                           |
 | chosenInlineResult| bot, data[, next]                     |                                           |
 | callbackQuery     | bot, data[, next]                     |                                           |
@@ -1037,6 +1069,7 @@ npm test
 | contact           | bot, data[, next]                     |                                           |
 | game              | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
+| *                 | bot, data[, next]                     |                                           |
 | /[name]           | bot, params[, next]                   | CMD                                       |
 |                   | -                                     |                                           |
 | (regexp)          | bot, params[, next]                   |                                           |

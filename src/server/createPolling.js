@@ -88,7 +88,7 @@ function main(botFather, params, callback) {
         botFather.api.getUpdates(pollingParams, function(error, data) {
             if(error) {
                 if(error.code === rErrors.ERR_USED_WEBHOOK) {
-                    botFather.callJson("setWebhook", null, load);
+                    botFather.callJson("deleteWebhook", null, load);
                 }
                 else {
                     rOnMsg(error, srvBot, null);

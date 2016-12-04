@@ -21,8 +21,12 @@ const onIncomingMessage             = require("./onIncomingMessage"),
 
 const gIncomeEv = [
     ["inline_query",            "inlineQuery",          onIncomingInlineQuery],
+
     ["message",                 "message",              onIncomingMessage],
     ["edited_message",          "editedMessage",        onIncomingMessage],
+    ["channel_post",            "channelPost",          onIncomingMessage],
+    ["edited_channel_post",     "editedChannelPost",    onIncomingMessage],
+
     ["callback_query",          "callbackQuery",        onIncomingCallbackQuery],
     ["chosen_inline_result",    "chosenInlineResult",   onIncomingChosenInlineResult]
 ];
@@ -43,22 +47,24 @@ function main(error, srvBot, data) {
 
     if(error) {
         onError(error);
+        return;
     }
-    else {
-        for(let ev, updateType, eventType, func, input, i = 0, len = gIncomeEv.length; i < len; i++) {
-            ev = gIncomeEv[i];
 
-            updateType = ev[0];
-            input = data[updateType];
+    //--------]>
 
-            if(input && typeof(input) === "object") {
-                eventType = ev[1];
-                func = ev[2];
+    for(let ev, updateType, eventType, func, input, i = 0, len = gIncomeEv.length; i < len; i++) {
+        ev = gIncomeEv[i];
 
-                func(Object.create(srvBot.ctx), srvBot.plugins, srvBot.events, updateType, eventType, input, onEnd);
+        updateType = ev[0];
+        input = data[updateType];
 
-                break;
-            }
+        if(input && typeof(input) === "object") {
+            eventType = ev[1];
+            func = ev[2];
+
+            func(Object.create(srvBot.ctx), srvBot.plugins, srvBot.events, updateType, eventType, input, onEnd);
+
+            break;
         }
     }
 

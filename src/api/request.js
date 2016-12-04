@@ -22,13 +22,13 @@ const gKeepAliveAgentHTTPS   = new rHttps.Agent({"keepAlive": true});
 const gReqTimeout       = 1000 * 60 * 2,
 
       gReqOptions       = {
-          "path":   null,
-          "method": "POST",
+          "path":       null,
+          "method":     "POST",
 
-          "host":   "api.telegram.org",
-          "port":   443,
+          "host":       "api.telegram.org",
+          "port":       443,
 
-          "agent":  gKeepAliveAgentHTTPS
+          "agent":      gKeepAliveAgentHTTPS
       },
 
       gReqProxyTunOptions = {
@@ -41,13 +41,13 @@ const gReqTimeout       = 1000 * 60 * 2,
           "agent":    gKeepAliveAgentHTTP
       },
       gReqProxyOptions  = {
-          "path":   null,
-          "method": "POST",
+          "path":       null,
+          "method":     "POST",
 
-          "host":   "api.telegram.org",
-          "port":   443,
+          "host":       "api.telegram.org",
+          "port":       443,
 
-          "agent":  false
+          "agent":      false
       };
 
 //-----------------------------------------------------
@@ -64,14 +64,10 @@ function main(proxy, token, method, callback, onInit) {
     if(proxy) {
         if(typeof(proxy) === "string") {
             proxy = proxy.split(":");
+        }
 
-            gReqProxyTunOptions.host = proxy[0];
-            gReqProxyTunOptions.port = proxy[1];
-        }
-        else {
-            gReqProxyTunOptions.host = proxy.host;
-            gReqProxyTunOptions.port = proxy.port;
-        }
+        gReqProxyTunOptions.host = proxy.host || proxy[0];
+        gReqProxyTunOptions.port = proxy.port || proxy[1];
 
         //-------]>
 
@@ -82,6 +78,8 @@ function main(proxy, token, method, callback, onInit) {
         if(callback) {
             req.on("error", onError);
         }
+
+        //-------]>
 
         req
             .on("connect", function(response, socket) {
@@ -115,19 +113,7 @@ function main(proxy, token, method, callback, onInit) {
         return (callback ? rHttps.request(opt, onResponse).on("error", onError) : rHttps.request(opt)).setTimeout(gReqTimeout, onTimeout);
     }
 
-    //----)>
-
-    function onError(error) {
-        if(error.code !== rErrors.ERR_BAD_PROXY) {
-            error.code = rErrors.ERR_BAD_REQUEST;
-        }
-
-        callback(error, null, null);
-    }
-
-    function onTimeout() {
-        this.destroy(new Error("Timeout."));
-    }
+    //-------)>
 
     function onResponse(response) {
         let firstChunk, chunks;
@@ -154,5 +140,17 @@ function main(proxy, token, method, callback, onInit) {
         function onResponseEnd() {
             callback(null, chunks ? Buffer.concat(chunks) : firstChunk, response);
         }
+    }
+
+    function onError(error) {
+        if(error.code !== rErrors.ERR_BAD_PROXY) {
+            error.code = rErrors.ERR_BAD_REQUEST;
+        }
+
+        callback(error, null, null);
+    }
+
+    function onTimeout() {
+        this.destroy(new Error("Timeout."));
     }
 }

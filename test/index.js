@@ -951,9 +951,9 @@ describe("Instance: bot", function() {
 
         //-----)>
 
-        it("setWebhook (delete) | promise", function(done) {
+        it("deleteWebhook | promise", function(done) {
             api
-                .setWebhook()
+                .deleteWebhook()
                 .then(function(isOk) {
                     expect(isOk).to.be.a("boolean").to.equal(true);
 

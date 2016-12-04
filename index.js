@@ -31,8 +31,8 @@ const gTgHostFile = "api.telegram.org";
 main.keyboard   = rKeyboard;
 main.parseCmd   = rParseCmd;
 
-main.call       = rTgApi.call;
-main.callJson   = rTgApi.callJson;
+main.call       = rTgApi.callAPI;
+main.callJson   = rTgApi.callAPIJson;
 
 //-----------------------------------------------------
 
@@ -49,8 +49,7 @@ function main(token) {
 
     function CMain() {
         this.mdPromise  = Promise;
-
-        this.kvCfgStore = Object.create(null);
+        this.kvCfgStore = new Map();
 
         this.keyboard   = rKeyboard;
         this.parseCmd   = rParseCmd;
@@ -59,16 +58,16 @@ function main(token) {
     }
 
     CMain.prototype = {
-        enable(key)                         { this.kvCfgStore[key] = true; return this; },
-        disable(key)                        { delete this.kvCfgStore[key]; return this; },
-        enabled(key)                        { return this.kvCfgStore[key] === true; },
-        disabled(key)                       { return this.kvCfgStore[key] !== true; },
+        enable(key)                         { this.kvCfgStore.set(key, true); return this; },
+        disable(key)                        { this.kvCfgStore.delete(key); return this; },
+        enabled(key)                        { return this.kvCfgStore.has(key); },
+        disabled(key)                       { return !this.enabled(key); },
 
         engine(t)                           { this.mdEngine = t; return this; },
         promise(t)                          { this.mdPromise = t; return this; },
 
-        call(method, data, callback)        { rTgApi.call(token, method, data, callback, this._optProxy); },
-        callJson(method, data, callback)    { rTgApi.callJson(token, method, data, callback, this._optProxy); },
+        call(method, data, callback)        { rTgApi.callAPI(token, method, data, callback, this._optProxy, this.enabled("tgUrlUpload")); },
+        callJson(method, data, callback)    { rTgApi.callAPIJson(token, method, data, callback, this._optProxy, this.enabled("tgUrlUpload")); },
 
         polling(params, callback)           { return rServer.polling(this, params, callback); },
         http(params, callback)              { return rServer.http(this, params, callback); },
@@ -83,18 +82,13 @@ function main(token) {
                 return this;
             }
 
-            this._optProxy = this._optProxy || {};
-
             if(typeof(t) === "string") {
                 t = t.split(":");
+            }
 
-                this._optProxy.host = t[0];
-                this._optProxy.port = t[1];
-            }
-            else {
-                this._optProxy.host = t.host;
-                this._optProxy.port = t.port;
-            }
+            this._optProxy = this._optProxy || {};
+            this._optProxy.host = t.host || t[0];
+            this._optProxy.port = t.port || t[1];
 
             return this;
         },

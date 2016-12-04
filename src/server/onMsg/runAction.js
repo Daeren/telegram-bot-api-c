@@ -114,23 +114,44 @@ function main(updateSubType, eventType, eventSubType, queue, events, input, reqC
     }
 
     function onEndQueue(state) {
-        if(state && state instanceof Error) {
-            callback(state, null);
-        }
-        else if(events) {
-            const evType = cmdParams ? cmdParams.cmd : (eventSubType || eventType);
-
-            queue = (events[state ? (evType + ":" + state) : evType] || events[evType] || cmdParams && events["/"]);
-
-            if(state) {
-                reqCtx.gotoState = state;
+        if(state) {
+            if(state instanceof Error) {
+                callback(state, null);
+                return;
             }
+
+            reqCtx.gotoState = state;
+        }
+
+        if(!events) {
+            return;
+        }
+
+        if(events.size > 0) {
+            if(cmdParams) {
+                callEvent(cmdParams.cmd);
+            }
+            else {
+                if(eventType) {
+                    callEvent(eventType);
+                }
+
+                if(eventSubType) {
+                    callEvent(eventSubType);
+                }
+            }
+        }
+        else {
+            callback(null, reqCtx);
+        }
+
+        //-----------------]>
+
+        function callEvent(evType) {
+            queue = (events.get(state ? (evType + ":" + state) : evType) || events.get(evType) || events.get(cmdParams ? "/" : "*"));
 
             if(queue) {
                 main(updateSubType, eventType, eventSubType, queue, null, input, reqCtx, callback);
-            }
-            else {
-                callback(null, reqCtx);
             }
         }
     }
