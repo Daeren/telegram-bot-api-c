@@ -845,6 +845,7 @@ api.sendDocument({
 |                   | -                                                                             |
 | --token           | high priority                                                                 |
 | --method          | high priority                                                                 |
+| --proxy           | "ip:port"                                                                     |
 
 
 ```js
@@ -852,6 +853,7 @@ api.sendDocument({
 
 > set TELEGRAM_BOT_TOKEN=X
 > set TELEGRAM_BOT_METHOD=X
+> set TELEGRAM_BOT_PROXY=X
 
 ...
 
@@ -874,7 +876,7 @@ api.sendDocument({
 
 (result)
 
-> {"chat_id": 0, "text": "2", "j": true}
+> {"chat_id": 0, "text": "2", "j": true, "proxy": "ip:port"}
 > <enter>
 
 (result)

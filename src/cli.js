@@ -18,11 +18,14 @@ const gCRLF             = "\r\n",
       gReCmdNameFull    = /^--(\w+)/,
       gReCmdNameShort   = /^-(\w+)/;
 
-const gBufLineEnd = new Buffer(gCRLF);
+const gBufLineEnd       = new Buffer(gCRLF);
 
 
-const gToken     = process.env.TELEGRAM_BOT_TOKEN,
-      gMethod    = process.env.TELEGRAM_BOT_METHOD;
+const gToken            = process.env.TELEGRAM_BOT_TOKEN,
+      gMethod           = process.env.TELEGRAM_BOT_METHOD,
+      gProxy            = process.env.TELEGRAM_BOT_PROXY;
+
+const gBot              = rBot()
 
 //-----------------]>
 
@@ -117,41 +120,40 @@ function initBotCmd(data, params) {
     gOptions = new Map();
     gParams = params || parseArgv(data);
 
-    moveObjField(gParams, gOptions, ["token", "method", "j"]);
+    moveObjField(gParams, gOptions, ["token", "method", "proxy", "j"]);
 }
 
 //-----)>
 
 function callBotMethod(options, params, callback) {
-    const bot = rBot(options.get("token") || gToken)
+    gBot
+        .token(options.get("token") || gToken)
+        .proxy(options.get("proxy") || gProxy)
+        .callJson(options.get("method") || gMethod, params, function(error, result) {
+            if(result && !result.ok && result.parameters && result.parameters.retry_after) {
+                setTimeout(function() {
+                    callBotMethod(options, params, callback);
+                }, 1000 * result.parameters.retry_after);
 
-    //-------]>
+                return;
+            }
 
-    bot.callJson(options.get("method") || gMethod, params, function(error, result) {
-        if(result && !result.ok && result.parameters && result.parameters.retry_after) {
-            setTimeout(function() {
-                callBotMethod(options, params, callback);
-            }, 1000 * result.parameters.retry_after);
+            if(callback) {
+                setImmediate(callback);
+            }
 
-            return;
-        }
+            if(error) {
+                process.stderr.write(error.toString());
+                process.stderr.write("\r\n");
 
-        if(callback) {
-            setImmediate(callback);
-        }
+                return;
+            }
 
-        if(error) {
-            process.stderr.write(error.toString());
-            process.stderr.write("\r\n");
+            result = JSON.stringify(result, null, options.get("j") ? "  " : null);
 
-            return;
-        }
-
-        result = JSON.stringify(result, null, options.get("j") ? "  " : null);
-
-        process.stdout.write(result);
-        process.stdout.write("\r\n");
-    });
+            process.stdout.write(result);
+            process.stdout.write("\r\n");
+        });
 }
 
 //-----------------------------------------------------
