@@ -136,8 +136,6 @@ function main(proxy, token, method, callback, onInit) {
     }
 
     function onError(error) {
-        console.log("ERR_BAD_PROXY!!");
-
         if(error.code !== rErrors.ERR_BAD_PROXY) {
             error.code = rErrors.ERR_BAD_REQUEST;
         }

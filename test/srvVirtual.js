@@ -211,10 +211,12 @@ describe("srv.virtual", function() {
             throw new Error("The message passed through the event | #1");
         });
 
-        server.on(/(\w+)/, function(bot, params) {
+        server.on(/(\w+)/, function(bot, params, next) {
             expect(params).to.be.a("array");
             expect(params[0]).to.be.a("string").and.equal(bot.message.text);
             expect(params[1]).to.be.a("string").and.equal(bot.message.text);
+
+            next = 0;
 
             tCheckBaseBotFields(bot);
             done();
