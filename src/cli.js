@@ -13,8 +13,10 @@ const rBot = require("./../index");
 
 //-----------------------------------------------------
 
-const gCRLF       = "\r\n",
-      gReToken    = /^(\d+:\w+)/;
+const gCRLF             = "\r\n",
+
+      gReCmdNameFull    = /^--(\w+)/,
+      gReCmdNameShort   = /^-(\w+)/;
 
 const gBufLineEnd = new Buffer(gCRLF);
 
@@ -170,21 +172,21 @@ function parseArgv(data) {
 
     //------]>
 
-    function explode(value, index) {
+    function explode(value) {
         if(nextOptIsVal) {
             nextOptIsVal = false;
 
             result.set(curOptName, value);
         }
         else {
-            let cmdName = value.match(/^--(\w+)/);
+            let cmdName = value.match(gReCmdNameFull);
 
             if(cmdName) {
                 nextOptIsVal = true;
                 curOptName = cmdName[1];
             }
             else {
-                cmdName = value.match(/^-(\w+)/);
+                cmdName = value.match(gReCmdNameShort);
 
                 if(cmdName) {
                     result.set(cmdName[1], true);

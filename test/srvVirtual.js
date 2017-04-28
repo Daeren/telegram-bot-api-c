@@ -216,9 +216,7 @@ describe("srv.virtual", function() {
             expect(params[0]).to.be.a("string").and.equal(bot.message.text);
             expect(params[1]).to.be.a("string").and.equal(bot.message.text);
 
-            next = 0;
-
-            tCheckBaseBotFields(bot);
+            tCheckBaseBotFields(bot, next); // ~next
             done();
         });
 
