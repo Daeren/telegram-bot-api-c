@@ -19,20 +19,19 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 ```js
-> tg-api TOKEN sendMessage --chat_id=0 --text="+"
+> tg-bot --token X --method sendMessage --chat_id 0 --text "+"
 ```
 
 
 [Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, Bot API 2.2 ([Telegram Gaming Platform][5]), Bot API 2.3, Bot API 2.3.1
 
-* Proxy: +
+* [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
 * Analytics: [tgb-pl-botanio][4]
 * Added: tgBot.api[sendMethod] => error.retryAfter
-* Added: "channelPost" and "editedChannelPost"
-* Added: "force" and "disable_edit_message" (setGameScore)
-* Added: example "channelPost"
 * Added: [tgUrlUpload](#refTgUpload)
+* Improved: [CLI](#refCLI), Proxy
+* Changed: tg-api => tg-bot
 
 
 
@@ -202,6 +201,7 @@ function onTextRegEx(bot, data) { }
 const gBot      = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
 const gProxyStr = "127.0.0.1:1337", // <-- Only HTTPS
+      gProxyArr = ["127.0.0.1", "1337"],
       gProxyObj = {
           "host": "127.0.0.1",
           "port": 1337
@@ -227,7 +227,7 @@ getMe(t => {
 rBot.callJson({
     "token":    process.env.TELEGRAM_BOT_TOKEN,
     "method":   "getMe",
-    "proxy":    gProxyStr
+    "proxy":    gProxyArr
 }, (e, d) => {});
 
 rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, d) => {}, gProxyObj);
@@ -542,12 +542,12 @@ Files must be smaller than 5 MB for photos and smaller than 20 MB for all other 
 
 
 <a name="refPlugin"></a>
-#### Plugin 
+#### Plugin
 
 ```js
 gSrv
     .use(function(bot, data, next) {
-        console.log("Async | Type: %s", type);
+        console.log("Async | Type: any");
 
         if(data === "next") {
             next();
@@ -838,29 +838,44 @@ api.sendDocument({
 <a name="refCLI"></a>
 #### CLI
 
+| Key               | Note                                                                          |
+|-------------------|-------------------------------------------------------------------------------|
+|                   | -                                                                             |
+| -j                | insert white space into the output JSON string for readability purposes       |
+|                   | -                                                                             |
+| --token           | high priority                                                                 |
+| --method          | high priority                                                                 |
+
+
 ```js
-> tg-api TOKEN METHOD -bool --key=val
-> node telegram-bot-api-c TOKEN METHOD -bool --key=val
+// Environment variables: low priority
+
+> set TELEGRAM_BOT_TOKEN=X
+> set TELEGRAM_BOT_METHOD=X
 
 ...
 
-> tg-api X sendMessage --chat_id=0 --text="Hi" -disable_web_page_preview
-
-> tg-api X sendPhoto --chat_id=0 --photo="/path/MiElPotato.jpg"
-> tg-api X sendPhoto --chat_id=0 --photo="https://www.google.ru/images/logos/ps_logo2.png"
-
-> tg-api X sendMessage < "./examples/msg.json"
+> tg-bot --token X --method sendMessage --key val -bool
+> node telegram-bot-api-c --token X --method sendMessage --key val -bool
 
 ...
 
-> tg-api X sendMessage
-> {"chat_id": 0, "text": "Hi"}
-> <enter> [\r\n]
+> tg-bot --token X --method sendMessage --chat_id 0 --text "Hi" -disable_web_page_preview
+> tg-bot --token X --method sendMessage < "./examples/msg.json"
+
+> tg-bot --token X --method sendPhoto --chat_id 0 --photo "/path/MiElPotato.jpg"
+> tg-bot --token X --method sendPhoto --chat_id 0 --photo "https://www.google.ru/images/logos/ps_logo2.png"
+
+...
+
+> tg-bot
+> {"token": "", "method": "sendMessage", "chat_id": 0, "text": "1"}
+> <enter>
 
 (result)
 
-> {"chat_id": 1, "text": "Hi 2"}
-> <enter> [\r\n]
+> {"chat_id": 0, "text": "2", "j": true}
+> <enter>
 
 (result)
 ```

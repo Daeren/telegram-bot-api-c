@@ -17,7 +17,8 @@ const rBot      = require("./../index");
 
 const gBot = rBot(process.env.TELEGRAM_BOT_TOKEN);
 
-const gProxyStr = "87.255.70.228:3128",
+const gProxyStr = "207.99.118.74:8080",
+      gProxyArr = gProxyStr.split(":"),
       gProxyObj = {
           "host": gProxyStr.split(":")[0],
           "port": gProxyStr.split(":")[1]
@@ -31,17 +32,21 @@ getMe(() => {
     gBot.proxy(gProxyStr);
 
     getMe(() => {
-        gBot.proxy();
+        gBot.proxy(gProxyArr);
 
         getMe(() => {
-            rBot.callJson({
-                "token":    process.env.TELEGRAM_BOT_TOKEN,
-                "method":   "getMe",
-                "proxy":    gProxyStr
-            }, (e, data) => {
-                console.log(e || data);
+            gBot.proxy();
 
-                rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, data) => console.log(e || data), gProxyObj);
+            getMe(() => {
+                rBot.callJson({
+                    "token":    process.env.TELEGRAM_BOT_TOKEN,
+                    "method":   "getMe",
+                    "proxy":    gProxyStr
+                }, (e, data) => {
+                    console.log(e || data);
+
+                    rBot.callJson(process.env.TELEGRAM_BOT_TOKEN, "getMe", (e, data) => console.log(e || data), gProxyObj);
+                });
             });
         });
     });

@@ -602,7 +602,6 @@ describe("srv.virtual", function() {
     it("Instance (event: cmd | goto | default-generator)", function(done) {
         let server = objBot.virtual(function() {
             throw new Error("The message passed through the event | #6");
-
         });
 
         server.use("text", function* () {

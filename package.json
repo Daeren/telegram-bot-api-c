@@ -1,17 +1,14 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "18.0.0",
+    "version": "19.0.0",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
     "homepage": "https://666.io",
     "keywords": [
-        "node",
+        "telegram",
         "bot",
         "api",
         "cli",
-        "telegram",
-        "telegram bot",
-        "telegram bot api",
         "telegram-bot-api-c",
         "bottality"
     ],
@@ -24,7 +21,7 @@
     "preferGlobal": "true",
 
     "bin": {
-        "tg-api": "./bin/index.js"
+        "tg-bot": "./bin/index.js"
     },
     "main": "./index",
     "scripts": {

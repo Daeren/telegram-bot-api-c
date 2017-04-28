@@ -270,7 +270,7 @@ function genMethodsFor(bot) {
             error.code = data.error_code;
 
             if(data.parameters) {
-                error.retryAfter = data.retry_after;
+                error.retryAfter = data.parameters.retry_after;
             }
 
             return error;
@@ -416,12 +416,17 @@ function writeFieldParam(req, type, value, next) {
 function writeFieldData(req, data, type, value, useTgUrlUpload, next) {
     const isBuffer = value && Buffer.isBuffer(value);
 
+    //---------]>
+
     switch(type) {
         case "message":
             req.write("\"\r\n\r\n");
 
             if(!isBuffer && typeof(value) === "object") {
-                value.on("error", next).on("end", next).pipe(req, gPipeOptions);
+                value
+                    .on("error", next)
+                    .on("end", next)
+                    .pipe(req, gPipeOptions);
             }
             else {
                 if(!isBuffer && typeof(value) !== "string") {
@@ -500,7 +505,10 @@ function writeFieldData(req, data, type, value, useTgUrlUpload, next) {
                     setImmediate(next);
                 }
                 else {
-                    value.on("error", next).on("end", next).pipe(req, gPipeOptions);
+                    value
+                        .on("error", next)
+                        .on("end", next)
+                        .pipe(req, gPipeOptions);
                 }
             }
 

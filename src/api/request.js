@@ -16,8 +16,8 @@ const rErrors = require("./../errors");
 
 //-----------------------------------------------------
 
-const gKeepAliveAgentHTTP    = new rHttp.Agent({"keepAlive": true});
-const gKeepAliveAgentHTTPS   = new rHttps.Agent({"keepAlive": true});
+const gKeepAliveAgentHTTP    = new rHttp.Agent({"keepAlive": true}),
+      gKeepAliveAgentHTTPS   = new rHttps.Agent({"keepAlive": true});
 
 const gReqTimeout       = 1000 * 60 * 2,
 
@@ -71,45 +71,38 @@ function main(proxy, token, method, callback, onInit) {
 
         //-------]>
 
-        const req = rHttp.request(gReqProxyTunOptions);
+        buildTunRequest(gReqProxyTunOptions, function(response, socket) {
+            const statusCode = response.statusCode;
 
-        //-------]>
+            if(statusCode === 200) {
+                gReqProxyOptions.path = path;
+                gReqProxyOptions.socket = socket;
 
-        if(callback) {
-            req.on("error", onError);
-        }
+                onInit(buildHTTPSRequest(gReqProxyOptions));
+            }
+            else {
+                const e = new Error("Proxy | connect.statusCode: " + statusCode);
+                e.code = rErrors.ERR_BAD_PROXY;
 
-        //-------]>
-
-        req
-            .on("connect", function(response, socket) {
-                const statusCode = response.statusCode;
-
-                if(statusCode === 200) {
-                    gReqProxyOptions.path = path;
-                    gReqProxyOptions.socket = socket;
-
-                    onInit(buildRequest(gReqProxyOptions));
-                }
-                else {
-                    const e = new Error("Proxy | connect.statusCode: " + statusCode);
-                    e.code = rErrors.ERR_BAD_PROXY;
-
-                    socket.destroy(e);
-                }
-            })
-            .setTimeout(gReqTimeout, onTimeout)
-            .end();
+                socket
+                    .on("error", onError)
+                    .destroy(e);
+            }
+        });
     }
     else {
         gReqOptions.path = path;
 
-        onInit(buildRequest(gReqOptions));
+        onInit(buildHTTPSRequest(gReqOptions));
     }
 
     //--------------]>
 
-    function buildRequest(opt) {
+    function buildTunRequest(opt, onConnect) {
+        return (callback ? rHttp.request(opt).on("error", onError) : rHttp.request(opt)).on("connect", onConnect).setTimeout(gReqTimeout, onTimeout).end();
+    }
+
+    function buildHTTPSRequest(opt) {
         return (callback ? rHttps.request(opt, onResponse).on("error", onError) : rHttps.request(opt)).setTimeout(gReqTimeout, onTimeout);
     }
 
@@ -143,6 +136,8 @@ function main(proxy, token, method, callback, onInit) {
     }
 
     function onError(error) {
+        console.log("ERR_BAD_PROXY!!");
+
         if(error.code !== rErrors.ERR_BAD_PROXY) {
             error.code = rErrors.ERR_BAD_REQUEST;
         }
