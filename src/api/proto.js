@@ -95,6 +95,7 @@ const gProtoTable = {
 
     "sendVideoNote": [
         ["string", "chat_id"],
+        ["video_note", "video_note"],
         ["string", "duration"],
         ["string", "length"],
         ["boolean", "disable_notification"],
@@ -396,6 +397,7 @@ const gArgsTable  = {
 
     "sendVideoNote": [
         "chat_id",
+        "video_note",
         "duration",
         "length",
         "disable_notification",
@@ -606,7 +608,7 @@ const gArgsTable  = {
 
     "deleteMessage": [
         "chat_id",
-        "message_id",
+        "message_id"
     ]
 };
 

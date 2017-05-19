@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.x][100], Bot API 2.3.x, Bot API 3.0
+[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.0
 
 * [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
@@ -39,10 +39,10 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 - All methods in the Bot API are case-insensitive (method: .call, .callJson)
 
-- message:                                  buffer, stream, string
-- location|venue|contact:                   buffer, string
-- photo|audio|voice|video|document|sticker: buffer, stream, file_id, path, url
-- certificate:                              buffer, stream, path, url
+- message:                                             buffer, stream, string
+- location|venue|contact:                              buffer, string
+- photo|audio|voice|video|document|sticker|video_note: buffer, stream, file_id, path, url
+- certificate:                                         buffer, stream, path, url
 ```
 
 

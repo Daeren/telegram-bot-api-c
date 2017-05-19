@@ -917,7 +917,7 @@ describe("Instance: bot", function() {
                 done();
             });
         });
-        
+
         //-----)>
 
         it("editMessageText | callback", function(done) {
