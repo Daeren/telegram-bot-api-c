@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.0][100], Bot API 2.1, Bot API 2.2 ([Telegram Gaming Platform][5]), Bot API 2.3, Bot API 2.3.1
+[Telegram Bot API][3], [Bot API 2.x][100], Bot API 2.3.x, Bot API 3.0
 
 * [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
@@ -496,27 +496,31 @@ objSrv
     });
 ```
 
-| Name              | Args                                                                                                          |
-|-------------------|---------------------------------------------------------------------------------------------------------------|
-|                   | -                                                                                                             |
-| html              |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
-| markdown          |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
-|                   | -                                                                                                             |
-| text              |  text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup          |
-| photo             |  photo, caption, disable_notification, reply_to_message_id, reply_markup                                      |
-| audio             |  audio, performer, title, duration, caption, disable_notification, reply_to_message_id, reply_markup          |
-| document          |  document, caption, disable_notification, reply_to_message_id, reply_markup                                   |
-| sticker           |  sticker, disable_notification, reply_to_message_id, reply_markup                                             |
-| video             |  video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup             |
-| voice             |  voice, duration, caption, disable_notification, reply_to_message_id, reply_markup                            |
-| location          |  latitude, longitude, disable_notification, reply_to_message_id, reply_markup                                 |
-| venue             |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
-| contact           |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |
-| chatAction        |  action                                                                                                       |
-| game              |  game_short_name, disable_notification, reply_to_message_id, reply_markup                                     |
-|                   | -                                                                                                             |
-| inlineQuery       |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
-| callbackQuery     |  text, show_alert                                                                                             |
+| Name                    | Args                                                                                                          |
+|-------------------------|---------------------------------------------------------------------------------------------------------------|
+|                         | -                                                                                                             |
+| html                    |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
+| markdown                |  text, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup                      |
+|                         | -                                                                                                             |
+| text                    |  text, parse_mode, disable_web_page_preview, disable_notification, reply_to_message_id, reply_markup          |
+| photo                   |  photo, caption, disable_notification, reply_to_message_id, reply_markup                                      |
+| audio                   |  audio, performer, title, duration, caption, disable_notification, reply_to_message_id, reply_markup          |
+| document                |  document, caption, disable_notification, reply_to_message_id, reply_markup                                   |
+| sticker                 |  sticker, disable_notification, reply_to_message_id, reply_markup                                             |
+| video                   |  video, width, height, duration, caption, disable_notification, reply_to_message_id, reply_markup             |
+| voice                   |  voice, duration, caption, disable_notification, reply_to_message_id, reply_markup                            |
+| videoNote               |  videoNote, duration, length, disable_notification, reply_to_message_id, reply_markup                         |
+| location                |  latitude, longitude, disable_notification, reply_to_message_id, reply_markup                                 |
+| venue                   |  latitude, longitude, title, address, foursquare_id, disable_notification, reply_to_message_id, reply_markup  |
+| contact                 |  phone_number, first_name, last_name, disable_notification, reply_to_message_id, reply_markup                 |
+| chatAction              |  action                                                                                                       |
+| game                    |  game_short_name, disable_notification, reply_to_message_id, reply_markup                                     |
+| invoice                 |  title ... <args-tg-doc-api> ... reply_markup                                                                 |
+|                         | -                                                                                                             |
+| inlineQuery             |  results, next_offset, is_personal, cache_time, switch_pm_text, switch_pm_parameter                           |
+| callbackQuery           |  text, show_alert                                                                                             |
+| shippingQuery           |  ok, shipping_options, error_message                                                                          |
+| preCheckoutQuery        |  ok, error_message                                                                                            |
 
 
 
@@ -1017,10 +1021,12 @@ npm test
 | isGroup           | boolean               | bot.isGroup = bot.message.chat.type === [super]group   |
 | isReply           | boolean               | bot.isReply = !!bot.message.reply_to_message           |
 |                   | -                     |                                                        |
-| cqid              | string                | bot.cqid = bot.callbackQuery.id                        |
-| qid               | string                | bot.qid = bot.inlineQuery.id                           |
 | cid               | number                | bot.cid = bot.message.chat.id                          |
 | mid               | number                | bot.mid = bot.message.message_id                       |
+| qid               | string                | bot.qid = bot.inlineQuery.id                           |
+| cqid              | string                | bot.cqid = bot.callbackQuery.id                        |
+| sid               | string                | bot.sid = bot.shipping_query.id                        |
+| pqid              | string                | bot.pqid = bot.pre_checkout_query.id                   |
 |                   | -                     |                                                        |
 | command           | object                | Incoming command                                       |
 |                   | -                     |                                                        |
@@ -1060,6 +1066,9 @@ npm test
 |                   | -                                     |                                           |
 | pinnedMessage     | bot, message[, next]                  |                                           |
 |                   | -                                     |                                           |
+| invoice           | bot, data[, next]                     |                                           |
+| successfulPayment | bot, data[, next]                     |                                           |
+|                   | -                                     |                                           |
 | enterChat         | bot, data[, next]                     |                                           |
 | leftChat          | bot, data[, next]                     |                                           |
 |                   | -                                     |                                           |
@@ -1081,6 +1090,7 @@ npm test
 | sticker           | bot, data[, next]                     |                                           |
 | video             | bot, data[, next]                     |                                           |
 | voice             | bot, data[, next]                     |                                           |
+| videoNote         | bot, data[, next]                     |                                           |
 | location          | bot, data[, next]                     |                                           |
 | venue             | bot, data[, next]                     |                                           |
 | contact           | bot, data[, next]                     |                                           |

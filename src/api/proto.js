@@ -93,6 +93,15 @@ const gProtoTable = {
         ["json", "reply_markup"]
     ],
 
+    "sendVideoNote": [
+        ["string", "chat_id"],
+        ["string", "duration"],
+        ["string", "length"],
+        ["boolean", "disable_notification"],
+        ["string", "reply_to_message_id"],
+        ["json", "reply_markup"]
+    ],
+
     "sendLocation": [
         ["string", "chat_id"],
         ["string", "latitude"],
@@ -132,6 +141,29 @@ const gProtoTable = {
     "sendGame": [
         ["string", "chat_id"],
         ["string", "game_short_name"],
+        ["boolean", "disable_notification"],
+        ["string", "reply_to_message_id"],
+        ["json", "reply_markup"]
+    ],
+
+    "sendInvoice": [
+        ["string", "chat_id"],
+        ["string", "title"],
+        ["string", "description"],
+        ["string", "payload"],
+        ["string", "provider_token"],
+        ["string", "start_parameter"],
+        ["string", "currency"],
+        ["json", "prices"],
+        ["string", "photo_url"],
+        ["string", "photo_size"],
+        ["string", "photo_width"],
+        ["string", "photo_height"],
+        ["boolean", "need_name"],
+        ["boolean", "need_phone_number"],
+        ["boolean", "need_email"],
+        ["boolean", "need_shipping_address"],
+        ["boolean", "is_flexible"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
@@ -220,6 +252,19 @@ const gProtoTable = {
         ["string", "cache_time"]
     ],
 
+    "answerShippingQuery": [
+        ["string", "shipping_query_id"],
+        ["boolean", "ok"],
+        ["json", "shipping_options"],
+        ["string", "error_message"]
+    ],
+
+    "answerPreCheckoutQuery": [
+        ["string", "pre_checkout_query_id"],
+        ["boolean", "ok"],
+        ["string", "error_message"]
+    ],
+
 
     "leaveChat": [
         ["string",  "chat_id"]
@@ -261,6 +306,11 @@ const gProtoTable = {
         ["json", "reply_markup"]
     ],
 
+
+    "deleteMessage": [
+        ["string", "chat_id"],
+        ["string", "message_id"]
+    ],
 
     "deleteWebhook": null
 };
@@ -344,6 +394,15 @@ const gArgsTable  = {
         "reply_markup"
     ],
 
+    "sendVideoNote": [
+        "chat_id",
+        "duration",
+        "length",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
     "sendLocation": [
         "chat_id",
         "latitude",
@@ -383,6 +442,29 @@ const gArgsTable  = {
     "sendGame": [
         "chat_id",
         "game_short_name",
+        "disable_notification",
+        "reply_to_message_id",
+        "reply_markup"
+    ],
+
+    "sendInvoice": [
+        "chat_id",
+        "title",
+        "description",
+        "payload",
+        "provider_token",
+        "start_parameter",
+        "currency",
+        "prices",
+        "photo_url",
+        "photo_size",
+        "photo_width",
+        "photo_height",
+        "need_name",
+        "need_phone_number",
+        "need_email",
+        "need_shipping_address",
+        "is_flexible",
         "disable_notification",
         "reply_to_message_id",
         "reply_markup"
@@ -467,6 +549,19 @@ const gArgsTable  = {
         "cache_time"
     ],
 
+    "answerShippingQuery": [
+        "shipping_query_id",
+        "ok",
+        "shipping_options",
+        "error_message"
+    ],
+
+    "answerPreCheckoutQuery": [
+        "pre_checkout_query_id",
+        "ok",
+        "error_message"
+    ],
+
 
     "leaveChat": [
         "chat_id"
@@ -506,6 +601,12 @@ const gArgsTable  = {
         "reply_markup",
         "message_id",
         "inline_message_id"
+    ],
+
+
+    "deleteMessage": [
+        "chat_id",
+        "message_id",
     ]
 };
 

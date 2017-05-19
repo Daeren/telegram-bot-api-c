@@ -56,6 +56,8 @@ CMain.prototype = Object.create(null);
 
     addElementMethod("inlineQuery", "answerInlineQuery");
     addElementMethod("callbackQuery", "answerCallbackQuery");
+    addElementMethod("shippingQuery", "answerShippingQuery");
+    addElementMethod("preCheckoutQuery", "answerPreCheckoutQuery");
 
     addElementMethod("markdown", "sendMessage", {"parse_mode": "markdown"});
     addElementMethod("html", "sendMessage", {"parse_mode": "html"});
@@ -211,7 +213,9 @@ CMain.prototype.send = function(callback) {
 
           chatId            = this.botReqCtx.cid,
           inlineQueryId     = this.botReqCtx.qid,
-          callbackQueryId   = this.botReqCtx.cqid;
+          callbackQueryId   = this.botReqCtx.cqid,
+          shippingQueryId   = this.botReqCtx.sid,
+          preCheckoutQueryId= this.botReqCtx.pqid;
 
     const queue             = this.queue,
           lastElement       = this.lastElement;
@@ -264,6 +268,14 @@ CMain.prototype.send = function(callback) {
 
             if(inlineQueryId) {
                 elem.inline_query_id = inlineQueryId;
+            }
+
+            if(shippingQueryId) {
+                elem.shipping_query_id = shippingQueryId;
+            }
+
+            if(preCheckoutQueryId) {
+                elem.pre_checkout_query_id = preCheckoutQueryId;
             }
 
             apiMethod(elem, function(error, result) {

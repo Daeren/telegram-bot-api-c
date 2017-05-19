@@ -34,7 +34,7 @@ const api       = objBot.api,
 
       parseCmd  = objBot.parseCmd;
 
-let midEditText, midEditCaption;
+let midEditText, midEditCaption, midDel;
 
 //-----------------------------------------------------
 
@@ -736,6 +736,8 @@ describe("Instance: bot", function() {
 
                 expect(data).to.have.property("photo").that.is.an("array");
 
+                midDel = data.message_id;
+
                 done();
             });
         });
@@ -901,6 +903,21 @@ describe("Instance: bot", function() {
             });
         });
 
+        it("sendVideoNote(url) | callback", function(done) {
+            api.sendVideoNote({
+                "chat_id":      chatId,
+                "video_note":   "http://www.quirksmode.org/html5/videos/big_buck_bunny.mp4",
+                "duration":     10,
+                "length":       320
+            }, function(error, data) {
+                checkBaseFields(error, data);
+
+                expect(data).to.have.property("video_note").that.is.an("object");
+
+                done();
+            });
+        });
+        
         //-----)>
 
         it("editMessageText | callback", function(done) {
@@ -950,6 +967,18 @@ describe("Instance: bot", function() {
         });
 
         //-----)>
+
+        it("deleteMessage | promise", function(done) {
+            api
+                .deleteMessage({"chat_id": chatId, "message_id": midDel})
+                .then(function(isOk) {
+                    expect(isOk).to.be.a("boolean").to.equal(true);
+
+                    done();
+                }, function(error) {
+                    checkWithoutError(error, done);
+                });
+        });
 
         it("deleteWebhook | promise", function(done) {
             api

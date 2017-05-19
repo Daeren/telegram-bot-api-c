@@ -28,15 +28,8 @@ function main(ctx, plugins, events, updateType, eventType, input, callback) {
 
     //------------]>
 
-    ctx.updateType = updateType;
     ctx.updateSubType = updateSubType;
-
-    ctx.eventType = eventType;
     ctx.eventSubType = eventSubType;
-
-    ctx.from = input.from;
-
-    ctx[eventType] = input;
 
     //---)>
 
@@ -57,7 +50,9 @@ function getEventNameByDataField(field) {
     /*jshint maxcomplexity:50 */
 
     switch(field) {
-        case "new_chat_member":         return "enterChat";
+        case "video_note":              return "videoNote";
+
+        case "new_chat_members":        return "enterChat";
         case "left_chat_member":        return "leftChat";
 
         case "new_chat_title":          return "chatTitle";
@@ -72,6 +67,8 @@ function getEventNameByDataField(field) {
         case "migrate_from_chat_id":    return "migrateFromChatId";
 
         case "pinned_message":          return "pinnedMessage";
+
+        case "successful_payment":      return "successfulPayment";
 
         default:                        return field;
     }
@@ -90,12 +87,13 @@ function getMessageDataField(m) {
         hasOwnProperty.call(m, t = "sticker") ||
         hasOwnProperty.call(m, t = "video") ||
         hasOwnProperty.call(m, t = "voice") ||
+        hasOwnProperty.call(m, t = "video_note") ||
         hasOwnProperty.call(m, t = "location") ||
         hasOwnProperty.call(m, t = "venue") ||
         hasOwnProperty.call(m, t = "contact") ||
         hasOwnProperty.call(m, t = "game") ||
 
-        hasOwnProperty.call(m, t = "new_chat_member") ||
+        hasOwnProperty.call(m, t = "new_chat_members") ||
         hasOwnProperty.call(m, t = "left_chat_member") ||
 
         hasOwnProperty.call(m, t = "new_chat_title") ||
@@ -109,7 +107,10 @@ function getMessageDataField(m) {
         hasOwnProperty.call(m, t = "migrate_to_chat_id") ||
         hasOwnProperty.call(m, t = "migrate_from_chat_id") ||
 
-        hasOwnProperty.call(m, t = "pinned_message")
+        hasOwnProperty.call(m, t = "pinned_message") ||
+
+        hasOwnProperty.call(m, t = "invoice") ||
+        hasOwnProperty.call(m, t = "successful_payment")
     ) {
         return t;
     }

@@ -13,21 +13,29 @@ const rUtil                         = require("./../../util"),
       rErrors                       = require("./../../errors");
 
 const onIncomingMessage             = require("./onIncomingMessage"),
+
+      onIncomingShippingQuery       = require("./onIncomingShippingQuery"),
+      onIncomingPreCheckoutQuery    = require("./onIncomingPreCheckoutQuery"),
+
       onIncomingInlineQuery         = require("./onIncomingInlineQuery"),
       onIncomingCallbackQuery       = require("./onIncomingCallbackQuery"),
+
       onIncomingChosenInlineResult  = require("./onIncomingChosenInlineResult");
 
 //-----------------------------------------------------
 
 const gIncomeEv = [
-    ["inline_query",            "inlineQuery",          onIncomingInlineQuery],
-
     ["message",                 "message",              onIncomingMessage],
     ["edited_message",          "editedMessage",        onIncomingMessage],
     ["channel_post",            "channelPost",          onIncomingMessage],
     ["edited_channel_post",     "editedChannelPost",    onIncomingMessage],
 
+    ["inline_query",            "inlineQuery",          onIncomingInlineQuery],
     ["callback_query",          "callbackQuery",        onIncomingCallbackQuery],
+
+    ["shipping_query",          "shippingQuery",        onIncomingShippingQuery],
+    ["pre_checkout_query",      "preCheckoutQuery",     onIncomingPreCheckoutQuery],
+
     ["chosen_inline_result",    "chosenInlineResult",   onIncomingChosenInlineResult]
 ];
 
@@ -52,7 +60,7 @@ function main(error, srvBot, data) {
 
     //--------]>
 
-    for(let ev, updateType, eventType, func, input, i = 0, len = gIncomeEv.length; i < len; i++) {
+    for(let ctx, ev, updateType, eventType, func, input, i = 0, len = gIncomeEv.length; i < len; i++) {
         ev = gIncomeEv[i];
 
         updateType = ev[0];
@@ -62,7 +70,23 @@ function main(error, srvBot, data) {
             eventType = ev[1];
             func = ev[2];
 
-            func(Object.create(srvBot.ctx), srvBot.plugins, srvBot.events, updateType, eventType, input, onEnd);
+            ctx = Object.create(srvBot.ctx);
+
+            //---------]>
+
+            ctx.updateType = updateType;
+            ctx.updateSubType = null;
+
+            ctx.eventType = eventType;
+            ctx.eventSubType = null;
+
+            ctx.from = input.from;
+
+            ctx[eventType] = input;
+
+            //---------]>
+
+            func(ctx, srvBot.plugins, srvBot.events, updateType, eventType, input, onEnd);
 
             break;
         }

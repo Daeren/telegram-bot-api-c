@@ -445,13 +445,14 @@ function writeFieldData(req, data, type, value, useTgUrlUpload, next) {
         case "sticker":
         case "video":
         case "voice":
+        case "video_note":
         case "certificate":
             if(typeof(value) === "string") {
                 const isUrl = gReIsHttpSUri.test(value);
 
                 //-------]>
 
-                if(type === "voice") {
+                if(type === "voice" || type === "video_note") {
                     useTgUrlUpload = false;
                 }
 

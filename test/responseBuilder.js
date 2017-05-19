@@ -36,9 +36,10 @@ const gBotReq       = {
 const gCreateRB = function() { return new CResponseBuilder(gBotReq, objBot); };
 
 const gElements = [
-    "text", "photo", "audio", "document", "sticker", "video", "voice", "location", "venue", "contact", "chatAction", "game",
+    "text", "photo", "audio", "document", "sticker", "video", "voice", "videoNote", "location", "venue", "contact", "chatAction", "game", "invoice",
 
     "inlineQuery", "callbackQuery",
+    "shippingQuery", "preCheckoutQuery",
 
     "markdown", "html"
 ];
