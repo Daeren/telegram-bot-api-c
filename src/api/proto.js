@@ -32,7 +32,6 @@ const gProtoTable = {
         ["string",  "reply_to_message_id"],
         ["json",    "reply_markup"]
     ],
-
     "sendPhoto": [
         ["string", "chat_id"],
         ["photo", "photo"],
@@ -41,7 +40,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendAudio": [
         ["string", "chat_id"],
         ["audio", "audio"],
@@ -53,7 +51,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendDocument": [
         ["string", "chat_id"],
         ["document", "document"],
@@ -62,7 +59,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendSticker": [
         ["string", "chat_id"],
         ["sticker", "sticker"],
@@ -70,7 +66,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendVideo": [
         ["string", "chat_id"],
         ["video", "video"],
@@ -82,7 +77,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendVoice": [
         ["string", "chat_id"],
         ["voice", "voice"],
@@ -92,7 +86,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendVideoNote": [
         ["string", "chat_id"],
         ["video_note", "video_note"],
@@ -102,7 +95,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendLocation": [
         ["string", "chat_id"],
         ["string", "latitude"],
@@ -111,7 +103,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendVenue": [
         ["string", "chat_id"],
         ["string", "latitude"],
@@ -123,7 +114,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendContact": [
         ["string", "chat_id"],
         ["string", "phone_number"],
@@ -133,12 +123,10 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendChatAction": [
         ["string", "chat_id"],
         ["string", "action"]
     ],
-
     "sendGame": [
         ["string", "chat_id"],
         ["string", "game_short_name"],
@@ -146,7 +134,6 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
-
     "sendInvoice": [
         ["string", "chat_id"],
         ["string", "title"],
@@ -174,15 +161,12 @@ const gProtoTable = {
     "getChat": [
         ["string", "chat_id"]
     ],
-
     "getChatAdministrators": [
         ["string", "chat_id"]
     ],
-
     "getChatMembersCount": [
         ["string", "chat_id"]
     ],
-
     "getChatMember": [
         ["string", "chat_id"],
         ["string", "user_id"]
@@ -216,6 +200,10 @@ const gProtoTable = {
         ["string", "inline_message_id"]
     ],
 
+    "getStickerSet": [
+        ["string", "name"]
+    ],
+
 
     "setWebhook": [
         ["string", "url"],
@@ -244,7 +232,6 @@ const gProtoTable = {
         ["string", "switch_pm_text"],
         ["string", "switch_pm_parameter"]
     ],
-
     "answerCallbackQuery": [
         ["string", "callback_query_id"],
         ["string", "text"],
@@ -252,14 +239,12 @@ const gProtoTable = {
         ["string", "url"],
         ["string", "cache_time"]
     ],
-
     "answerShippingQuery": [
         ["string", "shipping_query_id"],
         ["boolean", "ok"],
         ["json", "shipping_options"],
         ["string", "error_message"]
     ],
-
     "answerPreCheckoutQuery": [
         ["string", "pre_checkout_query_id"],
         ["boolean", "ok"],
@@ -273,12 +258,94 @@ const gProtoTable = {
 
     "kickChatMember": [
         ["string", "chat_id"],
-        ["string", "user_id"]
+        ["string", "user_id"],
+        ["string", "until_date"]
     ],
-
     "unbanChatMember": [
         ["string", "chat_id"],
         ["string", "user_id"]
+    ],
+    "restrictChatMember": [
+        ["string", "chat_id"],
+        ["string", "user_id"],
+        ["string", "until_date"],
+        ["boolean", "can_send_messages"],
+        ["boolean", "can_send_media_messages"],
+        ["boolean", "can_send_other_messages"],
+        ["boolean", "can_add_web_page_previews"]
+    ],
+    "promoteChatMember": [
+        ["string", "chat_id"],
+        ["string", "user_id"],
+        ["boolean", "can_change_info"],
+        ["boolean", "can_post_messages"],
+        ["boolean", "can_edit_messages"],
+        ["boolean", "can_delete_messages"],
+        ["boolean", "can_invite_users"],
+        ["boolean", "can_restrict_members"],
+        ["boolean", "can_pin_messages"],
+        ["boolean", "can_promote_members"]
+    ],
+
+
+    "exportChatInviteLink": [
+        ["string", "chat_id"]
+    ],
+
+
+    "uploadStickerFile": [
+        ["string", "user_id"],
+        ["sticker", "png_sticker"]
+    ],
+    "createNewStickerSet": [
+        ["string", "user_id"],
+        ["string", "name"],
+        ["string", "title"],
+        ["sticker", "png_sticker"],
+        ["string", "emojis"],
+        ["boolean", "contains_masks"],
+        ["json", "mask_position"]
+    ],
+    "addStickerToSet": [
+        ["string", "user_id"],
+        ["string", "name"],
+        ["sticker", "png_sticker"],
+        ["string", "emojis"],
+        ["json", "mask_position"]
+    ],
+    "setStickerPositionInSet": [
+        ["string", "sticker"],
+        ["string", "position"]
+    ],
+    "deleteStickerFromSet": [
+        ["string", "sticker"]
+    ],
+
+
+    "setChatPhoto": [
+        ["string", "chat_id"],
+        ["photo", "photo"]
+    ],
+    "deleteChatPhoto": [
+        ["string", "chat_id"]
+    ],
+
+    "setChatTitle": [
+        ["string", "chat_id"],
+        ["string", "title"]
+    ],
+    "setChatDescription": [
+        ["string", "chat_id"],
+        ["string", "description"]
+    ],
+
+    "pinChatMessage": [
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["boolean", "disable_notification"]
+    ],
+    "unpinChatMessage": [
+        ["string", "chat_id"]
     ],
 
 
@@ -291,7 +358,6 @@ const gProtoTable = {
         ["boolean", "disable_web_page_preview"],
         ["json", "reply_markup"]
     ],
-
     "editMessageCaption": [
         ["string", "chat_id"],
         ["string", "message_id"],
@@ -299,7 +365,6 @@ const gProtoTable = {
         ["string", "caption"],
         ["json", "reply_markup"]
     ],
-
     "editMessageReplyMarkup": [
         ["string", "chat_id"],
         ["string", "message_id"],
@@ -312,7 +377,6 @@ const gProtoTable = {
         ["string", "chat_id"],
         ["string", "message_id"]
     ],
-
     "deleteWebhook": null
 };
 
@@ -334,7 +398,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendPhoto": [
         "chat_id",
         "photo",
@@ -343,7 +406,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendAudio": [
         "chat_id",
         "audio",
@@ -355,7 +417,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendDocument": [
         "chat_id",
         "document",
@@ -364,7 +425,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendSticker": [
         "chat_id",
         "sticker",
@@ -372,7 +432,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendVideo": [
         "chat_id",
         "video",
@@ -384,7 +443,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendVoice": [
         "chat_id",
         "voice",
@@ -394,7 +452,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendVideoNote": [
         "chat_id",
         "video_note",
@@ -404,7 +461,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendLocation": [
         "chat_id",
         "latitude",
@@ -413,7 +469,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendVenue": [
         "chat_id",
         "latitude",
@@ -425,7 +480,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendContact": [
         "chat_id",
         "phone_number",
@@ -435,12 +489,10 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendChatAction": [
         "chat_id",
         "action"
     ],
-
     "sendGame": [
         "chat_id",
         "game_short_name",
@@ -448,7 +500,6 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
-
     "sendInvoice": [
         "chat_id",
         "title",
@@ -476,15 +527,12 @@ const gArgsTable  = {
     "getChat": [
         "chat_id"
     ],
-
     "getChatAdministrators": [
         "chat_id"
     ],
-
     "getChatMembersCount": [
         "chat_id"
     ],
-
     "getChatMember": [
         "chat_id",
         "user_id"
@@ -521,7 +569,6 @@ const gArgsTable  = {
         "max_connections",
         "allowed_updates"
     ],
-
     "setGameScore": [
         "user_id",
         "score",
@@ -542,7 +589,6 @@ const gArgsTable  = {
         "switch_pm_text",
         "switch_pm_parameter"
     ],
-
     "answerCallbackQuery": [
         "callback_query_id",
         "text",
@@ -550,14 +596,12 @@ const gArgsTable  = {
         "url",
         "cache_time"
     ],
-
     "answerShippingQuery": [
         "shipping_query_id",
         "ok",
         "shipping_options",
         "error_message"
     ],
-
     "answerPreCheckoutQuery": [
         "pre_checkout_query_id",
         "ok",
@@ -573,10 +617,91 @@ const gArgsTable  = {
         "chat_id",
         "user_id"
     ],
-
     "unbanChatMember": [
         "chat_id",
         "user_id"
+    ],
+    "restrictChatMember": [
+        ["chat_id"],
+        ["user_id"],
+        ["until_date"],
+        ["can_send_messages"],
+        ["can_send_media_messages"],
+        ["can_send_other_messages"],
+        ["can_add_web_page_previews"]
+    ],
+    "promoteChatMember": [
+        ["chat_id"],
+        ["user_id"],
+        ["can_change_info"],
+        ["can_post_messages"],
+        ["can_edit_messages"],
+        ["can_delete_messages"],
+        ["can_invite_users"],
+        ["can_restrict_members"],
+        ["can_pin_messages"],
+        ["can_promote_members"]
+    ],
+
+
+    "exportChatInviteLink": [
+        ["chat_id"]
+    ],
+
+
+    "uploadStickerFile": [
+        ["user_id"],
+        ["png_sticker"]
+    ],
+    "createNewStickerSet": [
+        ["user_id"],
+        ["name"],
+        ["title"],
+        ["png_sticker"],
+        ["emojis"],
+        ["contains_masks"],
+        ["mask_position"]
+    ],
+    "addStickerToSet": [
+        ["user_id"],
+        ["name"],
+        ["png_sticker"],
+        ["emojis"],
+        ["mask_position"]
+    ],
+    "setStickerPositionInSet": [
+        ["sticker"],
+        ["position"]
+    ],
+    "deleteStickerFromSet": [
+        ["sticker"]
+    ],
+
+
+    "setChatPhoto": [
+        ["chat_id"],
+        ["photo"]
+    ],
+    "deleteChatPhoto": [
+        ["chat_id"]
+    ],
+
+    "setChatTitle": [
+        ["chat_id"],
+        ["title"]
+    ],
+    "setChatDescription": [
+        ["chat_id"],
+        ["description"]
+    ],
+
+    "pinChatMessage": [
+        ["chat_id"],
+        ["message_id"],
+        ["disable_notification"]
+    ],
+    "unpinChatMessage": [
+        ["chat_id"]
     ],
 
 
@@ -589,7 +714,6 @@ const gArgsTable  = {
         "disable_web_page_preview",
         "reply_markup"
     ],
-
     "editMessageCaption": [
         "chat_id",
         "caption",
@@ -597,7 +721,6 @@ const gArgsTable  = {
         "inline_message_id",
         "reply_markup"
     ],
-
     "editMessageReplyMarkup": [
         "chat_id",
         "reply_markup",

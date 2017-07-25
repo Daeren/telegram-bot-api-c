@@ -38,19 +38,25 @@ objBot
 
         //-----[DEFAULT]-----}>
 
+        bot.engine(null);
+		
         data = ["H", "i"];
-        bot.render("Array | Text: {0} + {1}", data).then(console.log);
+		bot.answer().text(bot.render("Array | Text: {0} + {1}", data)).send();
 
         data = {"x": "H", "y": "i"};
-        bot.render("Hashtable | Text: {x} + {y}", data, (e, r) => console.log(e || r));
+		bot.answer().text(bot.render("Hashtable | Text: {x} + {y}", data)).send();
 
         //-----[EJS]-----}>
 
-        data = {};
-        data.input = {"x": "H", "y": "i"};
-        data.reply_markup = bot.keyboard.hGb();
-
-        bot.render("EJS | Text: <%= x %> + <%= y %>", data);
+        bot.engine(require("ejs"));
+		
+        data = {"x": "H", "y": "i"};
+		
+		bot
+		.answer()
+		.text(bot.render("EJS | Text: <%= x %> + <%= y %>", data))
+		.keyboard(bot.keyboard.hGb())
+		.send();
     });
 
 //------]>

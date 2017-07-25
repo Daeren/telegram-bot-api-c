@@ -1,4 +1,4 @@
-[![Codacy][cod_b]][cod_l]
+[![Codacy][cod_b]][cod_l] ![NodeSecurity][node_sec_b]
 
 ```
 npm -g install telegram-bot-api-c
@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.0
+[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.2
 
 * [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
@@ -1124,3 +1124,5 @@ MIT
 
 [cod_b]: https://img.shields.io/codacy/178f90f3c89945e7acb97b21140da7db.svg
 [cod_l]: https://www.codacy.com/app/daeren/telegram-bot-api-c/dashboard
+
+[node_sec_b]: https://nodesecurity.io/orgs/xiii/projects/58db156e-47b1-4d11-a406-aae26b97604d/badge

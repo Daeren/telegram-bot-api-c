@@ -88,9 +88,7 @@ function main(botFather, params, callback) {
 
         if(optCa) {
             if(Array.isArray(optCa)) {
-                optCa = optCa.map(function(e) {
-                    return rFs.readFileSync(certDir + e);
-                });
+                optCa = optCa.map(e => rFs.readFileSync(certDir + e));
             }
             else if(typeof(optCa) === "string") {
                 optCa = certDir + optCa;
