@@ -23,7 +23,7 @@ require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").sen
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.2
+[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.3
 
 * [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +

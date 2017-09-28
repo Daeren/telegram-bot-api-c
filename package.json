@@ -1,6 +1,6 @@
 {
     "name": "telegram-bot-api-c",
-    "version": "19.2.0",
+    "version": "19.2.1",
     "description": "Lightweight, Simple, Fastest module for Telegram Bot without Dependencies",
 
     "homepage": "https://666.io",
@@ -17,8 +17,6 @@
         "name": "Daeren",
         "email": "x@db.gg"
     },
-
-    "preferGlobal": "true",
 
     "bin": {
         "tg-bot": "./bin/index.js"
@@ -38,7 +36,6 @@
         "node": "> 0.12.0"
     },
 
-    "readme": "",
     "readmeFilename": "readme.md",
 
     "bugs": {

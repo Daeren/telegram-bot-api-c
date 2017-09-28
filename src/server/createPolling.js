@@ -85,25 +85,33 @@ function main(botFather, params, callback) {
     }
 
     function load() {
-        botFather.api.getUpdates(pollingParams, function(error, data) {
-            if(error) {
-                if(error.code === rErrors.ERR_USED_WEBHOOK) {
+        botFather.api.getUpdates(pollingParams, onUpdates);
+    }
+
+    function onUpdates(error, data) {
+        if(error) {
+            switch(error.code) {
+                case "ECONNRESET":
+                    runTimer();
+                    break;
+
+                case rErrors.ERR_USED_WEBHOOK:
                     botFather.callJson("deleteWebhook", null, load);
-                }
-                else {
+                    break;
+
+                default:
                     rOnMsg(error, srvBot, null);
                     runTimer();
-                }
             }
-            else {
-                if(data.length > 0) {
-                    data.forEach(onMsg);
-                    load();
-                } else {
-                    runTimer();
-                }
+        }
+        else {
+            if(data.length > 0) {
+                data.forEach(onMsg);
+                load();
+            } else {
+                runTimer();
             }
-        });
+        }
     }
 
     function onMsg(data) {
