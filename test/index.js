@@ -912,7 +912,7 @@ describe("Instance: bot", function() {
             }, function(error, data) {
                 checkBaseFields(error, data);
 
-                expect(data).to.have.property("video_note").that.is.an("object");
+                expect(data).to.have.property("video").that.is.an("object");
 
                 done();
             });

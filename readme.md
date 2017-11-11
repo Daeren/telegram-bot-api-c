@@ -7,32 +7,28 @@ git clone https://github.com/Daeren/telegram-bot-api-c.git
 
 
 ```js
-require("telegram-bot-api-c").call("TOKEN", "sendMessage", [0, "+"])
+require("telegram-bot-api-c").call("TK", "sendMessage", [0, "+"])
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").api.sendMessage({chat_id: 0, text: "+"})
+require("telegram-bot-api-c")("TK").api.sendMessage({chat_id: 0, text: "+"})
 ```
 
 ```js
-require("telegram-bot-api-c")("TOKEN").polling(bot => bot.answer().html("+").send())
+require("telegram-bot-api-c")("TK").polling(bot => bot.answer().html("+").send())
 ```
 
 ```js
-> tg-bot --token X --method sendMessage --chat_id 0 --text "+"
+> tg-bot --token TK --method sendMessage --chat_id 0 --text "+"
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.3
+[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.4
 
 * [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
 * Analytics: [tgb-pl-botanio][4]
 * Added: tgBot.api[sendMethod] => error.retryAfter
-* Added: [tgUrlUpload](#refTgUpload)
-* Improved: [CLI](#refCLI), Proxy
-* Changed: tg-api => tg-bot
-
 
 
 
@@ -385,10 +381,11 @@ gBot
     .api
     .setWebhook({"url": "https://site.xx/myBot"})
     .then(function(isOk) {
-        if(!isOk)
+        if(!isOk) {
             throw new Error("Oops...problem with the webhook...");
+        }
 
-        gBot.http(objSrvOptions, cbMsg);
+        gBot.http(gSrvOptions, cbMsg);
     });
 ```
 

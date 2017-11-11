@@ -99,6 +99,7 @@ const gProtoTable = {
         ["string", "chat_id"],
         ["string", "latitude"],
         ["string", "longitude"],
+        ["string", "live_period"],
         ["boolean", "disable_notification"],
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
@@ -177,29 +178,23 @@ const gProtoTable = {
         ["string", "offset"],
         ["string", "limit"]
     ],
-
     "getUpdates": [
         ["string", "offset"],
         ["string", "limit"],
         ["string", "timeout"],
         ["json", "allowed_updates"]
     ],
-
     "getFile": [
         ["string", "file_id"]
     ],
-
     "getMe": null,
-
     "getWebhookInfo": null,
-
     "getGameHighScores": [
         ["string", "user_id"],
         ["string", "chat_id"],
         ["string", "message_id"],
         ["string", "inline_message_id"]
     ],
-
     "getStickerSet": [
         ["string", "name"]
     ],
@@ -211,7 +206,6 @@ const gProtoTable = {
         ["string", "max_connections"],
         ["json", "allowed_updates"]
     ],
-
     "setGameScore": [
         ["string", "user_id"],
         ["string", "score"],
@@ -322,6 +316,14 @@ const gProtoTable = {
     ],
 
 
+    "setChatStickerSet": [
+        ["string", "chat_id"],
+        ["string", "sticker_set_name"]
+    ],
+    "deleteChatStickerSet": [
+        ["string", "chat_id"]
+    ],
+
     "setChatPhoto": [
         ["string", "chat_id"],
         ["photo", "photo"]
@@ -366,6 +368,22 @@ const gProtoTable = {
         ["json", "reply_markup"]
     ],
     "editMessageReplyMarkup": [
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"],
+        ["json", "reply_markup"]
+    ],
+
+
+    "editMessageLiveLocation": [
+        ["string", "chat_id"],
+        ["string", "message_id"],
+        ["string", "inline_message_id"],
+        ["string", "latitude"],
+        ["string", "longitude"],
+        ["json", "reply_markup"]
+    ],
+    "stopMessageLiveLocation": [
         ["string", "chat_id"],
         ["string", "message_id"],
         ["string", "inline_message_id"],
@@ -465,6 +483,7 @@ const gArgsTable  = {
         "chat_id",
         "latitude",
         "longitude",
+        "live_period",
         "disable_notification",
         "reply_to_message_id",
         "reply_markup"
@@ -678,6 +697,14 @@ const gArgsTable  = {
     ],
 
 
+    "setChatStickerSet": [
+        "chat_id",
+        "sticker_set_name"
+    ],
+    "deleteChatStickerSet": [
+        "chat_id"
+    ],
+
     "setChatPhoto": [
         ["chat_id"],
         ["photo"]
@@ -726,6 +753,22 @@ const gArgsTable  = {
         "reply_markup",
         "message_id",
         "inline_message_id"
+    ],
+
+
+    "editMessageLiveLocation": [
+        "chat_id",
+        "message_id",
+        "inline_message_id",
+        "latitude",
+        "longitude",
+        "reply_markup"
+    ],
+    "stopMessageLiveLocation": [
+        "chat_id",
+        "message_id",
+        "inline_message_id",
+        "reply_markup"
     ],
 
 
