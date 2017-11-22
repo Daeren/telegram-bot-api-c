@@ -95,6 +95,12 @@ const gProtoTable = {
         ["string", "reply_to_message_id"],
         ["json", "reply_markup"]
     ],
+    "sendMediaGroup": [
+        ["string", "chat_id"],
+        ["json", "media"],
+        ["boolean", "disable_notification"],
+        ["string", "reply_to_message_id"]
+    ],
     "sendLocation": [
         ["string", "chat_id"],
         ["string", "latitude"],
@@ -144,6 +150,7 @@ const gProtoTable = {
         ["string", "start_parameter"],
         ["string", "currency"],
         ["json", "prices"],
+        ["string", "provider_data"],
         ["string", "photo_url"],
         ["string", "photo_size"],
         ["string", "photo_width"],
@@ -479,6 +486,12 @@ const gArgsTable  = {
         "reply_to_message_id",
         "reply_markup"
     ],
+    "sendMediaGroup": [
+        "chat_id",
+        "media",
+        "disable_notification",
+        "reply_to_message_id"
+    ],
     "sendLocation": [
         "chat_id",
         "latitude",
@@ -528,6 +541,7 @@ const gArgsTable  = {
         "start_parameter",
         "currency",
         "prices",
+        "provider_data",
         "photo_url",
         "photo_size",
         "photo_width",

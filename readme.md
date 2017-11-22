@@ -23,13 +23,13 @@ require("telegram-bot-api-c")("TK").polling(bot => bot.answer().html("+").send()
 ```
 
 
-[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.4
+[Telegram Bot API][3], [Bot API 2.x][100], Bot API 3.5
 
 * [Proxy](#refProxy): +
 * Array and [Map][10] as a data source (.call, .callJson, .api[method]): +
 * Analytics: [tgb-pl-botanio][4]
 * Added: tgBot.api[sendMethod] => error.retryAfter
-
+* Added: [sendMediaGroup][150] (doesn't support "attach://")
 
 
 ```
@@ -1115,6 +1115,7 @@ MIT
 [5]: https://core.telegram.org/bots/games
 [10]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
 [100]: https://core.telegram.org/bots/2-0-intro
+[150]: https://github.com/Daeren/telegram-bot-api-c/blob/master/examples/sendMediaGroup.js
 
 [image-architecture]: https://666.io/assets/img/telegram-bot-api-c/architecture.png?x=16
 [image-test]: https://666.io/assets/img/telegram-bot-api-c/test.png?x=13
